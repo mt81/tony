@@ -1,10 +1,11 @@
 # Xcode is not the active developer directory on every machine; point at it explicitly.
 export DEVELOPER_DIR ?= /Applications/Xcode.app/Contents/Developer
+TUIST_VERSION := 4.216.3
 SIMULATOR ?= iPhone 18 Pro
 DERIVED := build/DerivedData
 APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 
-.PHONY: test check-imports project build run clean
+.PHONY: test check-imports check-tuist project build run clean
 
 # The test command: TonyCore unit tests, plus the import rule.
 test: check-imports
@@ -16,11 +17,18 @@ check-imports:
 		echo "error: TonyCore must not import UIKit, SwiftUI, EventKit or HealthKit"; exit 1; \
 	fi
 
-project:
-	xcodegen generate --quiet
+# Everyone generates the project with the same Tuist.
+check-tuist:
+	@INSTALLED_VERSION="$$(tuist version)"; \
+	if [ "$$INSTALLED_VERSION" != "$(TUIST_VERSION)" ]; then \
+		echo "error: Tuist $(TUIST_VERSION) is required, found '$$INSTALLED_VERSION'"; exit 1; \
+	fi
+
+project: check-tuist
+	tuist generate --no-open
 
 build: project
-	xcodebuild -project Tony.xcodeproj -scheme TonyApp \
+	xcodebuild -workspace Tony.xcworkspace -scheme TonyApp \
 		-destination 'platform=iOS Simulator,name=$(SIMULATOR)' \
 		-derivedDataPath $(DERIVED) -quiet build
 
@@ -30,4 +38,4 @@ run: build
 	xcrun simctl launch '$(SIMULATOR)' com.mt81.tony
 
 clean:
-	rm -rf build TonyCore/.build Tony.xcodeproj
+	rm -rf build TonyCore/.build Tony.xcodeproj Tony.xcworkspace Derived
