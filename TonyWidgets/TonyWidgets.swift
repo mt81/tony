@@ -1,0 +1,41 @@
+import SwiftUI
+import TonyCore
+import WidgetKit
+
+@main
+struct TonyWidgets: WidgetBundle {
+    var body: some Widget {
+        PlaceholderWidget()
+    }
+}
+
+/// Stands in until the real widgets land (C20), so the extension builds and embeds.
+struct PlaceholderWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "PlaceholderWidget", provider: PlaceholderProvider()) { _ in
+            Text("Tony")
+                .containerBackground(.background, for: .widget)
+        }
+        .configurationDisplayName("Tony")
+        .description("Your day at a glance.")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct PlaceholderEntry: TimelineEntry {
+    let date: Date
+}
+
+struct PlaceholderProvider: TimelineProvider {
+    func placeholder(in context: Context) -> PlaceholderEntry {
+        PlaceholderEntry(date: .now)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (PlaceholderEntry) -> Void) {
+        completion(PlaceholderEntry(date: .now))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<PlaceholderEntry>) -> Void) {
+        completion(Timeline(entries: [PlaceholderEntry(date: .now)], policy: .never))
+    }
+}
