@@ -1,7 +1,10 @@
 import SwiftUI
+import TonyCore
 import TonyDesign
 
 struct RootView: View {
+    let repository: (any Repository)?
+
     var body: some View {
         TabView {
             Tab {
@@ -10,7 +13,11 @@ struct RootView: View {
                 Label { Text("Today") } icon: { TonyIcon.today }
             }
             Tab {
-                TonyColor.canvas.ignoresSafeArea()
+                if let repository {
+                    TasksView(repository: repository)
+                } else {
+                    ContentUnavailableView("Your tasks could not be opened", systemImage: "exclamationmark.triangle")
+                }
             } label: {
                 Label { Text("Tasks") } icon: { TonyIcon.tasks }
             }

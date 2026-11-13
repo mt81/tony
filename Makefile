@@ -5,7 +5,7 @@ SIMULATOR ?= iPhone 18 Pro
 DERIVED := build/DerivedData
 APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 
-.PHONY: test check-imports check-tuist project build run clean
+.PHONY: test test-ui check-imports check-tuist project build run clean
 
 # The test command: the import rule, then the unit tests of both packages.
 test: check-imports
@@ -32,6 +32,12 @@ build: project
 	xcodebuild -workspace Tony.xcworkspace -scheme TonyApp \
 		-destination 'platform=iOS Simulator,name=$(SIMULATOR)' \
 		-derivedDataPath $(DERIVED) -quiet build
+
+# Drives the app in the simulator: slower than `make test`, run it when a screen changes.
+test-ui: project
+	xcodebuild -workspace Tony.xcworkspace -scheme TonyApp \
+		-destination 'platform=iOS Simulator,name=$(SIMULATOR)' \
+		-derivedDataPath $(DERIVED) -quiet test
 
 run: build
 	xcrun simctl boot '$(SIMULATOR)' 2>/dev/null || true

@@ -49,6 +49,17 @@ let project = Project(
             ]
         ),
         .target(
+            name: "TonyAppUITests",
+            destinations: destinations,
+            product: .uiTests,
+            bundleId: "com.mt81.tony.uitests",
+            deploymentTargets: deploymentTargets,
+            buildableFolders: ["TonyAppUITests"],
+            dependencies: [
+                .target(name: "TonyApp"),
+            ]
+        ),
+        .target(
             name: "TonyDesign",
             destinations: destinations,
             product: .framework,

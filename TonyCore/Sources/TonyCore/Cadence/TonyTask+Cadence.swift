@@ -61,9 +61,9 @@ extension TonyTask {
         }
     }
 
-    /// The first day the task counts as due, given what was done up to `day`.
+    /// The first day the task counts as due, given what was done up to `day`; nil when it will not come due again.
     /// For a weekly quota it is the day a full week has passed without a session, which only drives neglect.
-    private func dueDay(completions: [Completion], on day: Date, calendar: Calendar) -> Date? {
+    public func dueDay(completions: [Completion], on day: Date, calendar: Calendar) -> Date? {
         let lastDone = doneDates(completions: completions, upTo: day, calendar: calendar).max()
         let lastDoneDay = lastDone.map { calendar.startOfDay(for: $0) }
         let createdDay = calendar.startOfDay(for: createdAt)
