@@ -1,5 +1,6 @@
 import SwiftUI
 import TonyCore
+import TonyDesign
 import TonyStore
 
 @main
@@ -8,8 +9,21 @@ struct TonyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Color(.systemBackground)
-                .ignoresSafeArea()
+            content
+                .tint(TonyColor.accent)
+                .preferredColorScheme(.dark)
         }
+    }
+
+    @ViewBuilder private var content: some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-gallery") {
+            ComponentGallery()
+        } else {
+            RootView()
+        }
+        #else
+        RootView()
+        #endif
     }
 }

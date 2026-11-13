@@ -12,6 +12,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | --- | --- | --- |
 | `TonyCore` (Swift package) | Domain model, cadence, context builder, planner, consistency, protocols | Unit tests (`swift test`) |
 | `TonyStore` (Swift package) | SwiftData models and the `Repository` implementation, shared by the app and the extension | Unit tests (`swift test`), in memory |
+| `TonyDesign` (framework) | Colour, type, spacing and radius tokens; the Figma components as SwiftUI views; fonts and artwork | Preview gallery in the simulator (`-gallery` launch argument, debug builds) |
 | `TonyApp` (iOS app) | SwiftUI screens, adapters, plan coordinator, notifications | Simulator, then device |
 | `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
 
@@ -78,7 +79,7 @@ All of these pass, every time. Never push red.
 1. `make test`: the import check and every `TonyCore` and `TonyStore` test pass.
 2. `make build`: the app and the widget extension build with no errors and no warnings.
 3. `make run` when the change touches the app: it launches in the simulator and the changed screen behaves as described.
-4. Look at it when the change is visual: English and French, iPhone and iPad, light and dark, the largest Dynamic Type size.
+4. Look at it when the change is visual: English and French, iPhone and iPad, the largest Dynamic Type size. The app is dark only.
 5. Read your own diff: no secrets, no debug code, no leftover files, no unrelated changes.
 
 During development, run the smallest relevant test first (`swift test --package-path TonyCore --filter <name>`). Before pushing, run all the gates above.
@@ -99,7 +100,7 @@ During development, run the smallest relevant test first (`swift test --package-
 - Tests use Swift Testing (`import Testing`). Planner behaviour is tested with fixtures and table-driven cases, not through the UI.
 - New behaviour comes with a test, or an updated one.
 - No hardcoded user-facing text: every string goes through the String Catalog, in English and French. Templates and prompts are localised too.
-- No hardcoded colours, fonts, sizes or radii in views: use the design tokens and components taken from the Figma file.
+- No hardcoded colours, fonts, sizes or radii in views: use the design tokens and components of `TonyDesign`, taken from the Figma file.
 - Shell scripts and Makefile targets read step by step: named variables, one action per line. No dense one-liners.
 - Prefer Apple frameworks over third-party code.
 - ALWAYS evaluate existing solid libraries before developing in house when Apple frameworks do not cover the need. Bring Matteo the candidates with their reliability, ease of use, adoption, maintenance and licence, and a recommendation; he picks.
@@ -131,7 +132,7 @@ During development, run the smallest relevant test first (`swift test --package-
 - Text uses the type styles and scales with Dynamic Type. Layouts hold at the largest accessibility size.
 - Touch targets are at least 44 by 44 points.
 - Respect Reduce Motion for non-essential motion, and do not carry meaning by colour alone.
-- Check light and dark appearance, and iPhone and iPad in both orientations where the screen supports them.
+- The app is dark only: Figma defines one palette, and the app forces the dark appearance. Check iPhone and iPad in both orientations where the screen supports them.
 - The deployment target is iOS 27. Do not add availability checks or fallbacks for older versions.
 
 ## Localisation
