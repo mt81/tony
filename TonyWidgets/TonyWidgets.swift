@@ -1,5 +1,6 @@
 import SwiftUI
 import TonyCore
+import TonyStore
 import WidgetKit
 
 @main
@@ -24,6 +25,7 @@ struct PlaceholderWidget: Widget {
 
 struct PlaceholderEntry: TimelineEntry {
     let date: Date
+    var taskCount = 0
 }
 
 struct PlaceholderProvider: TimelineProvider {
@@ -36,6 +38,10 @@ struct PlaceholderProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<PlaceholderEntry>) -> Void) {
-        completion(Timeline(entries: [PlaceholderEntry(date: .now)], policy: .never))
+        Task {
+            let tasks = try? await SwiftDataRepository.appGroup().tasks()
+            let entry = PlaceholderEntry(date: .now, taskCount: tasks?.count ?? 0)
+            completion(Timeline(entries: [entry], policy: .never))
+        }
     }
 }

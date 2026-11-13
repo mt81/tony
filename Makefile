@@ -7,9 +7,10 @@ APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 
 .PHONY: test check-imports check-tuist project build run clean
 
-# The test command: TonyCore unit tests, plus the import rule.
+# The test command: the import rule, then the unit tests of both packages.
 test: check-imports
 	swift test --package-path TonyCore
+	swift test --package-path TonyStore
 
 # TonyCore must stay free of UI and system-data frameworks.
 check-imports:
@@ -38,4 +39,4 @@ run: build
 	xcrun simctl launch '$(SIMULATOR)' com.mt81.tony
 
 clean:
-	rm -rf build TonyCore/.build Tony.xcodeproj Tony.xcworkspace Derived
+	rm -rf build TonyCore/.build TonyStore/.build Tony.xcodeproj Tony.xcworkspace Derived

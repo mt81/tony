@@ -10,6 +10,7 @@ let project = Project(
     name: "Tony",
     packages: [
         .package(path: "TonyCore"),
+        .package(path: "TonyStore"),
     ],
     settings: .settings(base: [
         "SWIFT_VERSION": "6.0",
@@ -41,6 +42,7 @@ let project = Project(
             entitlements: appGroupEntitlements,
             dependencies: [
                 .package(product: "TonyCore"),
+                .package(product: "TonyStore"),
                 .target(name: "TonyWidgets"),
             ]
         ),
@@ -60,6 +62,7 @@ let project = Project(
             entitlements: appGroupEntitlements,
             dependencies: [
                 .package(product: "TonyCore"),
+                .package(product: "TonyStore"),
             ]
         ),
     ]
