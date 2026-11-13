@@ -38,7 +38,7 @@ enum Fixtures {
                     name: "Fold",
                     mode: .active,
                     duration: 15 * 60,
-                    requirements: Requirements(availability: .free, windows: [.evening])
+                    requirements: Requirements(windows: [.evening])
                 ),
             ],
             mustHappenBy: try november(8),
@@ -54,6 +54,48 @@ enum Fixtures {
             workEnd: DateComponents(hour: 17, minute: 0),
             wakeTime: DateComponents(hour: 7, minute: 0),
             bedtime: DateComponents(hour: 23, minute: 0)
+        )
+    }
+
+    /// A task due since 1 November, with one 30-minute step unless told otherwise.
+    static func task(
+        _ number: Int,
+        _ name: String,
+        rank: Int = 0,
+        cadence: Cadence? = .afterCompletion(days: 5),
+        requirements: Requirements = Requirements(),
+        steps: [Step]? = nil,
+        mustHappenBy: Date? = nil
+    ) throws -> TonyTask {
+        let singleStep = Step(id: try identifier(number * 100), name: name, mode: .active, duration: 30 * 60)
+        return TonyTask(
+            id: try identifier(number),
+            name: name,
+            icon: "star",
+            kind: .recurring,
+            rank: rank,
+            cadence: cadence,
+            requirements: requirements,
+            steps: steps ?? [singleStep],
+            mustHappenBy: mustHappenBy,
+            createdAt: try november(1)
+        )
+    }
+
+    static func dayContext(
+        day: Int,
+        routine: Routine = routine(),
+        busyIntervals: [DateInterval] = [],
+        status: DayStatus = .normal,
+        conditions: DayConditions = DayConditions()
+    ) throws -> DayContext {
+        DayContext(
+            routine: routine,
+            busyIntervals: busyIntervals,
+            status: status,
+            conditions: conditions,
+            day: try november(day),
+            calendar: calendar
         )
     }
 }
