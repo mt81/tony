@@ -1,0 +1,94 @@
+[
+  {
+    "keywords": { "en": ["laundry", "washing machine", "wash clothes"], "fr": ["lessive", "linge", "machine a laver"] },
+    "steps": [
+      { "name": { "en": "Load the washing machine", "fr": "Remplir la machine" }, "mode": "active", "minutes": 10, "gapMinutes": 0 },
+      { "name": { "en": "Wash", "fr": "Lavage" }, "mode": "background", "minutes": 45, "gapMinutes": 0 },
+      { "name": { "en": "Move to the dryer", "fr": "Passer au sèche-linge" }, "mode": "active", "minutes": 5, "gapMinutes": 0 },
+      { "name": { "en": "Dry", "fr": "Séchage" }, "mode": "background", "minutes": 60, "gapMinutes": 0 },
+      { "name": { "en": "Fold", "fr": "Plier" }, "mode": "active", "minutes": 60, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["dishes", "dishwasher"], "fr": ["vaisselle", "lave vaisselle"] },
+    "steps": [
+      { "name": { "en": "Load the dishwasher", "fr": "Remplir le lave-vaisselle" }, "mode": "active", "minutes": 10, "gapMinutes": 0 },
+      { "name": { "en": "Dishwasher runs", "fr": "Lavage" }, "mode": "background", "minutes": 120, "gapMinutes": 0 },
+      { "name": { "en": "Unload the dishwasher", "fr": "Vider le lave-vaisselle" }, "mode": "active", "minutes": 10, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["water the plants", "plants"], "fr": ["arroser", "plantes"] },
+    "steps": [
+      { "name": { "en": "Water the plants", "fr": "Arroser les plantes" }, "mode": "active", "minutes": 15, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["bed sheets", "sheets"], "fr": ["draps"] },
+    "steps": [
+      { "name": { "en": "Change the sheets", "fr": "Changer les draps" }, "mode": "active", "minutes": 20, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["vacuum", "hoover"], "fr": ["aspirateur"] },
+    "steps": [
+      { "name": { "en": "Vacuum", "fr": "Passer l’aspirateur" }, "mode": "active", "minutes": 30, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["mop"], "fr": ["serpillere", "laver le sol"] },
+    "steps": [
+      { "name": { "en": "Mop the floor", "fr": "Laver le sol" }, "mode": "active", "minutes": 20, "gapMinutes": 0 },
+      { "name": { "en": "Let it dry", "fr": "Laisser sécher" }, "mode": "background", "minutes": 30, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["bathroom"], "fr": ["salle de bain"] },
+    "steps": [
+      { "name": { "en": "Clean the bathroom", "fr": "Nettoyer la salle de bain" }, "mode": "active", "minutes": 40, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["trash", "bins", "rubbish"], "fr": ["poubelle"] },
+    "steps": [
+      { "name": { "en": "Take out the trash", "fr": "Sortir les poubelles" }, "mode": "active", "minutes": 5, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["iron"], "fr": ["repasser", "repassage"] },
+    "steps": [
+      { "name": { "en": "Iron", "fr": "Repasser" }, "mode": "active", "minutes": 45, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["meal prep", "cook"], "fr": ["preparer les repas", "cuisiner"] },
+    "steps": [
+      { "name": { "en": "Cook", "fr": "Cuisiner" }, "mode": "active", "minutes": 90, "gapMinutes": 0 },
+      { "name": { "en": "Pack the portions", "fr": "Mettre en portions" }, "mode": "active", "minutes": 15, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["groceries", "grocery"], "fr": ["courses"] },
+    "steps": [
+      { "name": { "en": "Do the groceries", "fr": "Faire les courses" }, "mode": "active", "minutes": 60, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["gym", "workout"], "fr": ["salle de sport", "musculation"] },
+    "steps": [
+      { "name": { "en": "Gym", "fr": "Salle de sport" }, "mode": "active", "minutes": 75, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["run", "jog"], "fr": ["courir", "course a pied", "footing"] },
+    "steps": [
+      { "name": { "en": "Run", "fr": "Courir" }, "mode": "active", "minutes": 45, "gapMinutes": 0 }
+    ]
+  },
+  {
+    "keywords": { "en": ["supplements", "vitamins"], "fr": ["complements", "vitamines"] },
+    "steps": [
+      { "name": { "en": "Take the supplements", "fr": "Prendre les compléments" }, "mode": "active", "minutes": 5, "gapMinutes": 0 }
+    ]
+  }
+]
