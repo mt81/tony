@@ -28,6 +28,7 @@ let project = Project(
             infoPlist: .extendingDefault(with: [
                 "CFBundleDisplayName": "Tony",
                 "UILaunchScreen": [:],
+                "UIUserInterfaceStyle": "Dark",
                 "UISupportedInterfaceOrientations": [
                     "UIInterfaceOrientationPortrait",
                 ],
@@ -43,8 +44,17 @@ let project = Project(
             dependencies: [
                 .package(product: "TonyCore"),
                 .package(product: "TonyStore"),
+                .target(name: "TonyDesign"),
                 .target(name: "TonyWidgets"),
             ]
+        ),
+        .target(
+            name: "TonyDesign",
+            destinations: destinations,
+            product: .framework,
+            bundleId: "com.mt81.tony.design",
+            deploymentTargets: deploymentTargets,
+            buildableFolders: ["TonyDesign"]
         ),
         .target(
             name: "TonyWidgets",
