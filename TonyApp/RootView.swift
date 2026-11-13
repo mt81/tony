@@ -4,6 +4,7 @@ import TonyDesign
 
 struct RootView: View {
     let repository: (any Repository)?
+    let catalog: (any TaskCatalog)?
 
     var body: some View {
         TabView {
@@ -14,7 +15,7 @@ struct RootView: View {
             }
             Tab {
                 if let repository {
-                    TasksView(repository: repository)
+                    TasksView(repository: repository, catalog: catalog)
                 } else {
                     ContentUnavailableView("Your tasks could not be opened", systemImage: "exclamationmark.triangle")
                 }

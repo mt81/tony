@@ -8,7 +8,10 @@ struct TasksView: View {
     @Environment(\.calendar) private var calendar
     @Environment(\.locale) private var locale
 
-    init(repository: any Repository) {
+    private let catalog: (any TaskCatalog)?
+
+    init(repository: any Repository, catalog: (any TaskCatalog)?) {
+        self.catalog = catalog
         _model = State(initialValue: TasksModel(repository: repository))
     }
 
@@ -36,6 +39,7 @@ struct TasksView: View {
             TaskEditorView(
                 task: edited.task,
                 isNew: edited.isNew,
+                catalog: catalog,
                 onSave: { task in Task { await model.save(task) } },
                 onDelete: { task in Task { await model.delete(task) } }
             )

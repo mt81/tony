@@ -7,6 +7,12 @@ final class TasksTabUITests: XCTestCase {
         continueAfterFailure = false
         TasksScreen().runCreateEditReorderDeleteAcrossRelaunches()
     }
+
+    @MainActor
+    func testNewTaskGetsItsStepsFromTheCatalogue() {
+        continueAfterFailure = false
+        TasksScreen().runCatalogueSuggestion()
+    }
 }
 
 @MainActor
@@ -47,6 +53,34 @@ private struct TasksScreen {
         XCTAssertFalse(row("UITest Beta").exists)
 
         delete("UITest Gamma")
+    }
+
+    func runCatalogueSuggestion() {
+        openTasks()
+        app.buttons["addTask"].tap()
+        let field = app.textFields["taskName"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("UITest laundry")
+
+        XCTAssertTrue(scrollToStep(named: "Load the washing machine"))
+        XCTAssertTrue(scrollToStep(named: "Fold"))
+        XCTAssertTrue(app.staticTexts["Suggested by Tony. Change anything that does not fit."].waitForExistence(timeout: 5))
+
+        app.buttons["Cancel"].tap()
+        XCTAssertFalse(row("UITest laundry").exists)
+    }
+
+    /// Scrolls the editor down until a step with this name is on screen.
+    private func scrollToStep(named name: String) -> Bool {
+        let step = app.textFields.matching(NSPredicate(format: "value == %@", name)).firstMatch
+        for _ in 0..<6 {
+            if step.waitForExistence(timeout: 1), step.isHittable {
+                return true
+            }
+            app.swipeUp()
+        }
+        return step.exists
     }
 
     private func openTasks() {

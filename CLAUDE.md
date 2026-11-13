@@ -3,7 +3,7 @@
 Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day around recurring tasks, goals and the calendar. The work is cut into 28 chunks, C01 to C28, tracked as GitHub issues #1 to #28.
 
 - Build chunks: https://claude.ai/artifact/YF6oBu6Zf1ZaBBcYMMMjUL
-- Solution document (decisions D1 to D13, spikes S1 to S5): https://claude.ai/artifact/2tZQjv5SA6uZzWBjjmWnkU
+- Solution document (decisions D1 to D14, spikes S1 to S5): https://claude.ai/artifact/2tZQjv5SA6uZzWBjjmWnkU
 - Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
 
 ## Project layout
@@ -39,7 +39,7 @@ The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun 
 - Matteo owns architecture decisions.
 - Follow the established architecture, target boundaries, technologies and conventions.
 - Do not introduce, replace or significantly restructure architectural patterns, technologies, dependencies, integrations or target boundaries without Matteo's approval.
-- Decisions D1 to D13 in the solution document are taken as written. Changing one needs Matteo's approval.
+- Decisions D1 to D14 in the solution document are taken as written. Changing one needs Matteo's approval.
 - Local implementation decisions within established patterns are delegated to Claude.
 - For architectural concerns, present the problem, viable options, tradeoffs and recommendation. Wait for approval before implementing changes that require architectural approval.
 - Do not ask for approval for routine implementation details already covered by these instructions or established project conventions.
@@ -48,7 +48,7 @@ The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun 
 ## Architecture rules
 
 - Logic lives in `TonyCore`. It never imports UIKit, SwiftUI, EventKit, HealthKit, WeatherKit, WidgetKit, SwiftData or UserNotifications. `make check-imports` enforces the first four.
-- System frameworks sit behind protocols declared in `TonyCore` (`CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`). The app provides the real adapters; tests use fakes.
+- System frameworks sit behind protocols declared in `TonyCore` (`CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`, `TaskCatalog`). The app provides the real adapters; tests use fakes.
 - The planner is deterministic: the current time, calendar and locale are passed in (`plan(..., now:)`), never read from `Date()`, `Calendar.current` or `Locale.current` inside `TonyCore`.
 - The on-device model only words and parses. It never decides the plan. Model output is validated against the plan, and every model feature has a template or rule-based fallback.
 - Views hold no planning logic. They render what the plan coordinator publishes and send user actions back to it.
@@ -123,6 +123,7 @@ During development, run the smallest relevant test first (`swift test --package-
 ## Privacy
 
 - Calendar, health and task data stay on the device. Nothing is sent to a server, logged, or put in analytics.
+- The one exception is the task catalogue (D14): when a task is created, its name and the language are sent to the catalogue service to get its steps. No account, device identifier or other task data goes with it. Until the service exists, `TableTaskCatalog` answers from `TonyApp/Catalog/TaskCatalog.json` and nothing leaves the device.
 - Ask for each permission when the feature that needs it is first used, and keep the app working when it is refused.
 - Read only what the feature needs (busy intervals, not event titles; sleep and workouts, not other health data).
 - Fixtures and tests use invented data, never Matteo's real calendar or health records.

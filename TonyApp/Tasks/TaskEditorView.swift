@@ -14,6 +14,10 @@ struct TaskEditorView: View {
     private let isNew: Bool
     private let onSave: (TonyTask) -> Void
     private let onDelete: (TonyTask) -> Void
+    private let catalog: (any TaskCatalog)?
+    /// The steps the task started with, which the catalogue may replace while they are untouched.
+    private let initialSteps: [Step]
+    @State private var suggestedSteps: [Step]?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.calendar) private var calendar
@@ -25,8 +29,16 @@ struct TaskEditorView: View {
         case timesPerWeek
     }
 
-    init(task: TonyTask, isNew: Bool, onSave: @escaping (TonyTask) -> Void, onDelete: @escaping (TonyTask) -> Void) {
+    init(
+        task: TonyTask,
+        isNew: Bool,
+        catalog: (any TaskCatalog)?,
+        onSave: @escaping (TonyTask) -> Void,
+        onDelete: @escaping (TonyTask) -> Void
+    ) {
         self.isNew = isNew
+        self.catalog = catalog
+        self.initialSteps = task.steps
         self.onSave = onSave
         self.onDelete = onDelete
         _task = State(initialValue: task)
@@ -69,6 +81,7 @@ struct TaskEditorView: View {
             }
             .scrollContentBackground(.hidden)
             .background(TonyColor.canvas)
+            .task(id: trimmedName) { await suggestSteps() }
             .navigationTitle(isNew ? Text("New task") : Text("Edit task"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -136,7 +149,7 @@ struct TaskEditorView: View {
     }
 
     private var stepsSection: some View {
-        Section("Steps") {
+        Section {
             ForEach($task.steps) { $step in
                 VStack(alignment: .leading, spacing: TonySpacing.small) {
                     TextField("Step name", text: $step.name, prompt: Text(trimmedName.isEmpty ? String(localized: "Step name") : trimmedName))
@@ -157,7 +170,36 @@ struct TaskEditorView: View {
             Button("Add a step") {
                 task.steps.append(Step(id: UUID(), name: "", mode: .active, duration: 30 * 60))
             }
+        } header: {
+            Text("Steps")
+        } footer: {
+            if suggestedSteps != nil, task.steps == suggestedSteps {
+                Text("Suggested by Tony. Change anything that does not fit.")
+            }
         }
+    }
+
+    /// While a new task's steps are untouched, fills them from the catalogue for the name being typed.
+    private func suggestSteps() async {
+        guard isNew, let catalog, stepsAreUntouched else { return }
+        try? await Task.sleep(for: .milliseconds(400))
+        guard !Task.isCancelled else { return }
+
+        let templates = trimmedName.isEmpty ? nil : try? await catalog.steps(forTaskNamed: trimmedName, locale: locale)
+        guard !Task.isCancelled, stepsAreUntouched else { return }
+
+        if let templates, !templates.isEmpty {
+            let steps = templates.map { $0.step(id: UUID()) }
+            task.steps = steps
+            suggestedSteps = steps
+        } else {
+            task.steps = initialSteps
+            suggestedSteps = nil
+        }
+    }
+
+    private var stepsAreUntouched: Bool {
+        task.steps == initialSteps || task.steps == suggestedSteps
     }
 
     private var deadlineSection: some View {

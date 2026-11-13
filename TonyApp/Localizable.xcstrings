@@ -913,6 +913,22 @@
         }
       }
     },
+    "Suggested by Tony. Change anything that does not fit.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggested by Tony. Change anything that does not fit."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposé par Tony. Change ce qui ne convient pas."
+          }
+        }
+      }
+    },
     "Tasks": {
       "localizations": {
         "en": {
