@@ -122,8 +122,9 @@ During development, run the smallest relevant test first (`swift test --package-
 
 ## Privacy
 
-- Calendar, health and task data stay on the device. Nothing is sent to a server, logged, or put in analytics.
-- The one exception is the task catalogue (D14): when a task is created, its name and the language are sent to the catalogue service to get its steps. No account, device identifier or other task data goes with it. Until the service exists, `TableTaskCatalog` answers from `TonyApp/Catalog/TaskCatalog.json` and nothing leaves the device.
+- Server-side services are fine, such as the task catalogue (D14). Each new one still needs Matteo's approval, like any external service.
+- The app never sends user data to a server: nothing that identifies the person or the device, and none of their task list, completions, calendar, health, routine, preferences or location. Nothing is logged or put in analytics.
+- A request carries only the generic, anonymous input the service needs. The task catalogue receives the name of a task being created and the language, nothing else. Until it exists, `TableTaskCatalog` answers from `TonyApp/Catalog/TaskCatalog.json` and nothing leaves the device.
 - Ask for each permission when the feature that needs it is first used, and keep the app working when it is refused.
 - Read only what the feature needs (busy intervals, not event titles; sleep and workouts, not other health data).
 - Fixtures and tests use invented data, never Matteo's real calendar or health records.
