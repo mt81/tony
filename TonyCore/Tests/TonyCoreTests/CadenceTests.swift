@@ -160,3 +160,10 @@ func dueAndNeglect(cadenceCase: CadenceCase) throws {
 
     #expect(task.weeklyQuotaProgress(completions: [], on: try Fixtures.november(2), calendar: Fixtures.calendar) == nil)
 }
+
+@Test func dueDayIsTheNextDayTheTaskComesDue() throws {
+    let task = try CadenceCase("due day", everyFiveDays, on: 3, isDue: false).task()
+    let done = [Completion(id: UUID(), taskID: task.id, date: try Fixtures.november(2, hour: 18), outcome: .done)]
+
+    #expect(task.dueDay(completions: done, on: try Fixtures.november(3), calendar: Fixtures.calendar) == (try Fixtures.november(7)))
+}

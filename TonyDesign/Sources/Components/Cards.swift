@@ -19,12 +19,17 @@ public struct TaskRow: View {
 
     public var body: some View {
         HStack(spacing: TonySpacing.medium) {
-            Image(systemName: "line.3.horizontal")
-                .tonyText(.labelLarge)
-                .foregroundStyle(TonyColor.muted)
-                .accessibilityHidden(true)
-            IconCircle(icon: icon, isNeglected: isNeglected)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Image(systemName: "line.3.horizontal")
+                    .tonyText(.labelLarge)
+                    .foregroundStyle(TonyColor.muted)
+                    .accessibilityHidden(true)
+                IconCircle(icon: icon, isNeglected: isNeglected)
+            }
             VStack(alignment: .leading, spacing: TonySpacing.hairline) {
+                if dynamicTypeSize.isAccessibilitySize {
+                    IconCircle(icon: icon, isNeglected: isNeglected)
+                }
                 Text(title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
                 Text(subtitle).tonyText(.caption).foregroundStyle(TonyColor.muted)
                 if dynamicTypeSize.isAccessibilitySize {

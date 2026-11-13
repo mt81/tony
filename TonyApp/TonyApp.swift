@@ -20,10 +20,10 @@ struct TonyApp: App {
         if ProcessInfo.processInfo.arguments.contains("-gallery") {
             ComponentGallery()
         } else {
-            RootView()
+            RootView(repository: repository)
         }
         #else
-        RootView()
+        RootView(repository: repository)
         #endif
     }
 }
