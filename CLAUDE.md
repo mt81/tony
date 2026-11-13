@@ -11,6 +11,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | Target | Contains | Verified by |
 | --- | --- | --- |
 | `TonyCore` (Swift package) | Domain model, cadence, context builder, planner, consistency, protocols | Unit tests (`swift test`) |
+| `TonyStore` (Swift package) | SwiftData models and the `Repository` implementation, shared by the app and the extension | Unit tests (`swift test`), in memory |
 | `TonyApp` (iOS app) | SwiftUI screens, adapters, plan coordinator, notifications | Simulator, then device |
 | `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
 
@@ -23,7 +24,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 
 | Command | What it does |
 | --- | --- |
-| `make test` | Import check, then `TonyCore` unit tests |
+| `make test` | Import check, then `TonyCore` and `TonyStore` unit tests |
 | `make project` | Checks the Tuist version, then generates `Tony.xcworkspace` |
 | `make build` | Builds the app for the simulator |
 | `make run` | Builds, installs and launches in the simulator |
@@ -45,7 +46,7 @@ The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun 
 ## Architecture rules
 
 - Logic lives in `TonyCore`. It never imports UIKit, SwiftUI, EventKit, HealthKit, WeatherKit, WidgetKit, SwiftData or UserNotifications. `make check-imports` enforces the first four.
-- System frameworks sit behind protocols declared in `TonyCore` (`CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`). The app provides the real adapters; tests use fakes.
+- System frameworks sit behind protocols declared in `TonyCore` (`CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`). The app provides the real adapters; tests use fakes.
 - The planner is deterministic: the current time, calendar and locale are passed in (`plan(..., now:)`), never read from `Date()`, `Calendar.current` or `Locale.current` inside `TonyCore`.
 - The on-device model only words and parses. It never decides the plan. Model output is validated against the plan, and every model feature has a template or rule-based fallback.
 - Views hold no planning logic. They render what the plan coordinator publishes and send user actions back to it.
@@ -74,7 +75,7 @@ The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun 
 
 All of these pass, every time. Never push red.
 
-1. `make test`: the import check and every `TonyCore` test pass.
+1. `make test`: the import check and every `TonyCore` and `TonyStore` test pass.
 2. `make build`: the app and the widget extension build with no errors and no warnings.
 3. `make run` when the change touches the app: it launches in the simulator and the changed screen behaves as described.
 4. Look at it when the change is visual: English and French, iPhone and iPad, light and dark, the largest Dynamic Type size.
