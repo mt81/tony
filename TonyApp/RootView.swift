@@ -1,10 +1,9 @@
 import SwiftUI
-import TonyCore
 import TonyDesign
+import TonyPresentation
 
 struct RootView: View {
-    let repository: (any Repository)?
-    let catalog: (any TaskCatalog)?
+    let tasksStore: Store<TasksFeature>?
 
     var body: some View {
         TabView {
@@ -14,8 +13,8 @@ struct RootView: View {
                 Label { Text("Today") } icon: { TonyIcon.today }
             }
             Tab {
-                if let repository {
-                    TasksView(repository: repository, catalog: catalog)
+                if let tasksStore {
+                    StoreView(store: tasksStore, content: TasksScreen.init)
                 } else {
                     ContentUnavailableView("Your tasks could not be opened", systemImage: "exclamationmark.triangle")
                 }
@@ -28,5 +27,17 @@ struct RootView: View {
                 Label { Text("You") } icon: { TonyIcon.you }
             }
         }
+    }
+}
+
+/// Draws a store's data model, and draws it again whenever the store's state changes.
+struct StoreView<F: Feature, Content: View>: View {
+    let store: Store<F>
+    let content: (F.DataModel) -> Content
+    @Environment(\.calendar) private var calendar
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        content(store.dataModel(context: PresentationContext(now: .now, calendar: calendar, locale: locale)))
     }
 }

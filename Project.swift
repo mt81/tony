@@ -11,6 +11,8 @@ let project = Project(
     packages: [
         .package(path: "TonyCore"),
         .package(path: "TonyStore"),
+        .package(path: "TonyUIKit"),
+        .package(path: "TonyPresentation"),
     ],
     settings: .settings(base: [
         "SWIFT_VERSION": "6.0",
@@ -44,6 +46,8 @@ let project = Project(
             dependencies: [
                 .package(product: "TonyCore"),
                 .package(product: "TonyStore"),
+                .package(product: "TonyPresentation"),
+                .package(product: "TonyUIKit"),
                 .target(name: "TonyDesign"),
                 .target(name: "TonyWidgets"),
             ]
@@ -65,7 +69,11 @@ let project = Project(
             product: .framework,
             bundleId: "com.mt81.tony.design",
             deploymentTargets: deploymentTargets,
-            buildableFolders: ["TonyDesign"]
+            buildableFolders: ["TonyDesign"],
+            dependencies: [
+                .package(product: "TonyPresentation"),
+                .package(product: "TonyUIKit"),
+            ]
         ),
         .target(
             name: "TonyWidgets",

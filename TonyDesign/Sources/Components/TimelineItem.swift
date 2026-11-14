@@ -1,47 +1,14 @@
 import SwiftUI
+import TonyPresentation
+import TonyUIKit
 
 /// One entry of the Today timeline. The five Figma kinds are: now, task with actions, meetings, task, and last task.
 public struct TimelineItem: View {
-    public struct Action: Identifiable {
-        public let label: String
-        public let perform: () -> Void
-
-        public var id: String { label }
-
-        public init(_ label: String, perform: @escaping () -> Void) {
-            self.label = label
-            self.perform = perform
-        }
-    }
-
-    private enum Kind {
-        case now(String)
-        case task(icon: String, time: String, title: String, reason: String, actions: [Action], onCheck: () -> Void)
-        case meetings(time: String, title: String, detail: String)
-    }
-
-    private let kind: Kind
-    private let isLast: Bool
+    private let model: TimelineItemDataModel
     @ScaledMetric(relativeTo: .body) private var railWidth = TonySize.iconCircle
 
-    public static func now(_ text: String) -> TimelineItem {
-        TimelineItem(kind: .now(text), isLast: false)
-    }
-
-    public static func task(
-        icon: String,
-        time: String,
-        title: String,
-        reason: String,
-        actions: [Action] = [],
-        isLast: Bool = false,
-        onCheck: @escaping () -> Void
-    ) -> TimelineItem {
-        TimelineItem(kind: .task(icon: icon, time: time, title: title, reason: reason, actions: actions, onCheck: onCheck), isLast: isLast)
-    }
-
-    public static func meetings(time: String, title: String, detail: String) -> TimelineItem {
-        TimelineItem(kind: .meetings(time: time, title: title, detail: detail), isLast: false)
+    public init(_ model: TimelineItemDataModel) {
+        self.model = model
     }
 
     public var body: some View {
@@ -68,11 +35,11 @@ public struct TimelineItem: View {
     }
 
     @ViewBuilder private var marker: some View {
-        switch kind {
+        switch model {
         case .now:
             dot(diameter: TonySize.nowDot, height: TonySize.nowMarkerHeight, colour: TonyColor.accent)
-        case .task(let icon, _, _, _, _, _):
-            IconCircle(icon: icon)
+        case .task(let item, _):
+            IconCircle(icon: item.icon)
         case .meetings:
             dot(diameter: TonySize.meetingsDot, height: TonySize.meetingsMarkerHeight, colour: TonyColor.muted)
         }
@@ -86,28 +53,28 @@ public struct TimelineItem: View {
     }
 
     @ViewBuilder private var content: some View {
-        switch kind {
+        switch model {
         case .now(let text):
             Text(text)
                 .tonyText(.label)
                 .foregroundStyle(TonyColor.accent)
                 .padding(.top, TonySpacing.tight)
-        case .task(_, let time, let title, let reason, let actions, let onCheck):
+        case .task(let item, _):
             VStack(alignment: .leading, spacing: TonySpacing.snug) {
                 HStack(spacing: TonySpacing.medium) {
                     VStack(alignment: .leading, spacing: TonySpacing.textGap) {
-                        Text(time).tonyText(.labelSmall).foregroundStyle(TonyColor.muted)
-                        Text(title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
-                        Text(reason).tonyText(.bodySmall).foregroundStyle(TonyColor.muted)
+                        Text(item.time).tonyText(.labelSmall).foregroundStyle(TonyColor.muted)
+                        Text(item.title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
+                        Text(item.reason).tonyText(.bodySmall).foregroundStyle(TonyColor.muted)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityElement(children: .combine)
-                    checkbox(onCheck: onCheck)
+                    checkbox(item.check)
                 }
-                if !actions.isEmpty {
+                if !item.actions.isEmpty {
                     ViewThatFits(in: .horizontal) {
-                        HStack(spacing: TonySpacing.small) { actionButtons(actions) }
-                        VStack(alignment: .leading, spacing: TonySpacing.small) { actionButtons(actions) }
+                        HStack(spacing: TonySpacing.small) { actionButtons(item.actions) }
+                        VStack(alignment: .leading, spacing: TonySpacing.small) { actionButtons(item.actions) }
                     }
                 }
             }
@@ -125,18 +92,20 @@ public struct TimelineItem: View {
         }
     }
 
-    private func actionButtons(_ actions: [Action]) -> some View {
-        ForEach(actions) { action in
-            Button(action: action.perform) {
-                Chip(action.label)
+    private func actionButtons(_ actions: [ButtonDataModel]) -> some View {
+        ForEach(actions.indices, id: \.self) { index in
+            let action = actions[index]
+            Button(action: action.action) {
+                Chip(ChipDataModel(title: action.title))
                     .frame(minHeight: TonySize.touchTarget)
             }
             .buttonStyle(.plain)
+            .disabled(!action.isEnabled)
         }
     }
 
-    private func checkbox(onCheck: @escaping () -> Void) -> some View {
-        Button(action: onCheck) {
+    private func checkbox(_ check: ButtonDataModel) -> some View {
+        Button(action: check.action) {
             Circle()
                 .strokeBorder(TonyColor.muted, lineWidth: TonySize.border)
                 .frame(width: TonySize.checkbox, height: TonySize.checkbox)
@@ -144,10 +113,14 @@ public struct TimelineItem: View {
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("Mark as done", bundle: .design))
+        .accessibilityLabel(check.title)
     }
 
     private var isNow: Bool {
-        if case .now = kind { true } else { false }
+        if case .now = model { true } else { false }
+    }
+
+    private var isLast: Bool {
+        if case .task(_, let isLast) = model { isLast } else { false }
     }
 }
