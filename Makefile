@@ -11,11 +11,23 @@ APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 test: check-imports
 	swift test --package-path TonyCore
 	swift test --package-path TonyStore
+	swift test --package-path TonyPresentation
 
-# TonyCore must stay free of UI and system-data frameworks.
+# Each layer imports only the layers below it.
+IMPORT := ^\s*(@preconcurrency\s+)?import\s+
+
 check-imports:
-	@if grep -rnE '^\s*(@preconcurrency\s+)?import\s+(UIKit|SwiftUI|EventKit|HealthKit)\b' TonyCore/Sources; then \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|EventKit|HealthKit)\b' TonyCore/Sources; then \
 		echo "error: TonyCore must not import UIKit, SwiftUI, EventKit or HealthKit"; exit 1; \
+	fi
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyDesign)\b' TonyPresentation/Sources; then \
+		echo "error: TonyPresentation must not import UI frameworks, SwiftData, TonyStore or TonyDesign"; exit 1; \
+	fi
+	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore)\b' TonyDesign/Sources; then \
+		echo "error: TonyDesign draws data models and must not import TonyCore or TonyStore"; exit 1; \
+	fi
+	@if grep -rnE '$(IMPORT)Tony' TonyUIKit/Sources; then \
+		echo "error: TonyUIKit is reusable and must not import any Tony module"; exit 1; \
 	fi
 
 # Everyone generates the project with the same Tuist.
@@ -45,4 +57,4 @@ run: build
 	xcrun simctl launch '$(SIMULATOR)' com.mt81.tony
 
 clean:
-	rm -rf build TonyCore/.build TonyStore/.build Tony.xcodeproj Tony.xcworkspace Derived
+	rm -rf build TonyCore/.build TonyStore/.build TonyPresentation/.build TonyUIKit/.build Tony.xcodeproj Tony.xcworkspace Derived
