@@ -16,6 +16,22 @@ struct TonyApp: App {
         return Store(state: TasksFeature.State(), environment: environment)
     }()
 
+    #if DEBUG
+    /// Debug builds only: the calendar check, shown with the -calendar launch argument.
+    @State private var calendarDebugStore: Store<CalendarDebugFeature>? = {
+        guard
+            ProcessInfo.processInfo.arguments.contains("-calendar"),
+            let repository = try? SwiftDataRepository.appGroup()
+        else {
+            return nil
+        }
+        let calendarSource = EventKitCalendarSource()
+        let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: .current) { Date() }
+        let environment = CalendarDebugFeature.Environment(calendarSource: calendarSource, coordinator: coordinator)
+        return Store(state: CalendarDebugFeature.State(), environment: environment)
+    }()
+    #endif
+
     var body: some Scene {
         WindowGroup {
             content
@@ -28,6 +44,8 @@ struct TonyApp: App {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-gallery") {
             ComponentGallery()
+        } else if let calendarDebugStore {
+            StoreView(store: calendarDebugStore, content: CalendarDebugScreen.init)
         } else {
             RootView(tasksStore: tasksStore)
         }
