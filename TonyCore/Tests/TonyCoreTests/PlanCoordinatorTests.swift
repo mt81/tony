@@ -1,0 +1,189 @@
+import Foundation
+import Synchronization
+import Testing
+@testable import TonyCore
+
+private final class TestClock: Sendable {
+    private let date: Mutex<Date>
+
+    init(_ date: Date) {
+        self.date = Mutex(date)
+    }
+
+    var now: Date { date.withLock { $0 } }
+
+    func set(_ newDate: Date) {
+        date.withLock { $0 = newDate }
+    }
+}
+
+private actor InMemoryRepository: Repository {
+    private var storedTasks: [TonyTask]
+    private var storedCompletions: [Completion] = []
+    private var storedRoutine: Routine?
+    private(set) var taskReads = 0
+    private var fails = false
+
+    init(tasks: [TonyTask], routine: Routine? = nil) {
+        storedTasks = tasks
+        storedRoutine = routine
+    }
+
+    func setFails(_ fails: Bool) { self.fails = fails }
+
+    func tasks() throws -> [TonyTask] {
+        taskReads += 1
+        if fails { throw CocoaError(.fileReadUnknown) }
+        return storedTasks
+    }
+
+    func save(_ task: TonyTask) { storedTasks.append(task) }
+    func deleteTask(id: UUID) { storedTasks.removeAll { $0.id == id } }
+    func reorderTasks(_ orderedIDs: [UUID]) {}
+    func completions() -> [Completion] { storedCompletions }
+    func save(_ completion: Completion) { storedCompletions.append(completion) }
+    func routine() -> Routine? { storedRoutine }
+    func save(_ routine: Routine) { storedRoutine = routine }
+    func preferences() -> [Preference] { [] }
+    func save(_ preference: Preference) {}
+}
+
+/// Saturday 7 November 2026 at 8:00, with two tasks due and an empty calendar.
+private struct Setup {
+    let clock: TestClock
+    let repository: InMemoryRepository
+    let calendarSource: FakeCalendarSource
+    let coordinator: PlanCoordinator
+    let tasks: [TonyTask]
+
+    init(routine: Routine? = nil, access: CalendarAccess = .granted, day: Int = 7) throws {
+        tasks = [try Fixtures.task(1, "Plants", rank: 0), try Fixtures.task(2, "Vacuum", rank: 1)]
+        let clock = TestClock(try Fixtures.november(day, hour: 8))
+        self.clock = clock
+        repository = InMemoryRepository(tasks: tasks, routine: routine)
+        calendarSource = FakeCalendarSource(access: access)
+        coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Fixtures.calendar) { clock.now }
+    }
+
+    func current() async throws -> PlannedDay {
+        try #require(await coordinator.current)
+    }
+}
+
+@Test func startingPublishesAPlanForTheDay() async throws {
+    let setup = try Setup()
+    var plans = await setup.coordinator.plans().makeAsyncIterator()
+
+    await setup.coordinator.start()
+
+    let planned = try #require(await plans.next())
+    #expect(planned.plan.items.map(\.taskID) == setup.tasks.map(\.id))
+    #expect(planned.plannedAt == (try Fixtures.november(7, hour: 8)))
+    #expect(planned == (try await setup.current()))
+}
+
+@Test func aNewSubscriberGetsTheLatestPlanRightAway() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+
+    var plans = await setup.coordinator.plans().makeAsyncIterator()
+
+    #expect(await plans.next() == (try await setup.current()))
+}
+
+@Test func theStandardRoutineIsUsedUntilOneIsSaved() async throws {
+    let withoutRoutine = try Setup(day: 3)
+    await withoutRoutine.coordinator.start()
+    #expect(try await withoutRoutine.current().context.blocks.allSatisfy { $0.location == .home })
+
+    let withRoutine = try Setup(routine: Fixtures.routine(), day: 3)
+    await withRoutine.coordinator.start()
+    #expect(try await withRoutine.current().context.blocks.allSatisfy { $0.location == .office })
+}
+
+@Test func recordingDoneYieldsAPlanWithoutThatTask() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+    let first = try #require(try await setup.current().plan.items.first)
+
+    try await setup.coordinator.record(.done, on: first)
+
+    #expect(try await setup.current().plan.items.map(\.taskID) == [setup.tasks[1].id])
+    #expect(try await setup.current().completions.contains { $0.taskID == first.taskID && $0.outcome == .done })
+}
+
+@Test func aStatusChangeYieldsANewPlanAndLastsOnlyThatDay() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+
+    await setup.coordinator.setStatus(.offDay)
+    #expect(try await setup.current().context.capacity == .off)
+    #expect(try await setup.current().plan.items.isEmpty)
+
+    setup.clock.set(try Fixtures.november(8, hour: 8))
+    await setup.coordinator.refresh()
+    #expect(try await setup.current().context.capacity == .full)
+    #expect(try await setup.current().plan.items.count == 2)
+}
+
+@Test func aCalendarChangeYieldsANewPlan() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+    var plans = await setup.coordinator.plans().makeAsyncIterator()
+    _ = await plans.next()
+
+    let meeting = DateInterval(start: try Fixtures.november(7, hour: 8), duration: 3600)
+    setup.calendarSource.replaceEvents([CalendarEvent(interval: meeting)])
+
+    let planned = try #require(await plans.next())
+    #expect(planned.context.blocks.filter { $0.availability == .busy }.map(\.interval) == [meeting])
+    #expect(planned.plan.items.first?.interval.start == meeting.end)
+}
+
+@Test func comingBackLaterPlansTheRestOfTheDay() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+    #expect(try await setup.current().plan.items.first?.interval.start == (try Fixtures.november(7, hour: 8)))
+
+    setup.clock.set(try Fixtures.november(7, hour: 14))
+    await setup.coordinator.refresh()
+
+    #expect(try await setup.current().plan.items.first?.interval.start == (try Fixtures.november(7, hour: 14)))
+}
+
+@Test func rapidEventsDoNotPlanOncePerEvent() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+    let readsBefore = await setup.repository.taskReads
+
+    await withTaskGroup(of: Void.self) { group in
+        for _ in 0..<25 {
+            group.addTask { await setup.coordinator.refresh() }
+        }
+    }
+
+    let passes = await setup.repository.taskReads - readsBefore
+    #expect((1...2).contains(passes))
+}
+
+@Test func withoutCalendarAccessTheDayIsPlannedWithNoBusyTime() async throws {
+    let setup = try Setup(access: .denied)
+    setup.calendarSource.replaceEvents([CalendarEvent(interval: DateInterval(start: try Fixtures.november(7, hour: 8), duration: 3600))])
+
+    await setup.coordinator.start()
+
+    #expect(try await setup.current().context.blocks.allSatisfy { $0.availability != .busy })
+    #expect(try await setup.current().plan.items.count == 2)
+}
+
+@Test func aStoreFailureKeepsThePreviousPlan() async throws {
+    let setup = try Setup()
+    await setup.coordinator.start()
+    let before = try await setup.current()
+
+    await setup.repository.setFails(true)
+    setup.clock.set(try Fixtures.november(7, hour: 14))
+    await setup.coordinator.refresh()
+
+    #expect(try await setup.current() == before)
+}
