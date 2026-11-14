@@ -39,8 +39,8 @@ private struct TasksScreen {
         XCTAssertTrue(row("UITest Gamma").waitForExistence(timeout: 5))
         XCTAssertFalse(row("UITest Alpha").exists)
 
-        row("UITest Beta").press(forDuration: 1, thenDragTo: row("UITest Gamma"))
-        XCTAssertLessThan(row("UITest Beta").frame.minY, row("UITest Gamma").frame.minY)
+        drag("UITest Beta", above: "UITest Gamma")
+        XCTAssertTrue(isAbove("UITest Beta", "UITest Gamma"))
 
         relaunch()
         XCTAssertTrue(row("UITest Gamma").waitForExistence(timeout: 5))
@@ -69,6 +69,26 @@ private struct TasksScreen {
 
         app.buttons["Cancel"].tap()
         XCTAssertFalse(row("UITest laundry").exists)
+    }
+
+    /// Drags one row past the top edge of another, slowly, and holds it there before letting go.
+    /// Dropping on the other row's centre sits on the reorder threshold and fails now and then.
+    private func drag(_ name: String, above other: String) {
+        let start = row(name).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = row(other).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -0.25))
+        start.press(forDuration: 1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.5)
+    }
+
+    /// Waits for the list to settle with the first row above the second.
+    private func isAbove(_ name: String, _ other: String) -> Bool {
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            if row(name).frame.minY < row(other).frame.minY {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        return false
     }
 
     /// Scrolls the editor down until a step with this name is on screen.
