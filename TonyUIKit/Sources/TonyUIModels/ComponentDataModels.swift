@@ -1,7 +1,6 @@
 import Foundation
-import TonyUIKit
 
-// Data models of Tony's own components. TonyDesign draws them.
+// Data models of Tony's own components.
 
 public struct ChipDataModel: Hashable, Sendable {
     public enum Style: Sendable, CaseIterable {

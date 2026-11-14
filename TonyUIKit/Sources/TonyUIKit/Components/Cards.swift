@@ -1,5 +1,5 @@
 import SwiftUI
-import TonyPresentation
+import TonyUIModels
 
 /// A task in the Tasks tab: icon, name, cadence line and a status chip.
 public struct TaskRow: View {

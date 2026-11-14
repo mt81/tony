@@ -1,6 +1,5 @@
 import SwiftUI
-import TonyPresentation
-import TonyUIKit
+import TonyUIModels
 
 /// One entry of the Today timeline. The five Figma kinds are: now, task with actions, meetings, task, and last task.
 public struct TimelineItem: View {

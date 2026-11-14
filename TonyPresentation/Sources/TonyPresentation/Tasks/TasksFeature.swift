@@ -1,6 +1,6 @@
 import Foundation
 import TonyCore
-import TonyUIKit
+import TonyUIModels
 
 /// The Tasks tab: the three lists, reordering, deleting, and the task form.
 public enum TasksFeature: Feature {

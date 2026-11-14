@@ -1,6 +1,5 @@
 import SwiftUI
-import TonyPresentation
-import TonyUIKit
+import TonyUIModels
 
 /// The Tasks tab, drawn from its data model.
 public struct TasksScreen: View {

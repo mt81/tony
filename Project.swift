@@ -47,8 +47,8 @@ let project = Project(
                 .package(product: "TonyCore"),
                 .package(product: "TonyStore"),
                 .package(product: "TonyPresentation"),
+                .package(product: "TonyUIModels"),
                 .package(product: "TonyUIKit"),
-                .target(name: "TonyDesign"),
                 .target(name: "TonyWidgets"),
             ]
         ),
@@ -61,18 +61,6 @@ let project = Project(
             buildableFolders: ["TonyAppUITests"],
             dependencies: [
                 .target(name: "TonyApp"),
-            ]
-        ),
-        .target(
-            name: "TonyDesign",
-            destinations: destinations,
-            product: .framework,
-            bundleId: "com.mt81.tony.design",
-            deploymentTargets: deploymentTargets,
-            buildableFolders: ["TonyDesign"],
-            dependencies: [
-                .package(product: "TonyPresentation"),
-                .package(product: "TonyUIKit"),
             ]
         ),
         .target(

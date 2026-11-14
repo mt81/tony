@@ -1,5 +1,5 @@
 import SwiftUI
-import TonyPresentation
+import TonyUIModels
 
 public struct Chip: View {
     private let model: ChipDataModel
