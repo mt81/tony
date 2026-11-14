@@ -1,47 +1,41 @@
 import SwiftUI
+import TonyPresentation
 
 public struct Chip: View {
-    public enum Style: Sendable, CaseIterable {
-        case neutral
-        case selected
-        case accent
-        case warning
+    private let model: ChipDataModel
 
-        var background: Color {
-            switch self {
-            case .neutral: TonyColor.surfaceRaised
-            case .selected: TonyColor.ink
-            case .accent: TonyColor.accent
-            case .warning: TonyColor.warningSoft
-            }
-        }
-
-        var foreground: Color {
-            switch self {
-            case .neutral: TonyColor.ink
-            case .selected, .accent: TonyColor.onAccent
-            case .warning: TonyColor.warning
-            }
-        }
-    }
-
-    private let label: String
-    private let style: Style
-
-    public init(_ label: String, style: Style = .neutral) {
-        self.label = label
-        self.style = style
+    public init(_ model: ChipDataModel) {
+        self.model = model
     }
 
     public var body: some View {
-        Text(label)
+        Text(model.title)
             .tonyText(.labelSmall)
             .lineLimit(1)
             .fixedSize()
-            .foregroundStyle(style.foreground)
+            .foregroundStyle(model.style.foreground)
             .padding(.horizontal, TonySpacing.inset)
             .padding(.vertical, TonySpacing.small)
-            .background(style.background, in: .capsule)
+            .background(model.style.background, in: .capsule)
+    }
+}
+
+extension ChipDataModel.Style {
+    var background: Color {
+        switch self {
+        case .neutral: TonyColor.surfaceRaised
+        case .selected: TonyColor.ink
+        case .accent: TonyColor.accent
+        case .warning: TonyColor.warningSoft
+        }
+    }
+
+    var foreground: Color {
+        switch self {
+        case .neutral: TonyColor.ink
+        case .selected, .accent: TonyColor.onAccent
+        case .warning: TonyColor.warning
+        }
     }
 }
 

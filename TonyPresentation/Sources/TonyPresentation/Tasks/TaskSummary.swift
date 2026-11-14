@@ -2,38 +2,39 @@ import Foundation
 import TonyCore
 
 /// The two lines of text and the chip of a task row.
-struct TaskSummary {
+struct TaskSummary: Equatable {
     let subtitle: String
     let status: String
     let isNeglected: Bool
 
-    init(task: TonyTask, completions: [Completion], now: Date, calendar: Calendar, locale: Locale) {
+    init(task: TonyTask, completions: [Completion], context: PresentationContext) {
+        let locale = context.locale
         let stepNames = task.steps.count > 1 ? task.steps.map { $0.name.lowercased(with: locale) } : []
-        let parts = [Self.cadenceText(for: task, calendar: calendar, locale: locale)] + (stepNames.isEmpty ? [] : [stepNames.formatted(.list(type: .and, width: .narrow).locale(locale))])
-        subtitle = parts.joined(separator: " · ")
+        let steps = stepNames.isEmpty ? [] : [stepNames.formatted(.list(type: .and, width: .narrow).locale(locale))]
+        subtitle = ([Self.cadenceText(for: task, context: context)] + steps).joined(separator: " · ")
 
-        let neglect = task.neglect(completions: completions, on: now, calendar: calendar)
-        isNeglected = neglect > 0
-        status = Self.statusText(for: task, completions: completions, isNeglected: neglect > 0, now: now, calendar: calendar, locale: locale)
+        isNeglected = task.neglect(completions: completions, on: context.now, calendar: context.calendar) > 0
+        status = Self.statusText(for: task, completions: completions, isNeglected: isNeglected, context: context)
     }
 
-    private static func cadenceText(for task: TonyTask, calendar: Calendar, locale: Locale) -> String {
+    private static func cadenceText(for task: TonyTask, context: PresentationContext) -> String {
+        let locale = context.locale
         switch task.cadence {
         case .afterCompletion(let days):
-            return String(localized: "Every \(days) days after last time", locale: locale)
+            return localized("Every \(days) days after last time", locale)
         case .weekdays(let weekdays):
-            let names = calendar.orderedWeekdays(locale: locale)
+            let names = context.calendar.orderedWeekdays(locale: locale)
                 .filter { weekdays.contains($0.weekday) }
                 .map(\.name)
-            return String(localized: "Every \(names.formatted(.list(type: .and).locale(locale)))", locale: locale)
+            return localized("Every \(names.formatted(.list(type: .and).locale(locale)))", locale)
         case .timesPerWeek(let times):
-            return String(localized: "\(times) times a week", locale: locale)
+            return localized("\(times) times a week", locale)
         case nil:
             guard let deadline = task.mustHappenBy else {
-                return String(localized: "No date", locale: locale)
+                return localized("No date", locale)
             }
             let day = deadline.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(locale))
-            return String(localized: "By \(day)", locale: locale)
+            return localized("By \(day)", locale)
         }
     }
 
@@ -41,31 +42,32 @@ struct TaskSummary {
         for task: TonyTask,
         completions: [Completion],
         isNeglected: Bool,
-        now: Date,
-        calendar: Calendar,
-        locale: Locale
+        context: PresentationContext
     ) -> String {
+        let (now, calendar, locale) = (context.now, context.calendar, context.locale)
         if let progress = task.weeklyQuotaProgress(completions: completions, on: now, calendar: calendar) {
             let done = progress.done.formatted(.number.locale(locale))
             let target = progress.target.formatted(.number.locale(locale))
             return "\(done) / \(target)"
         }
         if isNeglected {
-            return String(localized: "Due", locale: locale)
+            return localized("Due", locale)
         }
         if task.isDue(completions: completions, on: now, calendar: calendar) {
             if task.cadence == nil, let deadline = task.mustHappenBy {
-                return deadline.formatted(.dateTime.weekday(.abbreviated).locale(locale))
+                var formatStyle = Date.FormatStyle.dateTime.weekday(.abbreviated).locale(locale)
+                formatStyle.timeZone = calendar.timeZone
+                return deadline.formatted(formatStyle)
             }
-            return task.cadence == nil ? String(localized: "Someday", locale: locale) : String(localized: "Today", locale: locale)
+            return task.cadence == nil ? localized("Someday", locale) : localized("Today", locale)
         }
         guard
             let dueDay = task.dueDay(completions: completions, on: now, calendar: calendar),
             let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: now), to: dueDay).day
         else {
-            return String(localized: "Done", locale: locale)
+            return localized("Done", locale)
         }
-        return String(localized: "In \(days) days", locale: locale)
+        return localized("In \(days) days", locale)
     }
 }
 
