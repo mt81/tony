@@ -31,6 +31,7 @@ let project = Project(
                 "CFBundleDisplayName": "Tony",
                 "UILaunchScreen": [:],
                 "UIUserInterfaceStyle": "Dark",
+                "NSCalendarsFullAccessUsageDescription": "Tony reads when you are busy, never what your events are about, to suggest tasks at moments that fit.",
                 "UISupportedInterfaceOrientations": [
                     "UIInterfaceOrientationPortrait",
                 ],

@@ -1,0 +1,22 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSCalendarsFullAccessUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony reads when you are busy, never what your events are about, to suggest tasks at moments that fit."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony lit quand tu es occupé, jamais le contenu de tes événements, pour te proposer des tâches aux bons moments."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
