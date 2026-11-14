@@ -1,6 +1,5 @@
 import SwiftUI
-import TonyPresentation
-import TonyUIKit
+import TonyUIModels
 
 /// Every component with the sample content of the Figma "Components" frame, to compare the two side by side.
 /// Debug builds only: its text is sample data, not translated.

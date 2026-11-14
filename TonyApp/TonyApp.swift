@@ -1,6 +1,6 @@
 import SwiftUI
 import TonyCore
-import TonyDesign
+import TonyUIKit
 import TonyPresentation
 import TonyStore
 

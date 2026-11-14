@@ -18,7 +18,7 @@ let package = Package(
     targets: [
         .target(
             name: "TonyPresentation",
-            dependencies: ["TonyCore", "TonyUIKit"],
+            dependencies: ["TonyCore", .product(name: "TonyUIModels", package: "TonyUIKit")],
             resources: [.process("Resources")]
         ),
         .testTarget(name: "TonyPresentationTests", dependencies: ["TonyPresentation"]),

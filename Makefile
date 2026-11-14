@@ -13,21 +13,21 @@ test: check-imports
 	swift test --package-path TonyStore
 	swift test --package-path TonyPresentation
 
-# Each layer imports only the layers below it.
+# The business layer and the UI do not know each other; only the presentation layer knows both.
 IMPORT := ^\s*(@preconcurrency\s+)?import\s+
 
 check-imports:
-	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|EventKit|HealthKit)\b' TonyCore/Sources; then \
-		echo "error: TonyCore must not import UIKit, SwiftUI, EventKit or HealthKit"; exit 1; \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|EventKit|HealthKit|TonyUI)' TonyCore/Sources; then \
+		echo "error: TonyCore must not import UIKit, SwiftUI, EventKit, HealthKit or the UI modules"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyDesign)\b' TonyPresentation/Sources; then \
-		echo "error: TonyPresentation must not import UI frameworks, SwiftData, TonyStore or TonyDesign"; exit 1; \
+	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore|TonyPresentation)\b' TonyUIKit/Sources; then \
+		echo "error: the UI must not import TonyCore, TonyStore or TonyPresentation"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore)\b' TonyDesign/Sources; then \
-		echo "error: TonyDesign draws data models and must not import TonyCore or TonyStore"; exit 1; \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|TonyUIKit)\b' TonyUIKit/Sources/TonyUIModels; then \
+		echo "error: TonyUIModels is plain Swift and must not import UIKit, SwiftUI or the views"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)Tony' TonyUIKit/Sources; then \
-		echo "error: TonyUIKit is reusable and must not import any Tony module"; exit 1; \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyUIKit)\b' TonyPresentation/Sources; then \
+		echo "error: TonyPresentation must not import UI frameworks, SwiftData, TonyStore or the views"; exit 1; \
 	fi
 
 # Everyone generates the project with the same Tuist.

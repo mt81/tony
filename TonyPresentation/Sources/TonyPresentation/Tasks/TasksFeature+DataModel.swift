@@ -1,6 +1,6 @@
 import Foundation
 import TonyCore
-import TonyUIKit
+import TonyUIModels
 
 extension TasksFeature {
     @MainActor

@@ -1,5 +1,5 @@
 import SwiftUI
-import TonyDesign
+import TonyUIKit
 import TonyPresentation
 
 struct RootView: View {
