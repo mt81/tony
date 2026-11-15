@@ -16,11 +16,11 @@ final class TasksTabUITests: XCTestCase {
 }
 
 @MainActor
-private struct TasksScreen {
-    private let app = XCUIApplication()
+struct TasksScreen {
+    let app = XCUIApplication()
 
-    init() {
-        app.launchArguments += ["-AppleLanguages", "(en)"]
+    init(arguments: [String] = []) {
+        app.launchArguments += ["-AppleLanguages", "(en)"] + arguments
     }
 
     func runCreateEditReorderDeleteAcrossRelaunches() {
@@ -103,8 +103,10 @@ private struct TasksScreen {
         return step.exists
     }
 
-    private func openTasks() {
-        app.launch()
+    func openTasks() {
+        if app.state != .runningForeground {
+            app.launch()
+        }
         app.buttons["Tasks"].firstMatch.tap()
         XCTAssertTrue(app.buttons["addTask"].waitForExistence(timeout: 5))
     }
@@ -114,21 +116,28 @@ private struct TasksScreen {
         openTasks()
     }
 
-    private func row(_ name: String) -> XCUIElement {
+    func row(_ name: String) -> XCUIElement {
         app.buttons["task-\(name)"]
     }
 
-    private func create(_ name: String) {
+    func create(_ name: String, hasDeadline: Bool = false) {
         app.buttons["addTask"].tap()
         let field = app.textFields["taskName"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         field.typeText(name)
+        if hasDeadline {
+            let deadline = app.switches["Must happen by a date"]
+            for _ in 0..<6 where !(deadline.exists && deadline.isHittable) {
+                app.swipeUp()
+            }
+            deadline.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        }
         app.buttons["saveTask"].tap()
         XCTAssertTrue(row(name).waitForExistence(timeout: 5))
     }
 
-    private func delete(_ name: String) {
+    func delete(_ name: String) {
         row(name).tap()
         let deleteButton = app.buttons["deleteTask"]
         if !deleteButton.waitForExistence(timeout: 2) {
@@ -138,7 +147,7 @@ private struct TasksScreen {
         XCTAssertTrue(row(name).waitForNonExistence(timeout: 5))
     }
 
-    private func deleteLeftovers() {
+    func deleteLeftovers() {
         let leftovers = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'task-UITest'"))
         while leftovers.count > 0 {
             let name = String(leftovers.firstMatch.identifier.dropFirst("task-".count))
