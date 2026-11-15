@@ -33,6 +33,7 @@ public enum TonySpacing {
     public static let medium: CGFloat = 12
     public static let inset: CGFloat = 14
     public static let large: CGFloat = 16
+    public static let panelInset: CGFloat = 18
     public static let page: CGFloat = 20
     public static let timeline: CGFloat = 22
     public static let section: CGFloat = 28
@@ -44,6 +45,7 @@ public enum TonyRadius {
     public static let row: CGFloat = 20
     public static let stat: CGFloat = 22
     public static let tile: CGFloat = 24
+    public static let panel: CGFloat = 28
 }
 
 public enum TonySize {
@@ -58,6 +60,13 @@ public enum TonySize {
     public static let nowMarkerHeight: CGFloat = 30
     public static let meetingsMarkerHeight: CGFloat = 34
     public static let track: CGFloat = 10
+    public static let tonyHeader: CGFloat = 128
+    public static let tonyByline: CGFloat = 28
+    public static let graphHeight: CGFloat = 120
+    public static let graphBand: CGFloat = 31
+    public static let graphDot: CGFloat = 6
+    public static let graphScoreDot: CGFloat = 10
+    public static let graphTodayDot: CGFloat = 18
 }
 
 public enum TonyIcon {

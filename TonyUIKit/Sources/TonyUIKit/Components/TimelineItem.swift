@@ -38,7 +38,7 @@ public struct TimelineItem: View {
         case .now:
             dot(diameter: TonySize.nowDot, height: TonySize.nowMarkerHeight, colour: TonyColor.accent)
         case .task(let item, _):
-            IconCircle(icon: item.icon)
+            IconCircle(icon: item.icon, isNeglected: item.isNeglected)
         case .meetings:
             dot(diameter: TonySize.meetingsDot, height: TonySize.meetingsMarkerHeight, colour: TonyColor.muted)
         }
@@ -64,10 +64,11 @@ public struct TimelineItem: View {
                     VStack(alignment: .leading, spacing: TonySpacing.textGap) {
                         Text(item.time).tonyText(.labelSmall).foregroundStyle(TonyColor.muted)
                         Text(item.title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
-                        Text(item.reason).tonyText(.bodySmall).foregroundStyle(TonyColor.muted)
+                        Text(item.reason).tonyText(.bodySmall).foregroundStyle(item.isNeglected ? TonyColor.warning : TonyColor.muted)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier(ifPresent: item.accessibilityIdentifier)
                     checkbox(item.check)
                 }
                 if !item.actions.isEmpty {
@@ -100,6 +101,7 @@ public struct TimelineItem: View {
             }
             .buttonStyle(.plain)
             .disabled(!action.isEnabled)
+            .accessibilityIdentifier(ifPresent: action.accessibilityIdentifier)
         }
     }
 
@@ -113,6 +115,7 @@ public struct TimelineItem: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(check.title)
+        .accessibilityIdentifier(ifPresent: check.accessibilityIdentifier)
     }
 
     private var isNow: Bool {
