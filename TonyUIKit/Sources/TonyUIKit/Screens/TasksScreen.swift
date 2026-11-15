@@ -27,14 +27,7 @@ public struct TasksScreen: View {
         .listStyle(.plain)
         .listRowSpacing(TonySpacing.small)
         .scrollContentBackground(.hidden)
-        .background {
-            LinearGradient(
-                stops: [.init(color: TonyColor.glow, location: 0), .init(color: TonyColor.canvas, location: 0.3)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-        }
+        .background { PageBackground() }
         .onAppear(perform: model.onAppear)
         .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor() } })) { editor in
             TaskEditorScreen(editor)

@@ -65,14 +65,28 @@ public enum TimelineItemDataModel {
         public var actions: [ButtonDataModel]
         /// Marks the item as done; its title is the VoiceOver label.
         public var check: ButtonDataModel
+        /// Draws the icon and the reason in the neglected mood.
+        public var isNeglected: Bool
+        public var accessibilityIdentifier: String?
 
-        public init(icon: String, time: String, title: String, reason: String, actions: [ButtonDataModel] = [], check: ButtonDataModel) {
+        public init(
+            icon: String,
+            time: String,
+            title: String,
+            reason: String,
+            actions: [ButtonDataModel] = [],
+            check: ButtonDataModel,
+            isNeglected: Bool = false,
+            accessibilityIdentifier: String? = nil
+        ) {
             self.icon = icon
             self.time = time
             self.title = title
             self.reason = reason
             self.actions = actions
             self.check = check
+            self.isNeglected = isNeglected
+            self.accessibilityIdentifier = accessibilityIdentifier
         }
     }
 
