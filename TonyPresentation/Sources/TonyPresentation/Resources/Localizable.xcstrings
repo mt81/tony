@@ -1,6 +1,174 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
+    "%lld days since last time": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day since last time"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days since last time"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld jour depuis la dernière fois"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld jours depuis la dernière fois"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld meetings, back to back": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "1 meeting"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld meetings, back to back"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "1 réunion"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld réunions à la suite"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld more": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld more"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de plus"
+          }
+        }
+      }
+    },
+    "%lld of %lld this week": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld this week"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "%lld things would be nice today: %@.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "One thing would be nice today: %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld things would be nice today: %2$@."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Une chose serait bien aujourd'hui : %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld choses seraient bien aujourd'hui : %2$@."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld times a week": {
       "localizations": {
         "en": {
@@ -57,6 +225,54 @@
         }
       }
     },
+    "A free day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A free day"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une journée libre"
+          }
+        }
+      }
+    },
+    "A full day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A full day"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une journée chargée"
+          }
+        }
+      }
+    },
+    "A light day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A light day"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une journée légère"
+          }
+        }
+      }
+    },
     "A number of times a week": {
       "localizations": {
         "en": {
@@ -69,6 +285,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Un nombre de fois par semaine"
+          }
+        }
+      }
+    },
+    "A steady day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A steady day"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une journée bien remplie"
           }
         }
       }
@@ -165,6 +397,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Au bureau"
+          }
+        }
+      }
+    },
+    "Before your %@ meetings.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Before your %@ meetings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avant tes réunions de %@."
           }
         }
       }
@@ -297,6 +545,22 @@
         }
       }
     },
+    "Do you already have something planned for lunch?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do you already have something planned for lunch?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As-tu déjà quelque chose de prévu pour le déjeuner ?"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "en": {
@@ -309,6 +573,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fait"
+          }
+        }
+      }
+    },
+    "Done today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done today"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait aujourd'hui"
           }
         }
       }
@@ -505,6 +785,22 @@
         }
       }
     },
+    "Higher means you followed through on more of what Tony suggested. Rest days stay on the path.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Higher means you followed through on more of what Tony suggested. Rest days stay on the path."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus c'est haut, plus tu as suivi ce que Tony suggérait. Les jours de repos restent sur le chemin."
+          }
+        }
+      }
+    },
     "How": {
       "localizations": {
         "en": {
@@ -517,6 +813,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Comment"
+          }
+        }
+      }
+    },
+    "How things are": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How things are"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Où en sont les choses"
           }
         }
       }
@@ -609,6 +921,38 @@
         }
       }
     },
+    "It runs on its own.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It runs on its own."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ça tourne tout seul."
+          }
+        }
+      }
+    },
+    "Kept for the evening.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kept for the evening."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gardé pour ce soir."
+          }
+        }
+      }
+    },
     "Kind": {
       "localizations": {
         "en": {
@@ -637,6 +981,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dure %lld min"
+          }
+        }
+      }
+    },
+    "Later": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus tard"
+          }
+        }
+      }
+    },
+    "Mark %@ as done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mark %@ as done"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquer %@ comme fait"
           }
         }
       }
@@ -753,6 +1129,86 @@
         }
       }
     },
+    "Not today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not today"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas aujourd'hui"
+          }
+        }
+      }
+    },
+    "Not yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not yet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore"
+          }
+        }
+      }
+    },
+    "Nothing needs you today. Enjoy it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing needs you today. Enjoy it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien ne t'attend aujourd'hui. Profites-en."
+          }
+        }
+      }
+    },
+    "Now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenant"
+          }
+        }
+      }
+    },
+    "Now · a good moment for %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now · a good moment for %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenant · un bon moment pour %@"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "en": {
@@ -865,6 +1321,22 @@
         }
       }
     },
+    "Right after your meetings.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Right after your meetings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juste après tes réunions."
+          }
+        }
+      }
+    },
     "Save": {
       "localizations": {
         "en": {
@@ -877,6 +1349,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Enregistrer"
+          }
+        }
+      }
+    },
+    "Skip it": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip it"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passer"
           }
         }
       }
@@ -945,6 +1433,22 @@
         }
       }
     },
+    "Suggestions, not orders": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggestions, not orders"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Des suggestions, pas des ordres"
+          }
+        }
+      }
+    },
     "Tasks": {
       "localizations": {
         "en": {
@@ -957,6 +1461,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tâches"
+          }
+        }
+      }
+    },
+    "The first moment that fits.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first moment that fits."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le premier moment qui convient."
           }
         }
       }
@@ -989,6 +1509,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aujourd’hui"
+          }
+        }
+      }
+    },
+    "Tony": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony"
           }
         }
       }
@@ -1057,6 +1593,110 @@
         }
       }
     },
+    "Yes, sorted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes, sorted"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oui, c'est réglé"
+          }
+        }
+      }
+    },
+    "You have %lld meetings left today, the next at %@.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have one meeting left today, at %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %1$lld meetings left today, the next at %2$@."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Il te reste une réunion aujourd'hui, à %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Il te reste %1$lld réunions aujourd'hui, la prochaine à %2$@."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Your answer could not be saved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your answer could not be saved"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta réponse n'a pas pu être enregistrée"
+          }
+        }
+      }
+    },
+    "Your consistency": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your consistency"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta régularité"
+          }
+        }
+      }
+    },
+    "Your day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your day"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta journée"
+          }
+        }
+      }
+    },
     "Your tasks could not be saved": {
       "localizations": {
         "en": {
@@ -1069,6 +1709,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tes tâches n’ont pas pu être enregistrées"
+          }
+        }
+      }
+    },
+    "done / suggested": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "done / suggested"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fait / suggéré"
+          }
+        }
+      }
+    },
+    "rest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rest"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "repos"
+          }
+        }
+      }
+    },
+    "until %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "until %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "jusqu'à %@"
           }
         }
       }

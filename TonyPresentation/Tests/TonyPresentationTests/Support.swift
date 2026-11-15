@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 import Testing
 import TonyCore
 @testable import TonyPresentation
@@ -95,7 +96,10 @@ actor FakeRepository: Repository {
     }
 
     func completions() -> [Completion] { storedCompletions }
-    func save(_ completion: Completion) { storedCompletions.append(completion) }
+    func save(_ completion: Completion) throws {
+        if failsOnSave { throw CocoaError(.fileWriteUnknown) }
+        storedCompletions.append(completion)
+    }
     func routine() -> Routine? { nil }
     func save(_ routine: Routine) {}
     func preferences() -> [Preference] { [] }
@@ -109,5 +113,28 @@ struct FakeCatalog: TaskCatalog {
             StepTemplate(name: "Load", mode: .active, duration: 600),
             StepTemplate(name: "Wash", mode: .background, duration: 2700),
         ]
+    }
+}
+
+struct FakeCalendarSource: CalendarSource {
+    var busyIntervals: [DateInterval] = []
+
+    func access() -> CalendarAccess { .granted }
+    func requestAccess() -> CalendarAccess { .granted }
+    func busyIntervals(in interval: DateInterval) -> [DateInterval] { busyIntervals }
+    func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
+}
+
+final class TestClock: Sendable {
+    private let date: Mutex<Date>
+
+    init(_ date: Date) {
+        self.date = Mutex(date)
+    }
+
+    var now: Date { date.withLock { $0 } }
+
+    func set(_ newDate: Date) {
+        date.withLock { $0 = newDate }
     }
 }
