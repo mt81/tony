@@ -171,10 +171,7 @@ public enum TasksFeature: Feature {
             let draft = await TaskSentenceParser.draft(
                 from: sentence,
                 locale: locale,
-                instructions: localized(
-                    "You read one sentence as a task for a to-do list. Give the name of the task, without how often it repeats, in the words of the sentence. Give how it repeats. The sentence is in English.",
-                    locale
-                ),
+                instructions: ModelInstructions.task(locale),
                 service: environment.languageService
             )
             return .sentenceRead(draft, id: id, stepID: stepID, now: now)

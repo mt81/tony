@@ -8,7 +8,7 @@ import TonyStore
 struct TonyApp: App {
     @State private var stores = AppStores()
     #if DEBUG
-    @State private var modelSpike = Store<ModelSpikeFeature>(state: ModelSpikeFeature.State(), environment: ModelSpikeRunner.environment)
+    @State private var modelCheck = Store<ModelCheckFeature>(state: ModelCheckFeature.State(), environment: ModelCheckEnvironment.live)
     #endif
 
     var body: some Scene {
@@ -37,7 +37,7 @@ struct TonyApp: App {
         } else if let stores, ProcessInfo.processInfo.arguments.contains("-calendar") {
             StoreView(store: stores.calendarDebug, now: stores.now, content: CalendarDebugScreen.init)
         } else if ProcessInfo.processInfo.arguments.contains("-model") {
-            StoreView(store: modelSpike, now: { Date() }, content: ModelSpikeScreen.init)
+            StoreView(store: modelCheck, now: { Date() }, content: ModelCheckScreen.init)
         } else {
             RootView(stores: stores)
         }

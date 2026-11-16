@@ -254,10 +254,7 @@ struct TodayWording {
         let plannedIDs = Set(planItems.map(\.taskID))
 
         return BriefingRequest(
-            instructions: localized(
-                "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan. Never add a task, a time or a meeting. Write in English.",
-                locale
-            ),
+            instructions: ModelInstructions.briefing(locale),
             header: [context.now.formatted(dayStyle)],
             items: items,
             footer: footer,

@@ -1,11 +1,11 @@
 import SwiftUI
 import TonyUIModels
 
-/// Debug builds only: the model spikes and their results, to check the on-device model on a device.
-public struct ModelSpikeScreen: View {
-    private let model: ModelSpikeScreenDataModel
+/// Debug builds only: the evaluation set and its report, to check the on-device model on a device.
+public struct ModelCheckScreen: View {
+    private let model: ModelCheckScreenDataModel
 
-    public init(_ model: ModelSpikeScreenDataModel) {
+    public init(_ model: ModelCheckScreenDataModel) {
         self.model = model
     }
 
@@ -17,10 +17,12 @@ public struct ModelSpikeScreen: View {
                         .tonyText(.label)
                         .accessibilityIdentifier("modelAvailability")
                     ButtonView(model.run)
-                    if let summary = model.summary {
-                        Text(summary)
-                            .tonyText(.labelStrong)
-                            .accessibilityIdentifier("modelSummary")
+                    if let report = model.report {
+                        Text(report)
+                            .tonyText(.caption)
+                            .textSelection(.enabled)
+                            .accessibilityIdentifier("modelReport")
+                        ShareLink(model.shareReport, item: report)
                     }
                 }
                 Section {
