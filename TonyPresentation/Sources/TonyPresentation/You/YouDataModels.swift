@@ -1,4 +1,5 @@
 import Foundation
+import TonyUIModels
 
 /// The You tab: who the user is, their routine and what Tony may read. The rest of the tab comes with C25.
 public struct YouScreenDataModel {

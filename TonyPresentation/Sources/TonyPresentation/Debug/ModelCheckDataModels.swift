@@ -1,4 +1,5 @@
 import Foundation
+import TonyUIModels
 
 /// A debug screen that runs the on-device model on the evaluation set and shows what came back.
 public struct ModelCheckScreenDataModel {

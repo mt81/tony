@@ -50,6 +50,7 @@ let project = Project(
                 .package(product: "TonyCore"),
                 .package(product: "TonyStore"),
                 .package(product: "TonyPresentation"),
+                .package(product: "TonyScreens"),
                 .package(product: "TonyUIModels"),
                 .package(product: "TonyUIKit"),
                 .target(name: "TonyWidgets"),

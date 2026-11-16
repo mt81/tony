@@ -1,4 +1,6 @@
 import SwiftUI
+import TonyPresentation
+import TonyUIKit
 import TonyUIModels
 
 /// The Tasks tab, drawn from its data model.
@@ -26,7 +28,6 @@ public struct TasksScreen: View {
             addTaskRow
         }
         .listStyle(.plain)
-        .listRowSpacing(TonySpacing.small)
         .scrollContentBackground(.hidden)
         .background { PageBackground() }
         .onAppear(perform: model.onAppear)
@@ -123,10 +124,10 @@ public struct TasksScreen: View {
 }
 
 extension View {
-    /// A list row that shows only its content: no separator, no system background, page margins.
+    /// A list row that shows only its content: no separator, no system background, page margins, a small gap below.
     fileprivate func plainRow() -> some View {
         listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 0, leading: TonySpacing.page, bottom: 0, trailing: TonySpacing.page))
+            .listRowInsets(EdgeInsets(top: 0, leading: TonySpacing.page, bottom: TonySpacing.small, trailing: TonySpacing.page))
     }
 }

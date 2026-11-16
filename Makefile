@@ -26,8 +26,11 @@ check-imports:
 	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|TonyUIKit)\b' TonyUIKit/Sources/TonyUIModels; then \
 		echo "error: TonyUIModels is plain Swift and must not import UIKit, SwiftUI or the views"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyUIKit)\b' TonyPresentation/Sources; then \
-		echo "error: TonyPresentation must not import UI frameworks, SwiftData, TonyStore or the views"; exit 1; \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyUIKit|TonyScreens)\b' TonyPresentation/Sources/TonyPresentation; then \
+		echo "error: the reducers and data models must not import UI frameworks, SwiftData, TonyStore or the views"; exit 1; \
+	fi
+	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore|SwiftData)\b' TonyPresentation/Sources/TonyScreens; then \
+		echo "error: the screens draw data models and must not import TonyCore, TonyStore or SwiftData"; exit 1; \
 	fi
 
 # Everyone generates the project with the same Tuist.
