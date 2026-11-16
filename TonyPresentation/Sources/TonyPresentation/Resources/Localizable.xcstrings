@@ -449,6 +449,22 @@
         }
       }
     },
+    "Busy from %@ to %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busy from %1$@ to %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Occupé de %1$@ à %2$@"
+          }
+        }
+      }
+    },
     "By %@": {
       "localizations": {
         "en": {
@@ -1321,6 +1337,22 @@
         }
       }
     },
+    "Nothing is planned today.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing is planned today."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien n’est prévu aujourd’hui."
+          }
+        }
+      }
+    },
     "Nothing needs you today. Enjoy it.": {
       "localizations": {
         "en": {
@@ -1909,6 +1941,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toi"
+          }
+        }
+      }
+    },
+    "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan. Never add a task, a time or a meeting. Write in English.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan. Never add a task, a time or a meeting. Write in English."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu es Tony, un assistant calme et chaleureux. En deux à quatre phrases courtes, présente sa journée à la personne à partir du plan ci-dessous. Utilise uniquement les tâches et les heures du plan. N’ajoute jamais de tâche, d’heure ni de réunion. Écris en français et tutoie la personne."
           }
         }
       }

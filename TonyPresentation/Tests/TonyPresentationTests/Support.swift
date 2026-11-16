@@ -160,3 +160,20 @@ actor UnansweredCalendarSource: CalendarSource {
     func busyIntervals(in interval: DateInterval) -> [DateInterval] { [] }
     nonisolated func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
+
+/// A language model that always gives the same briefing, and keeps what it was asked.
+final class FakeLanguageService: LanguageService {
+    private let answer: String
+    private let asked = Mutex<[(instructions: String, plan: String)]>([])
+
+    init(briefing: String) {
+        answer = briefing
+    }
+
+    var requests: [(instructions: String, plan: String)] { asked.withLock { $0 } }
+
+    func briefing(instructions: String, plan: String) -> String {
+        asked.withLock { $0.append((instructions, plan)) }
+        return answer
+    }
+}

@@ -72,7 +72,14 @@ struct AppStores {
         coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: .current, now: now)
         today = Store(
             state: TodayFeature.State(),
-            environment: TodayFeature.Environment(coordinator: coordinator, repository: repository, catalog: catalog, locale: .current)
+            environment: TodayFeature.Environment(
+                coordinator: coordinator,
+                briefingWriter: BriefingWriter(service: FoundationModelsLanguageService()),
+                repository: repository,
+                catalog: catalog,
+                calendar: .current,
+                locale: .current
+            )
         )
         tasks = Store(
             state: TasksFeature.State(),

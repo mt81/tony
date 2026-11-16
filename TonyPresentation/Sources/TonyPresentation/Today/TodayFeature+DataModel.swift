@@ -10,7 +10,7 @@ extension TodayFeature {
         send: @escaping @MainActor (Action) -> Void
     ) -> TodayScreenDataModel {
         let locale = context.locale
-        let wording = Wording(state: state, context: context)
+        let wording = TodayWording(state: state, context: context)
 
         return TodayScreenDataModel(
             date: context.now.formatted(wording.dayStyle),
@@ -19,7 +19,7 @@ extension TodayFeature {
             briefing: BriefingDataModel(
                 author: localized("Tony", locale),
                 time: state.planned.map { "· \($0.plannedAt.formatted(wording.timeStyle))" } ?? "",
-                text: wording.briefing,
+                text: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing,
                 question: state.mocked?.question.map { question in
                     switch question {
                     case .lunchPlanned: localized("Do you already have something planned for lunch?", locale)
@@ -65,7 +65,7 @@ extension TodayFeature {
     @MainActor
     private static func timeline(
         state: State,
-        wording: Wording,
+        wording: TodayWording,
         send: @escaping @MainActor (Action) -> Void
     ) -> [TodayScreenDataModel.TimelineEntry] {
         let locale = wording.context.locale
@@ -117,7 +117,7 @@ extension TodayFeature {
         return timeline
     }
 
-    private static func tiles(state: State, wording: Wording) -> [TodayScreenDataModel.IdentifiedTile] {
+    private static func tiles(state: State, wording: TodayWording) -> [TodayScreenDataModel.IdentifiedTile] {
         (state.planned?.tasks ?? [])
             .map { (task: $0, isNeglected: wording.isNeglected($0)) }
             .sorted { ($0.isNeglected ? 0 : 1, $0.task.rank) < ($1.isNeglected ? 0 : 1, $1.task.rank) }
@@ -170,8 +170,8 @@ extension TodayFeature {
     }
 }
 
-/// The templated sentences of the Today tab. The on-device model will reword the briefing later (C15).
-private struct Wording {
+/// The templated sentences of the Today tab, and the request that asks the on-device model to reword the briefing.
+struct TodayWording {
     let state: TodayFeature.State
     let context: PresentationContext
 
@@ -227,6 +227,44 @@ private struct Wording {
             sentences.append(localized("You have \(meetings) meetings left today, the next at \(next.interval.start.formatted(timeStyle)).", locale))
         }
         return sentences.joined(separator: " ")
+    }
+
+    /// The plan as the model reads it, in the user's language, with the facts its answer is checked against.
+    var briefingRequest: BriefingRequest {
+        let (calendar, locale) = (context.calendar, context.locale)
+        func minutes(_ date: Date) -> Int {
+            let time = calendar.dateComponents([.hour, .minute], from: date)
+            return (time.hour ?? 0) * 60 + (time.minute ?? 0)
+        }
+        let planItems = state.planned?.plan.items ?? []
+        let items = planItems.compactMap { item -> BriefingRequest.Item? in
+            guard let task = task(of: item), let step = task.steps.first(where: { $0.id == item.stepID }) else { return nil }
+            return BriefingRequest.Item(
+                time: item.interval.start.formatted(timeStyle),
+                title: title(of: step, in: task),
+                reason: reason(for: item, step: step, task: task)
+            )
+        }
+        var footer = busyBlocks.map { block in
+            localized("Busy from \(block.interval.start.formatted(timeStyle)) to \(block.interval.end.formatted(timeStyle))", locale)
+        }
+        if items.isEmpty {
+            footer.append(localized("Nothing is planned today.", locale))
+        }
+        let plannedIDs = Set(planItems.map(\.taskID))
+
+        return BriefingRequest(
+            instructions: localized(
+                "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan. Never add a task, a time or a meeting. Write in English.",
+                locale
+            ),
+            header: [context.now.formatted(dayStyle)],
+            items: items,
+            footer: footer,
+            allowedMinutes: Set(planItems.map { minutes($0.interval.start) } + busyBlocks.flatMap { [minutes($0.interval.start), minutes($0.interval.end)] }),
+            otherTaskNames: (state.planned?.tasks ?? []).filter { !plannedIDs.contains($0.id) }.map(\.name),
+            fallback: briefing
+        )
     }
 
     var now: String {

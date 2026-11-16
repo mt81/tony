@@ -102,8 +102,8 @@ extension ModelSpikeCase {
             var problems = taskNames
                 .filter { !text.localizedCaseInsensitiveContains($0) }
                 .map { "does not name \($0)" }
-            let allowed = Self.minutesOfDay(in: input)
-            let invented = Self.minutesOfDay(in: text).filter { minutes in
+            let allowed = BriefingValidator.minutesOfDay(in: input)
+            let invented = BriefingValidator.minutesOfDay(in: text).filter { minutes in
                 // "6:00" may be the plan's 18:00 said the twelve-hour way.
                 !allowed.contains(minutes) && !allowed.contains(minutes + 12 * 60)
             }
@@ -124,28 +124,6 @@ extension ModelSpikeCase {
         default:
             return ["answered with the wrong kind of output"]
         }
-    }
-
-    /// Every time of day written in the text ("18:00", "18h30", "6 pm"), as minutes after midnight.
-    static func minutesOfDay(in text: String) -> Set<Int> {
-        var found: Set<Int> = []
-        for match in text.matches(of: /\b(\d{1,2})\s?[:h]\s?(\d{2})\b/) {
-            if let hour = Int(match.1), let minute = Int(match.2), hour < 24, minute < 60 {
-                found.insert(hour * 60 + minute)
-            }
-        }
-        for match in text.matches(of: /\b(\d{1,2})\s?(am|pm|a\.m\.|p\.m\.)/.ignoresCase()) {
-            if let hour = Int(match.1), (1...12).contains(hour) {
-                let isAfternoon = match.2.lowercased().hasPrefix("p")
-                found.insert((hour % 12 + (isAfternoon ? 12 : 0)) * 60)
-            }
-        }
-        for match in text.matches(of: /\b(\d{1,2})\s?h\b/) {
-            if let hour = Int(match.1), hour < 24 {
-                found.insert(hour * 60)
-            }
-        }
-        return found
     }
 }
 

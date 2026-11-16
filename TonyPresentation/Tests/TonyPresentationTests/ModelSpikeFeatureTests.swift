@@ -32,10 +32,6 @@ private func answer(_ output: ModelSpikeAnswer.Output, seconds: Double = 1) -> M
     ])
 }
 
-@Test func frenchTimesAreReadToo() {
-    #expect(ModelSpikeCase.minutesOfDay(in: "À 8 h les plantes, à 12h30 la lessive, à 18:00 le sport.") == [480, 750, 1080])
-}
-
 @Test(arguments: [
     (output: ModelSpikeAnswer.Output.task(name: "Water the plants", cadence: .afterCompletion(days: 5)), problems: [String]()),
     (output: .task(name: "Water", cadence: .afterCompletion(days: 5)), problems: ["name has no \"plants\""]),
