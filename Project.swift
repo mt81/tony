@@ -31,6 +31,8 @@ let project = Project(
                 "CFBundleDisplayName": "Tony",
                 "UILaunchScreen": [:],
                 "UIUserInterfaceStyle": "Dark",
+                "UIBackgroundModes": ["fetch"],
+                "BGTaskSchedulerPermittedIdentifiers": ["com.mt81.tony.refresh"],
                 "NSCalendarsFullAccessUsageDescription": "Tony reads when you are busy, never what your events are about, to suggest tasks at moments that fit.",
                 "UISupportedInterfaceOrientations": [
                     "UIInterfaceOrientationPortrait",
@@ -42,7 +44,7 @@ let project = Project(
                     "UIInterfaceOrientationLandscapeRight",
                 ],
             ]),
-            buildableFolders: ["TonyApp"],
+            buildableFolders: ["TonyApp", "TonyDebug"],
             entitlements: appGroupEntitlements,
             dependencies: [
                 .package(product: "TonyCore"),
@@ -76,7 +78,7 @@ let project = Project(
                     "NSExtensionPointIdentifier": "com.apple.widgetkit-extension",
                 ],
             ]),
-            buildableFolders: ["TonyWidgets"],
+            buildableFolders: ["TonyWidgets", "TonyDebug"],
             entitlements: appGroupEntitlements,
             dependencies: [
                 .package(product: "TonyCore"),

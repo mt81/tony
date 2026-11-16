@@ -7,8 +7,22 @@ import TonyStore
 @main
 struct TonyApp: App {
     @State private var stores = AppStores()
+    #if DEBUG
+    @State private var modelSpike = Store<ModelSpikeFeature>(state: ModelSpikeFeature.State(), environment: ModelSpikeRunner.environment)
+    #endif
 
     var body: some Scene {
+        #if DEBUG
+        // Spike S3: can the model be used from a background task?
+        window.backgroundTask(.appRefresh(ModelExtensionCheck.backgroundTaskIdentifier)) {
+            await ModelExtensionCheck.run(from: .backgroundTask)
+        }
+        #else
+        window
+        #endif
+    }
+
+    private var window: some Scene {
         WindowGroup {
             content
                 .tint(TonyColor.accent)
@@ -22,6 +36,8 @@ struct TonyApp: App {
             ComponentGallery()
         } else if let stores, ProcessInfo.processInfo.arguments.contains("-calendar") {
             StoreView(store: stores.calendarDebug, now: stores.now, content: CalendarDebugScreen.init)
+        } else if ProcessInfo.processInfo.arguments.contains("-model") {
+            StoreView(store: modelSpike, now: { Date() }, content: ModelSpikeScreen.init)
         } else {
             RootView(stores: stores)
         }
