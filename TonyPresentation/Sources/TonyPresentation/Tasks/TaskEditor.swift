@@ -183,6 +183,20 @@ public enum TaskEditor {
     }
 }
 
+extension TaskEditor {
+    /// Fills a new task's form from a sentence the user typed: name, kind and cadence. The user still confirms it.
+    static func fill(_ state: inout State, with draft: TaskDraft) -> [Effect] {
+        state.task.kind = draft.kind
+        switch draft.cadence {
+        case .afterCompletion(let days): (state.cadenceKind, state.everyDays) = (.afterCompletion, days)
+        case .weekdays(let weekdays): (state.cadenceKind, state.weekdays) = (.weekdays, weekdays)
+        case .timesPerWeek(let times): (state.cadenceKind, state.timesPerWeek) = (.timesPerWeek, times)
+        case nil: break
+        }
+        return reduce(&state, .nameChanged(draft.name))
+    }
+}
+
 extension TaskEditor.State {
     fileprivate mutating func updateStep(_ id: UUID, _ change: (inout Step) -> Void) {
         guard let index = task.steps.firstIndex(where: { $0.id == id }) else { return }

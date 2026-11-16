@@ -164,10 +164,26 @@ actor UnansweredCalendarSource: CalendarSource {
 /// A language model that always gives the same briefing, and keeps what it was asked.
 final class FakeLanguageService: LanguageService {
     private let answer: String
+    private let draft: TaskDraft?
+    private let readRoutine: Routine?
     private let asked = Mutex<[(instructions: String, plan: String)]>([])
 
-    init(briefing: String) {
+    init(briefing: String = "", draft: TaskDraft? = nil, routine: Routine? = nil) {
         answer = briefing
+        self.draft = draft
+        readRoutine = routine
+    }
+
+    func taskDraft(instructions: String, sentence: String) throws -> TaskDraft {
+        asked.withLock { $0.append((instructions, sentence)) }
+        guard let draft else { throw CocoaError(.featureUnsupported) }
+        return draft
+    }
+
+    func routine(instructions: String, description: String) throws -> Routine {
+        asked.withLock { $0.append((instructions, description)) }
+        guard let readRoutine else { throw CocoaError(.featureUnsupported) }
+        return readRoutine
     }
 
     var requests: [(instructions: String, plan: String)] { asked.withLock { $0 } }

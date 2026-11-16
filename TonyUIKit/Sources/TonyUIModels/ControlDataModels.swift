@@ -41,19 +41,23 @@ public struct TextFieldDataModel {
     public var prompt: String?
     public var accessibilityIdentifier: String?
     public var onChange: @MainActor (String) -> Void
+    /// Called when the user presses return; nil when return does nothing special.
+    public var onSubmit: (@MainActor () -> Void)?
 
     public init(
         title: String,
         text: String,
         prompt: String? = nil,
         accessibilityIdentifier: String? = nil,
-        onChange: @escaping @MainActor (String) -> Void
+        onChange: @escaping @MainActor (String) -> Void,
+        onSubmit: (@MainActor () -> Void)? = nil
     ) {
         self.title = title
         self.text = text
         self.prompt = prompt
         self.accessibilityIdentifier = accessibilityIdentifier
         self.onChange = onChange
+        self.onSubmit = onSubmit
     }
 }
 

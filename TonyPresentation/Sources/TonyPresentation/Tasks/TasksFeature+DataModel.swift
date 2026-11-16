@@ -15,6 +15,14 @@ extension TasksFeature {
         return TasksScreenDataModel(
             title: localized("Tasks", locale),
             add: ButtonDataModel(title: localized("Add a task", locale), systemImage: "plus", accessibilityIdentifier: "addTask", action: addTask),
+            quickAdd: TextFieldDataModel(
+                title: localized("Tell Tony what to add", locale),
+                text: state.quickAdd,
+                prompt: localized("Tell Tony… “water the plants every 5 days”", locale),
+                accessibilityIdentifier: "quickAdd",
+                onChange: { send(.quickAddChanged($0)) },
+                onSubmit: { send(.quickAddSubmitted(id: UUID(), stepID: UUID(), now: Date())) }
+            ),
             sections: kinds.compactMap { kind in
                 section(kind, state: state, context: context, send: send)
             },

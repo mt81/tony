@@ -106,6 +106,22 @@ extension YouFeature {
                 accessibilityIdentifier: "userName",
                 onChange: { send(.nameChanged($0)) }
             ),
+            description: TextFieldDataModel(
+                title: localized("Describe your week", locale),
+                text: editor.description,
+                prompt: localized("Tell Tony… “office on Tuesdays and Thursdays, 9 to 5:30”", locale),
+                accessibilityIdentifier: "routineDescription",
+                onChange: { send(.descriptionChanged($0)) },
+                onSubmit: { send(.descriptionSubmitted) }
+            ),
+            descriptionFooter: {
+                switch editor.reading {
+                case .none: nil
+                case .inProgress: localized("Tony is reading…", locale)
+                case .filled: localized("Tony filled in the form below. Check it before you save.", locale)
+                case .notUnderstood: localized("Tony could not read that. Fill in the form below.", locale)
+                }
+            }(),
             daysHeader: localized("Your week", locale),
             days: context.calendar.orderedWeekdays(locale: locale).map { day in
                 .init(

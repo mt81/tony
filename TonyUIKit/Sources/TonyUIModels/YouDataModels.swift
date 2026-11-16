@@ -74,6 +74,10 @@ public struct RoutineEditorDataModel: Identifiable {
     public let id = "routine"
     public var title: String
     public var name: TextFieldDataModel
+    /// Where the week is described in plain words. Return reads it and fills the form.
+    public var description: TextFieldDataModel
+    /// What happened to the description; nil before one is read.
+    public var descriptionFooter: String?
     public var daysHeader: String
     public var days: [Day]
     public var workHeader: String
@@ -90,6 +94,8 @@ public struct RoutineEditorDataModel: Identifiable {
     public init(
         title: String,
         name: TextFieldDataModel,
+        description: TextFieldDataModel,
+        descriptionFooter: String?,
         daysHeader: String,
         days: [Day],
         workHeader: String,
@@ -104,6 +110,8 @@ public struct RoutineEditorDataModel: Identifiable {
     ) {
         self.title = title
         self.name = name
+        self.description = description
+        self.descriptionFooter = descriptionFooter
         self.daysHeader = daysHeader
         self.days = days
         self.workHeader = workHeader

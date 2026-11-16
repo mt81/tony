@@ -15,6 +15,14 @@ public struct RoutineEditorScreen: View {
                 Section {
                     TextFieldView(model.name)
                 }
+                Section {
+                    TextFieldView(model.description)
+                        .submitLabel(.done)
+                } footer: {
+                    if let footer = model.descriptionFooter {
+                        Text(footer)
+                    }
+                }
                 Section(model.daysHeader) {
                     ForEach(model.days) { day in
                         PickerView(day.picker)

@@ -3,6 +3,8 @@ import Foundation
 public struct TasksScreenDataModel {
     public var title: String
     public var add: ButtonDataModel
+    /// Where a task is typed in plain words. Return reads it and opens the form, filled in.
+    public var quickAdd: TextFieldDataModel
     public var sections: [TaskSectionDataModel]
     public var addTask: ButtonDataModel
     public var editor: TaskEditorDataModel?
@@ -13,6 +15,7 @@ public struct TasksScreenDataModel {
     public init(
         title: String,
         add: ButtonDataModel,
+        quickAdd: TextFieldDataModel,
         sections: [TaskSectionDataModel],
         addTask: ButtonDataModel,
         editor: TaskEditorDataModel?,
@@ -22,6 +25,7 @@ public struct TasksScreenDataModel {
     ) {
         self.title = title
         self.add = add
+        self.quickAdd = quickAdd
         self.sections = sections
         self.addTask = addTask
         self.editor = editor
