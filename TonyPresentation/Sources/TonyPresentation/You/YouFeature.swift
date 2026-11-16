@@ -10,6 +10,14 @@ public enum YouFeature: Feature {
         case off
     }
 
+    /// What happened to the description of the week.
+    public enum Reading: Sendable, Equatable {
+        case none
+        case inProgress
+        case filled
+        case notUnderstood
+    }
+
     public enum TimeField: Sendable, Equatable {
         case workStart
         case workEnd
@@ -21,6 +29,9 @@ public enum YouFeature: Feature {
     public struct Editor: Sendable, Equatable {
         public var name: String
         public var routine: Routine
+        /// The week in the user's own words, which the model reads into the form.
+        public var description = ""
+        public var reading = Reading.none
 
         public var trimmedName: String {
             name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -54,6 +65,10 @@ public enum YouFeature: Feature {
         case nameChanged(String)
         case dayChanged(Locale.Weekday, DayKind)
         case timeChanged(TimeField, DateComponents)
+        case descriptionChanged(String)
+        case descriptionSubmitted
+        /// The routine read from the description; nil when it could not be read.
+        case descriptionRead(Routine?)
         case editorCancelled
         case editorSaved(now: Date)
         case allowCalendarTapped
@@ -65,17 +80,32 @@ public enum YouFeature: Feature {
         case load
         case save(name: String, routine: Routine, now: Date)
         case requestCalendarAccess
+        case read(description: String, current: Routine)
     }
 
     public struct Environment: Sendable {
         public var repository: any Repository
         public var calendarSource: any CalendarSource
         public var coordinator: PlanCoordinator
+        /// Reads the description of the week; nil when there is no model.
+        public var languageService: (any LanguageService)?
+        public var calendar: Calendar
+        public var locale: Locale
 
-        public init(repository: any Repository, calendarSource: any CalendarSource, coordinator: PlanCoordinator) {
+        public init(
+            repository: any Repository,
+            calendarSource: any CalendarSource,
+            coordinator: PlanCoordinator,
+            languageService: (any LanguageService)? = nil,
+            calendar: Calendar,
+            locale: Locale
+        ) {
             self.repository = repository
             self.calendarSource = calendarSource
             self.coordinator = coordinator
+            self.languageService = languageService
+            self.calendar = calendar
+            self.locale = locale
         }
     }
 
@@ -106,6 +136,20 @@ public enum YouFeature: Feature {
             case .workEnd: state.editor?.routine.workEnd = time
             case .wakeTime: state.editor?.routine.wakeTime = time
             case .bedtime: state.editor?.routine.bedtime = time
+            }
+        case .descriptionChanged(let description):
+            state.editor?.description = description
+        case .descriptionSubmitted:
+            guard let editor = state.editor, editor.reading != .inProgress else { break }
+            let description = editor.description.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !description.isEmpty else { break }
+            state.editor?.reading = .inProgress
+            return [.read(description: description, current: editor.routine)]
+        case .descriptionRead(let routine):
+            guard state.editor?.reading == .inProgress else { break }
+            state.editor?.reading = routine == nil ? .notUnderstood : .filled
+            if let routine {
+                state.editor?.routine = routine
             }
         case .editorCancelled:
             state.editor = nil
@@ -141,6 +185,15 @@ public enum YouFeature: Feature {
         case .requestCalendarAccess:
             _ = await environment.calendarSource.requestAccess()
             await environment.coordinator.refresh()
+        case .read(let description, let current):
+            let request = RoutineWording(routine: current, calendar: environment.calendar, locale: environment.locale)
+            return .descriptionRead(
+                await RoutineParser.routine(
+                    from: request.prompt(for: description),
+                    instructions: request.instructions,
+                    service: environment.languageService
+                )
+            )
         }
         do {
             let name = try await repository.preferences().first { $0.key == Preference.userNameKey }?.value ?? ""
@@ -149,6 +202,40 @@ public enum YouFeature: Feature {
         } catch {
             return .failed
         }
+    }
+}
+
+/// What the model is told to read a description of the week: the task, and the routine as it stands,
+/// so that what the description does not mention stays as it is.
+struct RoutineWording {
+    let routine: Routine
+    let calendar: Calendar
+    let locale: Locale
+
+    var instructions: String {
+        localized(
+            "You read how a person describes their usual week and give their routine: the days they work at home, the days they work at the office, when work starts and ends, when they get up and when they go to bed. Keep the current routine for everything the description does not say. The description is in English.",
+            locale
+        )
+    }
+
+    func prompt(for description: String) -> String {
+        let weekdays = calendar.orderedWeekdays(locale: locale)
+        func names(_ days: Set<Locale.Weekday>) -> String {
+            let names = weekdays.filter { days.contains($0.weekday) }.map(\.name)
+            return names.isEmpty ? localized("none", locale) : names.formatted(.list(type: .and, width: .narrow).locale(locale))
+        }
+        func time(_ components: DateComponents) -> String {
+            String(format: "%02d:%02d", components.hour ?? 0, components.minute ?? 0)
+        }
+        return [
+            localized("Current routine:", locale),
+            localized("Home days: \(names(routine.homeDays))", locale),
+            localized("Office days: \(names(routine.officeDays))", locale),
+            localized("Work from \(time(routine.workStart)) to \(time(routine.workEnd))", locale),
+            localized("Up at \(time(routine.wakeTime)), bed at \(time(routine.bedtime))", locale),
+            localized("Description: \(description)", locale),
+        ].joined(separator: "\n")
     }
 }
 

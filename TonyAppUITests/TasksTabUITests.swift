@@ -13,6 +13,12 @@ final class TasksTabUITests: XCTestCase {
         continueAfterFailure = false
         TasksScreen().runCatalogueSuggestion()
     }
+
+    @MainActor
+    func testASentenceFillsTheTaskForm() {
+        continueAfterFailure = false
+        TasksScreen().runQuickAdd()
+    }
 }
 
 @MainActor
@@ -69,6 +75,22 @@ struct TasksScreen {
 
         app.buttons["Cancel"].tap()
         XCTAssertFalse(row("UITest laundry").exists)
+    }
+
+    func runQuickAdd() {
+        openTasks()
+        let quickAdd = app.textFields["quickAdd"]
+        XCTAssertTrue(quickAdd.waitForExistence(timeout: 5))
+        quickAdd.tap()
+        quickAdd.typeText("UITest plants every 5 days\n")
+
+        let name = app.textFields["taskName"]
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        XCTAssertEqual(name.value as? String, "UITest plants")
+        XCTAssertTrue(app.staticTexts["Every 5 days"].waitForExistence(timeout: 5))
+
+        app.buttons["Cancel"].tap()
+        XCTAssertFalse(row("UITest plants").exists)
     }
 
     /// Drags one row past the top edge of another, slowly, and holds it there before letting go.

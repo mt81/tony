@@ -33,6 +33,7 @@ public struct TextFieldView: View {
 
     public var body: some View {
         TextField(model.title, text: Binding(get: { model.text }, set: model.onChange), prompt: Text(model.prompt ?? model.title))
+            .onSubmit { model.onSubmit?() }
             .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
     }
 }

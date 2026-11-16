@@ -9,12 +9,19 @@ private struct You {
     let repository = FakeRepository(tasks: [])
     let store: Store<YouFeature>
 
-    init(calendarSource: any CalendarSource = FakeCalendarSource()) throws {
+    init(calendarSource: any CalendarSource = FakeCalendarSource(), languageService: (any LanguageService)? = nil, language: String = "en") throws {
         let now = try Sample.november(10)
         let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Sample.calendar) { now }
         store = Store(
             state: YouFeature.State(),
-            environment: YouFeature.Environment(repository: repository, calendarSource: calendarSource, coordinator: coordinator)
+            environment: YouFeature.Environment(
+                repository: repository,
+                calendarSource: calendarSource,
+                coordinator: coordinator,
+                languageService: languageService,
+                calendar: Sample.calendar,
+                locale: Locale(identifier: language)
+            )
         )
     }
 
@@ -125,6 +132,61 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 
     #expect(alert.title == "Your routine could not be saved")
     #expect(try you.model().alert == nil)
+}
+
+// MARK: Describing the week
+
+@MainActor
+@Test func aDescriptionTheModelReadsFillsTheFormWithoutSavingIt() async throws {
+    var read = Routine.standard
+    read.homeDays = [.monday, .wednesday, .friday]
+    read.officeDays = [.tuesday, .thursday]
+    read.workEnd = DateComponents(hour: 17, minute: 30)
+    let service = FakeLanguageService(routine: read)
+    let you = try You(languageService: service)
+    try await you.open().routine.edit.action()
+
+    let empty = try #require(try you.model().editor)
+    empty.description.onChange("Office on Tuesdays and Thursdays, until 5:30")
+    let submit = try #require(empty.description.onSubmit)
+    submit()
+    let reading = try #require(try you.model().editor)
+    await you.store.waitForEffects()
+    let filled = try #require(try you.model().editor)
+
+    #expect(empty.descriptionFooter == nil)
+    #expect(reading.descriptionFooter == "Tony is reading…")
+    #expect(filled.descriptionFooter == "Tony filled in the form below. Check it before you save.")
+    #expect(filled.days.map(\.picker.selectedID) == ["home", "office", "home", "office", "home", "off", "off"])
+    #expect(await you.repository.routine() == nil)
+    #expect(service.requests.first?.plan == """
+        Current routine:
+        Home days: Monday, Tuesday, Wednesday, Thursday, Friday
+        Office days: none
+        Work from 09:00 to 17:00
+        Up at 07:00, bed at 23:00
+        Description: Office on Tuesdays and Thursdays, until 5:30
+        """)
+    #expect(service.requests.first?.instructions.hasSuffix("The description is in English.") == true)
+}
+
+@MainActor
+@Test func aDescriptionThatCannotBeReadLeavesTheFormAndSaysSo() async throws {
+    var backwards = Routine.standard
+    backwards.workEnd = DateComponents(hour: 6, minute: 0)
+    let withoutModel = try You(language: "fr")
+    let wrongAnswer = try You(languageService: FakeLanguageService(routine: backwards))
+
+    for you in [withoutModel, wrongAnswer] {
+        try await you.open().routine.edit.action()
+        you.store.send(.descriptionChanged("Bureau le mardi"))
+        you.store.send(.descriptionSubmitted)
+        await you.store.waitForEffects()
+    }
+
+    #expect(try withoutModel.model(language: "fr").editor?.descriptionFooter == "Tony n’a pas pu lire ça. Remplis le formulaire ci-dessous.")
+    #expect(try wrongAnswer.model().editor?.descriptionFooter == "Tony could not read that. Fill in the form below.")
+    #expect(wrongAnswer.store.state.editor?.routine == .standard)
 }
 
 // MARK: Calendar

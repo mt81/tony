@@ -67,6 +67,7 @@ struct AppStores {
             .flatMap { try? TableTaskCatalog(json: $0) }
         let calendarSource = EventKitCalendarSource()
         let now = Self.clock()
+        let languageService = FoundationModelsLanguageService()
 
         self.now = now
         coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: .current, now: now)
@@ -74,7 +75,7 @@ struct AppStores {
             state: TodayFeature.State(),
             environment: TodayFeature.Environment(
                 coordinator: coordinator,
-                briefingWriter: BriefingWriter(service: FoundationModelsLanguageService()),
+                briefingWriter: BriefingWriter(service: languageService),
                 repository: repository,
                 catalog: catalog,
                 calendar: .current,
@@ -83,11 +84,18 @@ struct AppStores {
         )
         tasks = Store(
             state: TasksFeature.State(),
-            environment: TasksFeature.Environment(repository: repository, catalog: catalog, locale: .current)
+            environment: TasksFeature.Environment(repository: repository, catalog: catalog, languageService: languageService, locale: .current)
         )
         you = Store(
             state: YouFeature.State(),
-            environment: YouFeature.Environment(repository: repository, calendarSource: calendarSource, coordinator: coordinator)
+            environment: YouFeature.Environment(
+                repository: repository,
+                calendarSource: calendarSource,
+                coordinator: coordinator,
+                languageService: languageService,
+                calendar: .current,
+                locale: .current
+            )
         )
         #if DEBUG
         calendarDebug = Store(

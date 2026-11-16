@@ -561,6 +561,22 @@
         }
       }
     },
+    "Current routine:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current routine:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Routine actuelle :"
+          }
+        }
+      }
+    },
     "Date": {
       "localizations": {
         "en": {
@@ -637,6 +653,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Supprimer la tâche"
+          }
+        }
+      }
+    },
+    "Describe your week": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe your week"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décris ta semaine"
+          }
+        }
+      }
+    },
+    "Description: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description : %@"
           }
         }
       }
@@ -925,6 +973,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Plus c'est haut, plus tu as suivi ce que Tony suggérait. Les jours de repos restent sur le chemin."
+          }
+        }
+      }
+    },
+    "Home days: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home days: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jours à la maison : %@"
           }
         }
       }
@@ -1417,6 +1481,22 @@
         }
       }
     },
+    "Office days: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office days: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jours au bureau : %@"
+          }
+        }
+      }
+    },
     "Office on %@": {
       "localizations": {
         "en": {
@@ -1705,6 +1785,54 @@
         }
       }
     },
+    "Tell Tony what to add": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tell Tony what to add"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dis à Tony quoi ajouter"
+          }
+        }
+      }
+    },
+    "Tell Tony… “office on Tuesdays and Thursdays, 9 to 5:30”": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tell Tony… “office on Tuesdays and Thursdays, 9 to 5:30”"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dis à Tony… « bureau le mardi et le jeudi, de 9 h à 17 h 30 »"
+          }
+        }
+      }
+    },
+    "Tell Tony… “water the plants every 5 days”": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tell Tony… “water the plants every 5 days”"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dis à Tony… « arroser les plantes tous les 5 jours »"
+          }
+        }
+      }
+    },
     "The first moment that fits.": {
       "localizations": {
         "en": {
@@ -1765,6 +1893,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tony"
+          }
+        }
+      }
+    },
+    "Tony could not read that. Fill in the form below.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony could not read that. Fill in the form below."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony n’a pas pu lire ça. Remplis le formulaire ci-dessous."
+          }
+        }
+      }
+    },
+    "Tony filled in the form below. Check it before you save.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony filled in the form below. Check it before you save."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony a rempli le formulaire ci-dessous. Vérifie-le avant d’enregistrer."
+          }
+        }
+      }
+    },
+    "Tony is reading…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony is reading…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony lit…"
           }
         }
       }
@@ -1833,6 +2009,22 @@
         }
       }
     },
+    "Up at %@, bed at %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up at %1$@, bed at %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever à %1$@, coucher à %2$@"
+          }
+        }
+      }
+    },
     "When it fits": {
       "localizations": {
         "en": {
@@ -1861,6 +2053,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Où"
+          }
+        }
+      }
+    },
+    "Work from %@ to %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work from %1$@ to %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travail de %1$@ à %2$@"
           }
         }
       }
@@ -1997,6 +2205,38 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "You read how a person describes their usual week and give their routine: the days they work at home, the days they work at the office, when work starts and ends, when they get up and when they go to bed. Keep the current routine for everything the description does not say. The description is in English.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You read how a person describes their usual week and give their routine: the days they work at home, the days they work at the office, when work starts and ends, when they get up and when they go to bed. Keep the current routine for everything the description does not say. The description is in English."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu lis comment une personne décrit sa semaine habituelle et tu donnes sa routine : les jours où elle travaille à la maison, les jours où elle travaille au bureau, quand le travail commence et finit, quand elle se lève et quand elle se couche. Garde la routine actuelle pour tout ce que la description ne dit pas. La description est en français."
+          }
+        }
+      }
+    },
+    "You read one sentence as a task for a to-do list. Give the name of the task, without how often it repeats, in the words of the sentence. Give how it repeats. The sentence is in English.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You read one sentence as a task for a to-do list. Give the name of the task, without how often it repeats, in the words of the sentence. Give how it repeats. The sentence is in English."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu lis une phrase comme une tâche pour une liste de choses à faire. Donne le nom de la tâche, sans sa fréquence, avec les mots de la phrase. Donne sa fréquence. La phrase est en français."
           }
         }
       }
@@ -2141,6 +2381,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "fait / suggéré"
+          }
+        }
+      }
+    },
+    "none": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "none"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucun"
           }
         }
       }

@@ -237,3 +237,86 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     #expect(store.state.editor?.task.steps.map(\.name) == [""])
     #expect(store.state.editor?.suggestedSteps == nil)
 }
+
+// MARK: Quick add
+
+@MainActor
+private func quickAdd(_ sentence: String, language: String = "en", languageService: (any LanguageService)? = nil) async throws -> (Store<TasksFeature>, TaskEditorDataModel) {
+    let locale = Locale(identifier: language)
+    let environment = TasksFeature.Environment(
+        repository: FakeRepository(),
+        catalog: FakeCatalog(),
+        languageService: languageService,
+        locale: locale,
+        suggestionDelay: .zero
+    )
+    let store = Store<TasksFeature>(state: TasksFeature.State(), environment: environment)
+    let context = try Sample.context(language: language)
+
+    store.dataModel(context: context).quickAdd.onChange(sentence)
+    let submit = try #require(store.dataModel(context: context).quickAdd.onSubmit)
+    submit()
+    await store.waitForEffects()
+    return (store, try #require(store.dataModel(context: context).editor))
+}
+
+@MainActor
+@Test func aSentenceFillsTheFormInEnglish() async throws {
+    let (store, editor) = try await quickAdd("Water the plants every 5 days")
+
+    #expect(editor.title == "New task")
+    #expect(editor.name.text == "Water the plants")
+    #expect(editor.kind.selectedID == TonyTask.Kind.recurring.rawValue)
+    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.afterCompletion.rawValue)
+    #expect(editor.cadence?.count?.title == "Every 5 days")
+    #expect(editor.save.isEnabled)
+    #expect(store.state.quickAdd.isEmpty)
+    #expect(store.state.tasks.isEmpty)
+}
+
+@MainActor
+@Test func aSentenceFillsTheFormInFrench() async throws {
+    let (_, editor) = try await quickAdd("Arroser les plantes tous les 5 jours", language: "fr")
+
+    #expect(editor.name.text == "Arroser les plantes")
+    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.afterCompletion.rawValue)
+    #expect(editor.cadence?.count?.title == "Tous les 5 jours")
+}
+
+@MainActor
+@Test func aSentenceCanGiveWeekdaysAGoalOrAOneTimeTaskAndItsSteps() async throws {
+    let (_, trash) = try await quickAdd("Take out the trash every Tuesday")
+    let (_, gym) = try await quickAdd("Go to the gym 3 times a week")
+    let (_, passport) = try await quickAdd("Renew my passport")
+    let (laundryStore, _) = try await quickAdd("Laundry every week")
+
+    #expect(trash.cadence?.weekdays.filter(\.isOn).map(\.title) == ["Tuesday"])
+    #expect(gym.kind.selectedID == TonyTask.Kind.goal.rawValue)
+    #expect(gym.cadence?.count?.title == "3 times a week")
+    #expect(passport.kind.selectedID == TonyTask.Kind.oneTime.rawValue)
+    #expect(passport.cadence == nil)
+    #expect(laundryStore.state.editor?.task.steps.map(\.name) == ["Load", "Wash"])
+}
+
+@MainActor
+@Test func theModelIsAskedOnlyForWhatTheRulesDoNotRead() async throws {
+    let service = FakeLanguageService(draft: TaskDraft(name: "Water the plants", cadence: .afterCompletion(days: 3)))
+
+    let (_, byRules) = try await quickAdd("Water the plants every 5 days", languageService: service)
+    let (_, byModel) = try await quickAdd("Water the plants every couple of days", languageService: service)
+
+    #expect(byRules.cadence?.count?.title == "Every 5 days")
+    #expect(byModel.name.text == "Water the plants")
+    #expect(byModel.cadence?.count?.title == "Every 3 days")
+    #expect(service.requests.map(\.plan) == ["Water the plants every couple of days"])
+    #expect(service.requests.first?.instructions.hasSuffix("The sentence is in English.") == true)
+}
+
+@MainActor
+@Test func anEmptySentenceOpensNothing() throws {
+    var state = TasksFeature.State()
+    _ = TasksFeature.reduce(&state, .quickAddChanged("   "))
+
+    #expect(TasksFeature.reduce(&state, .quickAddSubmitted(id: try Sample.identifier(1), stepID: try Sample.identifier(2), now: try Sample.november(10))).isEmpty)
+    #expect(state.editor == nil)
+}
