@@ -21,7 +21,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 - `Info.plist` and `.entitlements` files are generated into `Derived/` from `Project.swift`. Edit them there.
 - Tuist is pinned to the version in the Makefile (`TUIST_VERSION`); `make project` refuses any other. It is installed with `brew install --cask tuist`.
 - The app and the extension share data through the app group `group.com.mt81.tony`.
-- Debug builds have four launch arguments: `-gallery` shows the component gallery, `-calendar` shows the calendar check (calendar access and today's blocks as the planner sees them), `-model` shows the model check (the spike prompts run on the on-device model, with timings, and what the widget and the background task noted), and `-now 08:00` freezes the clock at that time today, to see the plan at another hour.
+- Debug builds have four launch arguments: `-gallery` shows the component gallery, `-calendar` shows the calendar check (calendar access and today's blocks as the planner sees them), `-model` shows the model check (it runs the evaluation set on the on-device model and reports the pass rate, and shows what the widget and the background task noted), and `-now 08:00` freezes the clock at that time today, to see the plan at another hour.
 - The app declares the background refresh mode with one task identifier, `com.mt81.tony.refresh`. Until C21 only the debug model check uses it.
 - `TonyDebug/` holds debug-only source compiled into both the app and the widget extension.
 

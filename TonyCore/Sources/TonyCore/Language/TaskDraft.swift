@@ -41,7 +41,7 @@ public enum TaskSentenceParser {
     }
 
     /// The name must come from the sentence, and the cadence must be one the form can show.
-    static func isValid(_ draft: TaskDraft, for sentence: String) -> Bool {
+    public static func isValid(_ draft: TaskDraft, for sentence: String) -> Bool {
         let name = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty, sentence.range(of: name, options: [.caseInsensitive, .diacriticInsensitive]) != nil else {
             return false
@@ -69,7 +69,7 @@ public enum RoutineParser {
         return routine
     }
 
-    static func isValid(_ routine: Routine) -> Bool {
+    public static func isValid(_ routine: Routine) -> Bool {
         func minutes(_ time: DateComponents) -> Int? {
             guard let hour = time.hour, let minute = time.minute, (0..<24).contains(hour), (0..<60).contains(minute) else { return nil }
             return hour * 60 + minute
