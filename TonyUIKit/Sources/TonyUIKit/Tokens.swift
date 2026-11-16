@@ -62,6 +62,7 @@ public enum TonySize {
     public static let track: CGFloat = 10
     public static let tonyHeader: CGFloat = 128
     public static let tonyByline: CGFloat = 28
+    public static let avatar: CGFloat = 60
     public static let graphHeight: CGFloat = 120
     public static let graphBand: CGFloat = 31
     public static let graphDot: CGFloat = 6

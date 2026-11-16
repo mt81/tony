@@ -1,7 +1,7 @@
 import Foundation
 import TonyCore
 
-/// The task form. Part of the Tasks feature, which shows it, saves it and looks up its steps.
+/// The task form. The feature that shows it (Tasks, Today) saves the task and looks up its steps.
 public enum TaskEditor {
     public enum CadenceKind: String, Sendable, CaseIterable {
         case afterCompletion

@@ -29,6 +29,9 @@ public struct TodayScreen: View {
         }
         .background { PageBackground() }
         .onAppear(perform: model.onAppear)
+        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor() } })) { editor in
+            TaskEditorScreen(editor)
+        }
         .alert(model.alert)
     }
 
@@ -106,6 +109,7 @@ public struct TodayScreen: View {
                     TimelineItem(entry.item)
                 }
             }
+            DashedButton(model.addTask)
         }
     }
 

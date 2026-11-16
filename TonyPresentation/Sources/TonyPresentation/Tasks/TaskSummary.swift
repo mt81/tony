@@ -73,13 +73,13 @@ struct TaskSummary: Equatable {
 
 extension Calendar {
     /// The seven weekdays in this calendar's order, with their names in the given locale.
-    func orderedWeekdays(locale: Locale) -> [(weekday: Locale.Weekday, name: String)] {
+    func orderedWeekdays(locale: Locale) -> [(weekday: Locale.Weekday, name: String, shortName: String)] {
         var localised = self
         localised.locale = locale
         let weekdays: [Locale.Weekday] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
         return (0..<7).map { offset in
             let index = (firstWeekday - 1 + offset) % 7
-            return (weekdays[index], localised.standaloneWeekdaySymbols[index])
+            return (weekdays[index], localised.standaloneWeekdaySymbols[index], localised.shortStandaloneWeekdaySymbols[index])
         }
     }
 }

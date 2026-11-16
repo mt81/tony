@@ -89,6 +89,19 @@ public struct DatePickerView: View {
     }
 }
 
+public struct TimePickerView: View {
+    private let model: TimePickerDataModel
+
+    public init(_ model: TimePickerDataModel) {
+        self.model = model
+    }
+
+    public var body: some View {
+        DatePicker(model.title, selection: Binding(get: { model.time }, set: model.onChange), displayedComponents: .hourAndMinute)
+            .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
+    }
+}
+
 extension View {
     /// Shows the alert while the data model is there.
     public func alert(_ model: AlertDataModel?) -> some View {

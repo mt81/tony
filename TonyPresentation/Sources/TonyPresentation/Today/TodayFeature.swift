@@ -5,7 +5,7 @@ import TonyUIModels
 /// The Today tab: the day's plan from the coordinator, and the user's answers to it.
 public enum TodayFeature: Feature {
     /// Parts of the screen that are mocked until the chunk that owns them:
-    /// the consistency week (C25), the briefing question (C22, C24), the user's name (C13),
+    /// the consistency week (C25), the briefing question (C22, C24),
     /// and meeting titles, which the calendar adapter does not read (privacy rule: busy times only).
     public struct Mocked: Sendable, Equatable {
         public enum DayScore: Sendable, Equatable {
@@ -17,14 +17,12 @@ public enum TodayFeature: Feature {
             case lunchPlanned
         }
 
-        public var userName: String
         /// One entry per day, from the first day of the week.
         public var week: [DayScore]
         public var question: Question?
         public var meetingTitles: [String]
 
         public static let sample = Mocked(
-            userName: "Matteo",
             week: [
                 .score(done: 4, suggested: 5),
                 .rest,
@@ -42,33 +40,65 @@ public enum TodayFeature: Feature {
     public struct State: Sendable, Equatable {
         public var planned: PlannedDay?
         public var mocked: Mocked?
-        public var hasFailed = false
+        /// The name entered in the You tab; nil when there is none.
+        public var userName: String?
+        public var editor: TaskEditor.State?
+        public var failure: Failure?
 
         public init() {}
     }
 
+    public enum Failure: Sendable, Equatable {
+        case answer
+        case task
+    }
+
     public enum Action: Sendable, Equatable {
         case appeared
+        case nameLoaded(String?)
         /// The coordinator's latest plan; nil while there is none.
         case planned(PlannedDay?)
         case checkTapped(DayPlan.Item)
         case laterTapped(DayPlan.Item)
         case notTodayTapped(DayPlan.Item)
         case questionAnswered
-        case failed
+        case addTapped(id: UUID, stepID: UUID, now: Date)
+        case editor(TaskEditor.Action)
+        case editorCancelled
+        case editorSaved
+        case failed(Failure)
         case alertDismissed
     }
 
     public enum Effect: Sendable, Equatable {
         case plan
+        case loadName
         case record(PlanAction, on: DayPlan.Item)
+        case save(TonyTask)
+        case suggestSteps(forName: String)
     }
 
     public struct Environment: Sendable {
         public var coordinator: PlanCoordinator
+        public var repository: any Repository
+        public var catalog: (any TaskCatalog)?
+        /// The language the catalogue answers in.
+        public var locale: Locale
+        /// How long typing must pause before the catalogue is asked.
+        public var suggestionDelay: Duration
 
-        public init(coordinator: PlanCoordinator) {
+        public init(
+            coordinator: PlanCoordinator,
+            repository: any Repository,
+            catalog: (any TaskCatalog)?,
+            locale: Locale,
+            suggestionDelay: Duration = .milliseconds(400)
+        ) {
             self.coordinator = coordinator
+            self.repository = repository
+            self.catalog = catalog
+            self.locale = locale
+            self.suggestionDelay = suggestionDelay
         }
     }
 
@@ -78,7 +108,9 @@ public enum TodayFeature: Feature {
             if state.mocked == nil {
                 state.mocked = .sample
             }
-            return [.plan]
+            return [.plan, .loadName]
+        case .nameLoaded(let name):
+            state.userName = name
         case .planned(let planned):
             state.planned = planned ?? state.planned
         case .checkTapped(let item):
@@ -89,10 +121,27 @@ public enum TodayFeature: Feature {
             return [.record(.notToday, on: item)]
         case .questionAnswered:
             state.mocked?.question = nil
-        case .failed:
-            state.hasFailed = true
+        case .addTapped(let id, let stepID, let now):
+            state.editor = .newTask(id: id, stepID: stepID, now: now)
+        case .editor(let editorAction):
+            guard var editor = state.editor else { break }
+            let effects = TaskEditor.reduce(&editor, editorAction)
+            state.editor = editor
+            return effects.map { effect in
+                switch effect {
+                case .suggestSteps(let name): .suggestSteps(forName: name)
+                }
+            }
+        case .editorCancelled:
+            state.editor = nil
+        case .editorSaved:
+            guard let editor = state.editor, editor.isValid else { break }
+            state.editor = nil
+            return [.save(editor.editedTask)]
+        case .failed(let failure):
+            state.failure = failure
         case .alertDismissed:
-            state.hasFailed = false
+            state.failure = nil
         }
         return []
     }
@@ -102,13 +151,36 @@ public enum TodayFeature: Feature {
         switch effect {
         case .plan:
             await coordinator.start()
+        case .loadName:
+            let preferences = (try? await environment.repository.preferences()) ?? []
+            let name = preferences.first { $0.key == Preference.userNameKey }?.value ?? ""
+            return .nameLoaded(name.isEmpty ? nil : name)
         case .record(let action, let item):
             do {
                 try await coordinator.record(action, on: item)
             } catch {
-                return .failed
+                return .failed(.answer)
             }
+        case .save(let task):
+            do {
+                try await environment.repository.save(task)
+            } catch {
+                return .failed(.task)
+            }
+            await coordinator.refresh()
+        case .suggestSteps(let name):
+            let action = await TaskEditor.suggestSteps(
+                forName: name,
+                catalog: environment.catalog,
+                locale: environment.locale,
+                after: environment.suggestionDelay
+            )
+            return action.map { .editor($0) }
         }
         return .planned(await coordinator.current)
+    }
+
+    public static func cancellationKey(for effect: Effect) -> String? {
+        if case .suggestSteps = effect { "suggestSteps" } else { nil }
     }
 }

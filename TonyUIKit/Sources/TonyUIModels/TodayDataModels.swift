@@ -29,8 +29,12 @@ public struct TodayScreenDataModel {
     public var timelineTitle: String
     public var timelineHint: String
     public var timeline: [TimelineEntry]
+    public var addTask: ButtonDataModel
     public var tilesTitle: String
     public var tiles: [IdentifiedTile]
+    /// The task form, while a task is being added.
+    public var editor: TaskEditorDataModel?
+    public var dismissEditor: @MainActor () -> Void
     public var alert: AlertDataModel?
     public var onAppear: @MainActor () -> Void
 
@@ -42,8 +46,11 @@ public struct TodayScreenDataModel {
         timelineTitle: String,
         timelineHint: String,
         timeline: [TimelineEntry],
+        addTask: ButtonDataModel,
         tilesTitle: String,
         tiles: [IdentifiedTile],
+        editor: TaskEditorDataModel?,
+        dismissEditor: @escaping @MainActor () -> Void,
         alert: AlertDataModel?,
         onAppear: @escaping @MainActor () -> Void
     ) {
@@ -54,8 +61,11 @@ public struct TodayScreenDataModel {
         self.timelineTitle = timelineTitle
         self.timelineHint = timelineHint
         self.timeline = timeline
+        self.addTask = addTask
         self.tilesTitle = tilesTitle
         self.tiles = tiles
+        self.editor = editor
+        self.dismissEditor = dismissEditor
         self.alert = alert
         self.onAppear = onAppear
     }

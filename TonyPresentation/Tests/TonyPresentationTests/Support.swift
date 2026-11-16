@@ -100,10 +100,19 @@ actor FakeRepository: Repository {
         if failsOnSave { throw CocoaError(.fileWriteUnknown) }
         storedCompletions.append(completion)
     }
-    func routine() -> Routine? { nil }
-    func save(_ routine: Routine) {}
-    func preferences() -> [Preference] { [] }
-    func save(_ preference: Preference) {}
+    private var storedRoutine: Routine?
+    private var storedPreferences: [Preference] = []
+
+    func routine() -> Routine? { storedRoutine }
+    func save(_ routine: Routine) throws {
+        if failsOnSave { throw CocoaError(.fileWriteUnknown) }
+        storedRoutine = routine
+    }
+    func preferences() -> [Preference] { storedPreferences }
+    func save(_ preference: Preference) {
+        storedPreferences.removeAll { $0.key == preference.key }
+        storedPreferences.append(preference)
+    }
 }
 
 struct FakeCatalog: TaskCatalog {
@@ -137,4 +146,17 @@ final class TestClock: Sendable {
     func set(_ newDate: Date) {
         date.withLock { $0 = newDate }
     }
+}
+
+/// A calendar the user has not answered for yet, and who says yes when asked.
+actor UnansweredCalendarSource: CalendarSource {
+    private var current = CalendarAccess.notDetermined
+
+    func access() -> CalendarAccess { current }
+    func requestAccess() -> CalendarAccess {
+        current = .granted
+        return current
+    }
+    func busyIntervals(in interval: DateInterval) -> [DateInterval] { [] }
+    nonisolated func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }

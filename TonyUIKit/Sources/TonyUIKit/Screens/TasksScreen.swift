@@ -103,20 +103,9 @@ public struct TasksScreen: View {
     }
 
     private var addTaskRow: some View {
-        Button(action: model.addTask.action) {
-            Text(model.addTask.title)
-                .tonyText(.label)
-                .foregroundStyle(TonyColor.muted)
-                .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
-                .padding(.vertical, TonySpacing.xSmall)
-                .overlay {
-                    RoundedRectangle(cornerRadius: TonyRadius.row)
-                        .strokeBorder(TonyColor.line, style: StrokeStyle(lineWidth: TonySize.border, dash: [TonySpacing.tight]))
-                }
-        }
-        .buttonStyle(.plain)
-        .padding(.top, TonySpacing.small)
-        .plainRow()
+        DashedButton(model.addTask)
+            .padding(.top, TonySpacing.small)
+            .plainRow()
     }
 }
 

@@ -14,3 +14,8 @@ public struct Preference: Codable, Sendable, Hashable {
         self.date = date
     }
 }
+
+extension Preference {
+    /// The key of the name the user goes by.
+    public static let userNameKey = "user.name"
+}
