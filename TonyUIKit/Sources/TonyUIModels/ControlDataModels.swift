@@ -124,6 +124,21 @@ public struct DatePickerDataModel {
     }
 }
 
+/// Picks a time of day. Only the hour and minute of the date count.
+public struct TimePickerDataModel {
+    public var title: String
+    public var time: Date
+    public var accessibilityIdentifier: String?
+    public var onChange: @MainActor (Date) -> Void
+
+    public init(title: String, time: Date, accessibilityIdentifier: String? = nil, onChange: @escaping @MainActor (Date) -> Void) {
+        self.title = title
+        self.time = time
+        self.accessibilityIdentifier = accessibilityIdentifier
+        self.onChange = onChange
+    }
+}
+
 public struct AlertDataModel {
     public var title: String
     public var dismiss: ButtonDataModel

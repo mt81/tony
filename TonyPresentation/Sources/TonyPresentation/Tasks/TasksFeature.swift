@@ -128,17 +128,13 @@ public enum TasksFeature: Feature {
         case .reorder(let orderedIDs):
             return await change(repository) { try await repository.reorderTasks(orderedIDs) }
         case .suggestSteps(let name):
-            do {
-                try await Task.sleep(for: environment.suggestionDelay)
-            } catch {
-                return nil
-            }
-            guard !name.isEmpty, let catalog = environment.catalog else {
-                return .editor(.stepsSuggested(forName: name, steps: nil))
-            }
-            let templates = try? await catalog.steps(forTaskNamed: name, locale: environment.locale)
-            let steps = templates?.map { $0.step(id: UUID()) }
-            return .editor(.stepsSuggested(forName: name, steps: steps))
+            let action = await TaskEditor.suggestSteps(
+                forName: name,
+                catalog: environment.catalog,
+                locale: environment.locale,
+                after: environment.suggestionDelay
+            )
+            return action.map { .editor($0) }
         }
     }
 

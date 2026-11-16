@@ -353,6 +353,22 @@
         }
       }
     },
+    "Allow calendar access": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow calendar access"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser l’accès au calendrier"
+          }
+        }
+      }
+    },
     "Anywhere": {
       "localizations": {
         "en": {
@@ -397,6 +413,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Au bureau"
+          }
+        }
+      }
+    },
+    "Bed around": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bed around"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucher vers"
           }
         }
       }
@@ -449,6 +481,38 @@
         }
       }
     },
+    "Calendar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendrier"
+          }
+        }
+      }
+    },
+    "Calendar access is off. Turn it on in Settings so Tony can plan around your meetings.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar access is off. Turn it on in Settings so Tony can plan around your meetings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’accès au calendrier est désactivé. Active-le dans Réglages pour que Tony planifie autour de tes réunions."
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "en": {
@@ -493,6 +557,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Date"
+          }
+        }
+      }
+    },
+    "Day off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day off"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jour de repos"
           }
         }
       }
@@ -609,6 +689,22 @@
         }
       }
     },
+    "Edit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
+          }
+        }
+      }
+    },
     "Edit task": {
       "localizations": {
         "en": {
@@ -621,6 +717,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Modifier la tâche"
+          }
+        }
+      }
+    },
+    "Ends": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ends"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fin"
           }
         }
       }
@@ -797,6 +909,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Plus c'est haut, plus tu as suivi ce que Tony suggérait. Les jours de repos restent sur le chemin."
+          }
+        }
+      }
+    },
+    "Home on %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home on %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maison : %@"
           }
         }
       }
@@ -1001,6 +1129,22 @@
         }
       }
     },
+    "Let Tony plan around your meetings. He reads when you are busy, never what the events are about.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let Tony plan around your meetings. He reads when you are busy, never what the events are about."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laisse Tony planifier autour de tes réunions. Il lit quand tu es occupé, jamais le sujet des événements."
+          }
+        }
+      }
+    },
     "Mark %@ as done": {
       "localizations": {
         "en": {
@@ -1113,6 +1257,22 @@
         }
       }
     },
+    "No working days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No working days"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun jour de travail"
+          }
+        }
+      }
+    },
     "Not in the rain": {
       "localizations": {
         "en": {
@@ -1221,6 +1381,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "OK"
+          }
+        }
+      }
+    },
+    "Office on %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office on %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bureau : %@"
           }
         }
       }
@@ -1369,6 +1545,22 @@
         }
       }
     },
+    "Sleep": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil"
+          }
+        }
+      }
+    },
     "Someday": {
       "localizations": {
         "en": {
@@ -1381,6 +1573,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Un jour"
+          }
+        }
+      }
+    },
+    "Starts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starts"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Début"
           }
         }
       }
@@ -1529,6 +1737,22 @@
         }
       }
     },
+    "Tony plans around your meetings. He reads when you are busy, never what the events are about.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony plans around your meetings. He reads when you are busy, never what the events are about."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tony planifie autour de tes réunions. Il lit quand tu es occupé, jamais le sujet des événements."
+          }
+        }
+      }
+    },
     "Top matters most": {
       "localizations": {
         "en": {
@@ -1541,6 +1765,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le haut compte le plus"
+          }
+        }
+      }
+    },
+    "Up around": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up around"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever vers"
+          }
+        }
+      }
+    },
+    "Up around %@ · bed around %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever vers %1$@ · coucher vers %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up around %1$@ · bed around %2$@"
           }
         }
       }
@@ -1577,6 +1833,22 @@
         }
       }
     },
+    "Work has to end after it starts.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work has to end after it starts."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le travail doit finir après avoir commencé."
+          }
+        }
+      }
+    },
     "Work hours": {
       "localizations": {
         "en": {
@@ -1593,6 +1865,22 @@
         }
       }
     },
+    "Workday %@ to %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travail de %1$@ à %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workday %1$@ to %2$@"
+          }
+        }
+      }
+    },
     "Yes, sorted": {
       "localizations": {
         "en": {
@@ -1605,6 +1893,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oui, c'est réglé"
+          }
+        }
+      }
+    },
+    "You": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toi"
           }
         }
       }
@@ -1697,6 +2001,54 @@
         }
       }
     },
+    "Your name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton nom"
+          }
+        }
+      }
+    },
+    "Your routine": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your routine"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta routine"
+          }
+        }
+      }
+    },
+    "Your routine could not be saved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your routine could not be saved"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta routine n’a pas pu être enregistrée"
+          }
+        }
+      }
+    },
     "Your tasks could not be saved": {
       "localizations": {
         "en": {
@@ -1709,6 +2061,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tes tâches n’ont pas pu être enregistrées"
+          }
+        }
+      }
+    },
+    "Your week": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your week"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta semaine"
           }
         }
       }

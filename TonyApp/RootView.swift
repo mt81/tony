@@ -27,7 +27,11 @@ struct RootView: View {
                 Label { Text("Tasks") } icon: { TonyIcon.tasks }
             }
             Tab {
-                TonyColor.canvas.ignoresSafeArea()
+                if let stores {
+                    StoreView(store: stores.you, now: stores.now, content: YouScreen.init)
+                } else {
+                    unavailable
+                }
             } label: {
                 Label { Text("You") } icon: { TonyIcon.you }
             }

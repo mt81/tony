@@ -20,7 +20,16 @@ private struct Day {
             calendarSource: FakeCalendarSource(busyIntervals: meetings),
             calendar: Sample.calendar
         ) { clock.now }
-        store = Store(state: TodayFeature.State(), environment: TodayFeature.Environment(coordinator: coordinator))
+        store = Store(
+            state: TodayFeature.State(),
+            environment: TodayFeature.Environment(
+                coordinator: coordinator,
+                repository: repository,
+                catalog: FakeCatalog(),
+                locale: Locale(identifier: "en"),
+                suggestionDelay: .zero
+            )
+        )
     }
 
     func open(language: String = "en_GB") async -> TodayScreenDataModel {
@@ -58,7 +67,7 @@ private func morningMeetings() throws -> [DateInterval] {
 @Test func appearingAsksForThePlanAndFillsTheMockedParts() {
     var state = TodayFeature.State()
 
-    #expect(TodayFeature.reduce(&state, .appeared) == [.plan])
+    #expect(TodayFeature.reduce(&state, .appeared) == [.plan, .loadName])
     #expect(state.mocked == .sample)
 }
 
@@ -70,7 +79,7 @@ private func morningMeetings() throws -> [DateInterval] {
     _ = TodayFeature.reduce(&state, .appeared)
 
     #expect(state.mocked?.question == nil)
-    #expect(state.mocked?.userName == "Matteo")
+    #expect(state.mocked?.week == TodayFeature.Mocked.sample.week)
 }
 
 @MainActor
@@ -164,7 +173,67 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(day.model().alert == nil)
 }
 
+// MARK: Adding a task
+
+@MainActor
+@Test func aTaskAddedFromTodayIsSavedAndPlanned() async throws {
+    let day = try Day(hour: 8, tasks: [])
+    let empty = await day.open()
+
+    empty.addTask.action()
+    let editor = try #require(day.model().editor)
+    editor.name.onChange("Laundry")
+    await day.store.waitForEffects()
+    try #require(day.model().editor).save.action()
+    await day.store.waitForEffects()
+    let model = day.model()
+
+    #expect(empty.addTask.title == "+ Add a task")
+    #expect(editor.title == "New task")
+    #expect(editor.delete == nil)
+    #expect(model.editor == nil)
+    #expect(await day.repository.savedTasks.map(\.name) == ["Laundry"])
+    #expect(await day.repository.savedTasks.first?.steps.map(\.name) == ["Load", "Wash"])
+    #expect(model.taskItems.map(\.title) == ["Laundry · Load", "Laundry · Wash"])
+}
+
+@MainActor
+@Test func cancellingTheFormSavesNothing() async throws {
+    let day = try Day(hour: 8, tasks: [])
+
+    await day.open().addTask.action()
+    try #require(day.model().editor).cancel.action()
+    await day.store.waitForEffects()
+
+    #expect(day.model().editor == nil)
+    #expect(await day.repository.savedTasks.isEmpty)
+}
+
+@MainActor
+@Test func aTaskThatCannotBeSavedShowsAnAlert() async throws {
+    let day = try Day(hour: 8, tasks: [])
+    await day.open().addTask.action()
+    day.store.send(.editor(.nameChanged("Passport")))
+    await day.repository.setFailsOnSave(true)
+
+    day.store.send(.editorSaved)
+    await day.store.waitForEffects()
+
+    #expect(day.model().alert?.title == "Your tasks could not be saved")
+}
+
 // MARK: Wording
+
+@MainActor
+@Test func theHeadlineUsesTheNameFromTheYouTab() async throws {
+    let day = try Day(hour: 8, tasks: [])
+    await day.repository.save(Preference(key: Preference.userNameKey, value: "Matteo", sourceSentence: "", date: day.clock.now))
+
+    let english = await day.open()
+
+    #expect(english.headline == "A free day, Matteo")
+    #expect(day.model(language: "fr_FR").headline == "Une journée libre, Matteo")
+}
 
 @MainActor
 @Test func theBriefingNamesTheTasksAndTheMeetingsInBothLanguages() async throws {
@@ -174,14 +243,14 @@ private func morningMeetings() throws -> [DateInterval] {
     let french = day.model(language: "fr_FR")
 
     #expect(english.date == "Tuesday 10 November")
-    #expect(english.headline == "A light day, Matteo")
+    #expect(english.headline == "A light day")
     #expect(english.briefing.text == "2 things would be nice today: Plants and Vacuum. You have 3 meetings left today, the next at 10:00.")
     #expect(english.timeline.first?.id == "now")
     #expect(english.taskItems[0].reason == "The first moment that fits.")
     #expect(english.taskItems[0].check.title == "Mark Plants as done")
     #expect(english.briefing.question == "Do you already have something planned for lunch?")
     #expect(french.date == "mardi 10 novembre")
-    #expect(french.headline == "Une journée légère, Matteo")
+    #expect(french.headline == "Une journée légère")
     #expect(french.briefing.text == "2 choses seraient bien aujourd'hui : Plants et Vacuum. Il te reste 3 réunions aujourd'hui, la prochaine à 10:00.")
     #expect(french.meetings == ["10:00 3 réunions à la suite Daily scrum · Weekly sync · 1 de plus · jusqu'à 11:00"])
 }
@@ -193,7 +262,7 @@ private func morningMeetings() throws -> [DateInterval] {
 
     #expect(await one.open().briefing.text == "One thing would be nice today: Plants.")
     #expect(await none.open().briefing.text == "Nothing needs you today. Enjoy it.")
-    #expect(none.model().headline == "A free day, Matteo")
+    #expect(none.model().headline == "A free day")
     #expect(none.model().timeline.map(\.id) == ["now"])
 }
 

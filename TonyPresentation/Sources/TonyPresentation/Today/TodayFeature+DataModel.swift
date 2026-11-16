@@ -34,14 +34,30 @@ extension TodayFeature {
             timelineTitle: localized("Your day", locale),
             timelineHint: localized("Suggestions, not orders", locale),
             timeline: timeline(state: state, wording: wording, send: send),
+            addTask: ButtonDataModel(title: localized("+ Add a task", locale), accessibilityIdentifier: "todayAddTask") {
+                send(.addTapped(id: UUID(), stepID: UUID(), now: context.now))
+            },
             tilesTitle: localized("How things are", locale),
             tiles: tiles(state: state, wording: wording),
-            alert: state.hasFailed
-                ? AlertDataModel(
-                    title: localized("Your answer could not be saved", locale),
-                    dismiss: ButtonDataModel(title: localized("OK", locale)) { send(.alertDismissed) }
+            editor: state.editor.map { editor in
+                TaskEditor.dataModel(
+                    for: editor,
+                    context: context,
+                    edit: { send(.editor($0)) },
+                    cancel: { send(.editorCancelled) },
+                    save: { send(.editorSaved) },
+                    delete: {}
                 )
-                : nil,
+            },
+            dismissEditor: { send(.editorCancelled) },
+            alert: state.failure.map { failure in
+                let title =
+                    switch failure {
+                    case .answer: localized("Your answer could not be saved", locale)
+                    case .task: localized("Your tasks could not be saved", locale)
+                    }
+                return AlertDataModel(title: title, dismiss: ButtonDataModel(title: localized("OK", locale)) { send(.alertDismissed) })
+            },
             onAppear: { send(.appeared) }
         )
     }
@@ -192,7 +208,7 @@ private struct Wording {
             case 3...4: localized("A steady day", locale)
             default: localized("A full day", locale)
             }
-        guard let name = state.mocked?.userName else { return kind }
+        guard let name = state.userName else { return kind }
         return localized("\(kind), \(name)", locale)
     }
 
