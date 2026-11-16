@@ -1,4 +1,6 @@
 import SwiftUI
+import TonyPresentation
+import TonyUIKit
 import TonyUIModels
 
 /// The task form, drawn from its data model.
@@ -44,7 +46,7 @@ public struct TaskEditorScreen: View {
             .scrollContentBackground(.hidden)
             .background(TonyColor.canvas)
             .navigationTitle(model.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     ButtonView(model.cancel)

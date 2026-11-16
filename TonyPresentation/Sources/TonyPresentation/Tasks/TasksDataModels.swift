@@ -1,4 +1,5 @@
 import Foundation
+import TonyUIModels
 
 public struct TasksScreenDataModel {
     public var title: String

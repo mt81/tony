@@ -1,4 +1,6 @@
 import SwiftUI
+import TonyPresentation
+import TonyUIKit
 import TonyUIModels
 
 /// The form for the name and the usual week, drawn from its data model.
@@ -46,7 +48,7 @@ public struct RoutineEditorScreen: View {
             .scrollContentBackground(.hidden)
             .background(TonyColor.canvas)
             .navigationTitle(model.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     ButtonView(model.cancel)

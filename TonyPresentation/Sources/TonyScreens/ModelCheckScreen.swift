@@ -1,4 +1,6 @@
 import SwiftUI
+import TonyPresentation
+import TonyUIKit
 import TonyUIModels
 
 /// Debug builds only: the evaluation set and its report, to check the on-device model on a device.

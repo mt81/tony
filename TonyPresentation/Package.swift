@@ -10,6 +10,7 @@ let package = Package(
     ],
     products: [
         .library(name: "TonyPresentation", targets: ["TonyPresentation"]),
+        .library(name: "TonyScreens", targets: ["TonyScreens"]),
     ],
     dependencies: [
         .package(path: "../TonyCore"),
@@ -20,6 +21,15 @@ let package = Package(
             name: "TonyPresentation",
             dependencies: ["TonyCore", .product(name: "TonyUIModels", package: "TonyUIKit")],
             resources: [.process("Resources")]
+        ),
+        // The screens: SwiftUI views that draw the screens' data models with the components of TonyUIKit.
+        .target(
+            name: "TonyScreens",
+            dependencies: [
+                "TonyPresentation",
+                .product(name: "TonyUIModels", package: "TonyUIKit"),
+                .product(name: "TonyUIKit", package: "TonyUIKit"),
+            ]
         ),
         .testTarget(name: "TonyPresentationTests", dependencies: ["TonyPresentation"]),
     ]
