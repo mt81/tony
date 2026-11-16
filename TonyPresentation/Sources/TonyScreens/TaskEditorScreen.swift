@@ -84,3 +84,10 @@ public struct TaskEditorScreen: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Task form") {
+    TaskEditorScreen(PreviewSamples.taskEditor)
+        .tonyPreview(padding: 0)
+}
+#endif

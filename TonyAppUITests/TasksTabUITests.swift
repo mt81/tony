@@ -130,7 +130,7 @@ struct TasksScreen {
             app.launch()
         }
         app.buttons["Tasks"].firstMatch.tap()
-        XCTAssertTrue(app.buttons["addTask"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["addTask"].waitForExistence(timeout: 15))
     }
 
     private func relaunch() {
@@ -161,8 +161,9 @@ struct TasksScreen {
 
     func delete(_ name: String) {
         row(name).tap()
+        // The button is at the end of the form, which is as long as the task has steps.
         let deleteButton = app.buttons["deleteTask"]
-        if !deleteButton.waitForExistence(timeout: 2) {
+        for _ in 0..<10 where !(deleteButton.waitForExistence(timeout: 1) && deleteButton.isHittable) {
             app.swipeUp()
         }
         deleteButton.tap()

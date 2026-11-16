@@ -145,3 +145,26 @@ public struct TodayScreen: View {
             .accessibilityAddTraits(.isHeader)
     }
 }
+
+#if DEBUG
+#Preview("Today") {
+    TodayScreen(PreviewSamples.today())
+        .tonyPreview(padding: 0)
+}
+
+#Preview("Today, nothing planned") {
+    TodayScreen(PreviewSamples.emptyToday)
+        .tonyPreview(padding: 0)
+}
+
+#Preview("Today, largest text") {
+    TodayScreen(PreviewSamples.today())
+        .tonyPreview(padding: 0)
+        .dynamicTypeSize(.accessibility5)
+}
+
+#Preview("Today, answer not saved") {
+    TodayScreen(PreviewSamples.today(alert: AlertDataModel(title: "Your answer could not be saved", dismiss: ButtonDataModel(title: "OK") {})))
+        .tonyPreview(padding: 0)
+}
+#endif

@@ -60,3 +60,20 @@ public struct RoutineEditorScreen: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Routine form") {
+    RoutineEditorScreen(PreviewSamples.routineEditor())
+        .tonyPreview(padding: 0)
+}
+
+#Preview("Routine form, description not read, work hours wrong") {
+    RoutineEditorScreen(
+        PreviewSamples.routineEditor(
+            workFooter: "Work has to end after it starts.",
+            descriptionFooter: "Tony could not read that. Fill in the form below."
+        )
+    )
+    .tonyPreview(padding: 0)
+}
+#endif

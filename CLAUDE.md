@@ -12,8 +12,8 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | --- | --- | --- |
 | `TonyCore` (Swift package) | Domain model, cadence, context builder, planner, consistency, protocols | Unit tests (`swift test`) |
 | `TonyStore` (Swift package) | SwiftData models and the `Repository` implementation, shared by the app and the extension | Unit tests (`swift test`), in memory |
-| `TonyUIKit` (Swift package, two targets) | The UI, on its own. `TonyUIModels`: every view's data model, in plain Swift. `TonyUIKit`: the SwiftUI views that draw them, the colour, type, spacing and radius tokens, fonts and artwork | Preview gallery in the simulator (`-gallery` launch argument, debug builds) |
-| `TonyPresentation` (Swift package) | The glue between business and UI: the `Store` and `Feature` protocol; each screen's state, actions, reducer and effects; the mapping from state to data models; presentation strings | Unit tests (`swift test`) |
+| `TonyUIKit` (Swift package, two targets) | The reusable UI, on its own. `TonyUIModels`: the data models of controls and components, in plain Swift. `TonyUIKit`: the SwiftUI controls and components that draw them, the colour, type, spacing and radius tokens, fonts and artwork | Xcode previews, and the gallery in the simulator (`-gallery` launch argument, debug builds) |
+| `TonyPresentation` (Swift package, two targets) | `TonyPresentation`: the glue between business and UI, with the `Store` and `Feature` protocol; each screen's state, actions, reducer and effects; each screen's data model and the mapping from state to it; presentation strings. `TonyScreens`: the SwiftUI screens that draw those data models with the components of `TonyUIKit` | Unit tests (`swift test`) for `TonyPresentation`; Xcode previews for `TonyScreens` |
 | `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit) | Simulator (`TonyAppUITests`), then device |
 | `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
 
@@ -55,8 +55,9 @@ The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun 
 - System frameworks sit behind protocols declared in `TonyCore` (`CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`, `TaskCatalog`). The app provides the real adapters; tests use fakes.
 - The planner is deterministic: the current time, calendar and locale are passed in (`plan(..., now:)`), never read from `Date()`, `Calendar.current` or `Locale.current` inside `TonyCore`.
 - The on-device model only words and parses. It never decides the plan. Model output is validated against the plan, and every model feature has a template or rule-based fallback.
-- The business layer (`TonyCore`) and the UI (`TonyUIKit`, `TonyUIModels`) do not know each other. The UI never sees a business object such as `TonyTask`: it only sees data models.
-- `TonyPresentation` is the only module that knows both. Its reducers and mappers turn business objects into data models, and user actions into changes. It imports `TonyUIModels`, never the views.
+- The business layer (`TonyCore`) and the views (`TonyUIKit`, `TonyUIModels`, `TonyScreens`) do not know each other. A view never sees a business object such as `TonyTask`: it only sees data models.
+- The `TonyPresentation` target is the only one that knows both. Its reducers and mappers turn business objects into data models, and user actions into changes. It imports `TonyUIModels`, never SwiftUI or the views.
+- The `TonyScreens` target imports `TonyPresentation` for the screens' data models and `TonyUIKit` for the components. It never imports `TonyCore`.
 - `TonyApp` wires the stores to their adapters and shows the screens. `make check-imports` enforces all of these boundaries.
 
 ## Screens
@@ -71,7 +72,8 @@ Every screen follows one unidirectional pattern, like Redux:
 
 - Every view takes its own data model: the values it shows, already localised and formatted, and the closures it calls. A button's data model has its title and its action.
 - Views decide nothing: no `if` on domain state, no formatting, no strings of their own. They lay out what the data model says.
-- Each data model lives in `TonyUIModels` and its view in `TonyUIKit`, for generic controls, Tony's components and whole screens alike.
+- A control's or a component's data model lives in `TonyUIModels` and its view in `TonyUIKit`. A screen's data model lives beside its feature in `TonyPresentation` and its view in `TonyScreens`.
+- Every view has an Xcode preview with sample data, and so do the tokens (colours, type styles, spacings, radii, artwork). Previews and their sample data are inside `#if DEBUG`; their text is sample data, not translated. A new view comes with its preview.
 - Reducers, effects and data models are tested in `TonyPresentation` with fakes; UI tests only check that the screens are wired.
 - Domain types are `Codable` and `Sendable`. Swift 6 strict concurrency stays on.
 

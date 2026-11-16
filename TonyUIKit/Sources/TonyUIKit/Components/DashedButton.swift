@@ -25,3 +25,10 @@ public struct DashedButton: View {
         .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
     }
 }
+
+#if DEBUG
+#Preview("Dashed button") {
+    DashedButton(ButtonDataModel(title: "+ Add a task") {})
+        .tonyPreview()
+}
+#endif

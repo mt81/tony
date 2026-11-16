@@ -110,3 +110,24 @@ public struct ConsistencyGraph: View {
         return path
     }
 }
+
+#if DEBUG
+#Preview("Consistency graph") {
+    let values = ["4/5", "rest", "1/3", "3/4", "·", "·", "·"]
+    let levels = [0.8, 0.8, 0.33, 0.75, 0.75, 0.75, 0.75]
+    let kinds: [ConsistencyDataModel.Day.Kind] = [.scored, .rest, .scored, .scored, .upcoming, .upcoming, .upcoming]
+    let days = Array("MTWTFSS").enumerated().map { index, letter in
+        ConsistencyDataModel.Day(id: index, letter: String(letter), value: values[index], level: levels[index], kind: kinds[index], isToday: index == 3)
+    }
+    return ConsistencyGraph(
+        ConsistencyDataModel(
+            title: "Your consistency",
+            caption: "done / suggested",
+            days: days,
+            footnote: "Higher means you followed through on more of what Tony suggested. Rest days stay on the path.",
+            accessibilityLabel: "Your consistency"
+        )
+    )
+    .tonyPreview()
+}
+#endif

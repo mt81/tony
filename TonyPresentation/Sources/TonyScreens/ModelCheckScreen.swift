@@ -65,3 +65,10 @@ public struct ModelCheckScreen: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Model check") {
+    ModelCheckScreen(PreviewSamples.modelCheck)
+        .tonyPreview(padding: 0)
+}
+#endif

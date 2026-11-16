@@ -48,3 +48,10 @@ public struct CalendarDebugScreen: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Calendar check") {
+    CalendarDebugScreen(PreviewSamples.calendarDebug)
+        .tonyPreview(padding: 0)
+}
+#endif

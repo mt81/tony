@@ -115,3 +115,21 @@ public struct YouScreen: View {
             .foregroundStyle(TonyColor.muted)
     }
 }
+
+#if DEBUG
+#Preview("You") {
+    YouScreen(PreviewSamples.you())
+        .tonyPreview(padding: 0)
+}
+
+#Preview("You, no name, calendar allowed") {
+    YouScreen(PreviewSamples.you(name: "", canAllowCalendar: false))
+        .tonyPreview(padding: 0)
+}
+
+#Preview("You, largest text") {
+    YouScreen(PreviewSamples.you())
+        .tonyPreview(padding: 0)
+        .dynamicTypeSize(.accessibility5)
+}
+#endif

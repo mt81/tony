@@ -112,3 +112,57 @@ public struct AreaRow: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+#if DEBUG
+private func previewRow(_ icon: String, _ title: String, _ subtitle: String, _ status: ChipDataModel, isNeglected: Bool = false) -> TaskRowDataModel {
+    TaskRowDataModel(
+        id: UUID(),
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        status: status,
+        isNeglected: isNeglected,
+        accessibilityIdentifier: title,
+        open: {},
+        delete: ButtonDataModel(title: "Delete", role: .destructive) {}
+    )
+}
+
+#Preview("Task row") {
+    VStack(spacing: TonySpacing.small) {
+        TaskRow(previewRow("🧺", "Laundry", "Every week · wash, dry, fold", ChipDataModel(title: "Today")))
+        TaskRow(previewRow("🥀", "Water the plants", "Every 5 days after last time", ChipDataModel(title: "Due", style: .warning), isNeglected: true))
+    }
+    .tonyPreview()
+}
+
+#Preview("Task row, largest text") {
+    TaskRow(previewRow("🥀", "Water the plants", "Every 5 days after last time", ChipDataModel(title: "Due", style: .warning), isNeglected: true))
+        .tonyPreview()
+        .dynamicTypeSize(.accessibility5)
+}
+
+#Preview("Tile") {
+    HStack(alignment: .top, spacing: TonySpacing.medium) {
+        Tile(TileDataModel(icon: "🌿", title: "Plants", detail: "In 4 days"))
+        Tile(TileDataModel(icon: "🛏️🪰", title: "Bed sheets", detail: "16 days. The flies moved in.", isNeglected: true))
+    }
+    .tonyPreview()
+}
+
+#Preview("Stat") {
+    HStack(alignment: .top, spacing: TonySpacing.medium) {
+        Stat(StatDataModel(value: "12", label: "tasks done"))
+        Stat(StatDataModel(value: "2/4", label: "gym sessions"))
+    }
+    .tonyPreview()
+}
+
+#Preview("Area row") {
+    VStack(spacing: TonySpacing.medium) {
+        AreaRow(AreaRowDataModel(name: "Home", progress: 0.6, status: "Good"))
+        AreaRow(AreaRowDataModel(name: "Plants", progress: 0.2, status: "Thirsty"))
+    }
+    .tonyPreview()
+}
+#endif

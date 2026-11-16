@@ -13,3 +13,10 @@ public struct PageBackground: View {
         .ignoresSafeArea()
     }
 }
+
+#if DEBUG
+#Preview("Page background") {
+    PageBackground()
+        .preferredColorScheme(.dark)
+}
+#endif

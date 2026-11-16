@@ -126,3 +126,34 @@ public struct TimelineItem: View {
         if case .task(_, let isLast) = model { isLast } else { false }
     }
 }
+
+#if DEBUG
+#Preview("Timeline items") {
+    let check = ButtonDataModel(title: "Mark as done") {}
+    let items: [TimelineItemDataModel] = [
+        .now(text: "Now · a good moment to start the laundry"),
+        .task(
+            .init(
+                icon: "🧺",
+                time: "8:30",
+                title: "Start a load of laundry",
+                reason: "Before your 10:00 meetings. It runs on its own.",
+                actions: ["Later", "Not today"].map { ButtonDataModel(title: $0) {} },
+                check: check
+            ),
+            isLast: false
+        ),
+        .meetings(time: "10:00", title: "3 meetings, back to back", detail: "Daily scrum · Weekly sync · 1 more · until 11:00"),
+        .task(.init(icon: "🥀", time: "11:15", title: "Water the plants", reason: "8 days since last time", check: check, isNeglected: true), isLast: false),
+        .task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true),
+    ]
+    return ScrollView {
+        VStack(spacing: 0) {
+            ForEach(items.indices, id: \.self) { index in
+                TimelineItem(items[index])
+            }
+        }
+    }
+    .tonyPreview()
+}
+#endif

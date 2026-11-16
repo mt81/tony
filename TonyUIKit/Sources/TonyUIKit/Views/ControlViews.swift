@@ -142,3 +142,39 @@ extension View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Controls") {
+    Form {
+        Section {
+            TextFieldView(TextFieldDataModel(title: "Name", text: "", onChange: { _ in }))
+            TextFieldView(TextFieldDataModel(title: "Name", text: "Water the plants", onChange: { _ in }))
+            PickerView(
+                PickerDataModel(
+                    title: "Kind",
+                    options: [.init(id: "recurring", title: "Recurring task"), .init(id: "goal", title: "Goal")],
+                    selectedID: "recurring",
+                    onSelect: { _ in }
+                )
+            )
+            ToggleView(ToggleDataModel(id: "evening", title: "Evening", isOn: true, onChange: { _ in }))
+            StepperView(StepperDataModel(title: "Every 5 days", value: 5, range: 1...365, onChange: { _ in }))
+            DatePickerView(DatePickerDataModel(title: "Date", date: .now, onChange: { _ in }))
+            TimePickerView(TimePickerDataModel(title: "Starts", time: .now, onChange: { _ in }))
+        }
+        Section {
+            ButtonView(ButtonDataModel(title: "Add a step") {})
+            ButtonView(ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: false) {})
+            ButtonView(ButtonDataModel(title: "Delete task", role: .destructive) {})
+        }
+    }
+    .scrollContentBackground(.hidden)
+    .tonyPreview(padding: 0)
+}
+
+#Preview("Alert") {
+    TonyColor.canvas
+        .alert(AlertDataModel(title: "Your tasks could not be saved", dismiss: ButtonDataModel(title: "OK", role: .cancel) {}))
+        .tonyPreview(padding: 0)
+}
+#endif
