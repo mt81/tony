@@ -11,7 +11,13 @@ private struct Day {
     let repository: FakeRepository
     let store: Store<TodayFeature>
 
-    init(hour: Int, tasks: [TonyTask], meetings: [DateInterval] = []) throws {
+    init(
+        hour: Int,
+        tasks: [TonyTask],
+        meetings: [DateInterval] = [],
+        languageService: (any LanguageService)? = nil,
+        language: String = "en_GB"
+    ) throws {
         let clock = TestClock(try Sample.november(10, hour: hour))
         self.clock = clock
         repository = FakeRepository(tasks: tasks)
@@ -24,9 +30,11 @@ private struct Day {
             state: TodayFeature.State(),
             environment: TodayFeature.Environment(
                 coordinator: coordinator,
+                briefingWriter: BriefingWriter(service: languageService),
                 repository: repository,
                 catalog: FakeCatalog(),
-                locale: Locale(identifier: "en"),
+                calendar: Sample.calendar,
+                locale: Locale(identifier: language),
                 suggestionDelay: .zero
             )
         )
@@ -171,6 +179,57 @@ private func morningMeetings() throws -> [DateInterval] {
 
     #expect(alert.title == "Your answer could not be saved")
     #expect(day.model().alert == nil)
+}
+
+// MARK: The model's wording
+
+@MainActor
+@Test func aValidWordingFromTheModelReplacesTheTemplate() async throws {
+    let service = FakeLanguageService(briefing: "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
+    let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")], meetings: try morningMeetings(), languageService: service)
+
+    let model = await day.open()
+
+    #expect(model.briefing.text == "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
+    #expect(service.requests.count == 1)
+    #expect(service.requests.first?.plan == """
+        Tuesday 10 November
+        8:00 Plants. The first moment that fits.
+        8:30 Vacuum. The first moment that fits.
+        Busy from 10:00 to 11:00
+        """)
+    #expect(service.requests.first?.instructions.hasSuffix("Write in English.") == true)
+}
+
+@MainActor
+@Test func aWordingThatNamesATimeOrATaskOutsideThePlanIsNotShown() async throws {
+    let plants = try Sample.task(1, "Plants")
+    let gym = try Sample.task(2, "Gym", kind: .goal, cadence: .timesPerWeek(1))
+    let wrongTime = try Day(hour: 8, tasks: [plants], languageService: FakeLanguageService(briefing: "Water the plants at 9:15."))
+    let wrongTask = try Day(hour: 8, tasks: [plants, gym], languageService: FakeLanguageService(briefing: "Plants first, then the gym."))
+    try await wrongTask.repository.save(try Sample.done(gym, day: 9))
+
+    #expect(await wrongTime.open().briefing.text == "One thing would be nice today: Plants.")
+    #expect(await wrongTask.open().briefing.text == "One thing would be nice today: Plants.")
+}
+
+@MainActor
+@Test func theModelIsAskedInFrenchAndAgainOnlyWhenThePlanChanges() async throws {
+    let service = FakeLanguageService(briefing: "Les Plants d'abord, puis le Vacuum.")
+    let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")], languageService: service, language: "fr_FR")
+
+    let first = await day.open(language: "fr_FR")
+    _ = await day.open(language: "fr_FR")
+    first.taskItems[0].check.action()
+    await day.store.waitForEffects()
+
+    // Opening twice asks once. The new plan is asked twice: the answer still names Plants, now done, so it is retried, then dropped.
+    #expect(first.briefing.text == "Les Plants d'abord, puis le Vacuum.")
+    #expect(service.requests.count == 3)
+    #expect(service.requests.first?.plan == "mardi 10 novembre\n8:00 Plants. Le premier moment qui convient.\n8:30 Vacuum. Le premier moment qui convient.")
+    #expect(service.requests.last?.plan == "mardi 10 novembre\n8:00 Vacuum. Le premier moment qui convient.")
+    #expect(day.model(language: "fr_FR").briefing.text == "Une chose serait bien aujourd'hui : Vacuum.")
+    #expect(service.requests.first?.instructions.hasSuffix("Écris en français et tutoie la personne.") == true)
 }
 
 // MARK: Adding a task

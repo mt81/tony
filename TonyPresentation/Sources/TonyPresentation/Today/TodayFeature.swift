@@ -37,8 +37,15 @@ public enum TodayFeature: Feature {
         )
     }
 
+    /// The model's wording of one plan. It is shown for as long as that plan is the one on screen.
+    public struct WordedBriefing: Sendable, Equatable {
+        public var plan: DayPlan
+        public var text: String
+    }
+
     public struct State: Sendable, Equatable {
         public var planned: PlannedDay?
+        public var briefing: WordedBriefing?
         public var mocked: Mocked?
         /// The name entered in the You tab; nil when there is none.
         public var userName: String?
@@ -58,6 +65,8 @@ public enum TodayFeature: Feature {
         case nameLoaded(String?)
         /// The coordinator's latest plan; nil while there is none.
         case planned(PlannedDay?)
+        /// The model's wording of that plan; nil when it gave none and the template stays.
+        case briefingWorded(plan: DayPlan, text: String?)
         case checkTapped(DayPlan.Item)
         case laterTapped(DayPlan.Item)
         case notTodayTapped(DayPlan.Item)
@@ -73,6 +82,7 @@ public enum TodayFeature: Feature {
     public enum Effect: Sendable, Equatable {
         case plan
         case loadName
+        case wordBriefing(PlannedDay)
         case record(PlanAction, on: DayPlan.Item)
         case save(TonyTask)
         case suggestSteps(forName: String)
@@ -80,23 +90,29 @@ public enum TodayFeature: Feature {
 
     public struct Environment: Sendable {
         public var coordinator: PlanCoordinator
+        public var briefingWriter: BriefingWriter
         public var repository: any Repository
         public var catalog: (any TaskCatalog)?
-        /// The language the catalogue answers in.
+        public var calendar: Calendar
+        /// The language of the briefing and of the catalogue's answers.
         public var locale: Locale
         /// How long typing must pause before the catalogue is asked.
         public var suggestionDelay: Duration
 
         public init(
             coordinator: PlanCoordinator,
+            briefingWriter: BriefingWriter,
             repository: any Repository,
             catalog: (any TaskCatalog)?,
+            calendar: Calendar,
             locale: Locale,
             suggestionDelay: Duration = .milliseconds(400)
         ) {
             self.coordinator = coordinator
+            self.briefingWriter = briefingWriter
             self.repository = repository
             self.catalog = catalog
+            self.calendar = calendar
             self.locale = locale
             self.suggestionDelay = suggestionDelay
         }
@@ -112,7 +128,13 @@ public enum TodayFeature: Feature {
         case .nameLoaded(let name):
             state.userName = name
         case .planned(let planned):
-            state.planned = planned ?? state.planned
+            guard let planned else { break }
+            state.planned = planned
+            if state.briefing?.plan != planned.plan {
+                return [.wordBriefing(planned)]
+            }
+        case .briefingWorded(let plan, let text):
+            state.briefing = text.map { WordedBriefing(plan: plan, text: $0) } ?? state.briefing
         case .checkTapped(let item):
             return [.record(.done, on: item)]
         case .laterTapped(let item):
@@ -155,6 +177,13 @@ public enum TodayFeature: Feature {
             let preferences = (try? await environment.repository.preferences()) ?? []
             let name = preferences.first { $0.key == Preference.userNameKey }?.value ?? ""
             return .nameLoaded(name.isEmpty ? nil : name)
+        case .wordBriefing(let planned):
+            var state = State()
+            state.planned = planned
+            let context = PresentationContext(now: planned.plannedAt, calendar: environment.calendar, locale: environment.locale)
+            let request = TodayWording(state: state, context: context).briefingRequest
+            let briefing = await environment.briefingWriter.briefing(for: request)
+            return .briefingWorded(plan: planned.plan, text: briefing.source == .model ? briefing.text : nil)
         case .record(let action, let item):
             do {
                 try await coordinator.record(action, on: item)
@@ -181,6 +210,10 @@ public enum TodayFeature: Feature {
     }
 
     public static func cancellationKey(for effect: Effect) -> String? {
-        if case .suggestSteps = effect { "suggestSteps" } else { nil }
+        switch effect {
+        case .suggestSteps: "suggestSteps"
+        case .wordBriefing: "wordBriefing"
+        default: nil
+        }
     }
 }
