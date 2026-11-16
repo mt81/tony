@@ -131,3 +131,16 @@ extension View {
             .listRowInsets(EdgeInsets(top: 0, leading: TonySpacing.page, bottom: TonySpacing.small, trailing: TonySpacing.page))
     }
 }
+
+#if DEBUG
+#Preview("Tasks") {
+    TasksScreen(PreviewSamples.tasks())
+        .tonyPreview(padding: 0)
+}
+
+#Preview("Tasks, largest text") {
+    TasksScreen(PreviewSamples.tasks())
+        .tonyPreview(padding: 0)
+        .dynamicTypeSize(.accessibility5)
+}
+#endif

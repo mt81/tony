@@ -104,6 +104,9 @@ public struct ComponentGallery: View {
     }
 }
 
-#Preview {
+#if DEBUG
+#Preview("Component gallery") {
     ComponentGallery()
+        .preferredColorScheme(.dark)
 }
+#endif

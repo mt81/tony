@@ -53,3 +53,22 @@ struct IconCircle: View {
             .accessibilityHidden(true)
     }
 }
+
+#if DEBUG
+#Preview("Chip") {
+    VStack(alignment: .leading, spacing: TonySpacing.medium) {
+        ForEach(ChipDataModel.Style.allCases, id: \.self) { style in
+            Chip(ChipDataModel(title: String(describing: style), style: style))
+        }
+    }
+    .tonyPreview()
+}
+
+#Preview("Icon circle") {
+    HStack(spacing: TonySpacing.medium) {
+        IconCircle(icon: "🌿")
+        IconCircle(icon: "🥀", isNeglected: true)
+    }
+    .tonyPreview()
+}
+#endif
