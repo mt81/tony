@@ -39,6 +39,10 @@ struct PlaceholderProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<PlaceholderEntry>) -> Void) {
         Task {
+            #if DEBUG
+            // Spike S3: can the model be used from the widget extension?
+            await ModelExtensionCheck.run(from: .widget)
+            #endif
             let tasks = try? await SwiftDataRepository.appGroup().tasks()
             let entry = PlaceholderEntry(date: .now, taskCount: tasks?.count ?? 0)
             completion(Timeline(entries: [entry], policy: .never))
