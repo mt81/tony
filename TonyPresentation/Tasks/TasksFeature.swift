@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
@@ -42,29 +43,16 @@ public enum TasksFeature: Feature {
         case read(sentence: String, id: UUID, stepID: UUID, now: Date)
     }
 
+    @MemberwiseInit(.public)
     public struct Environment: Sendable {
         public var repository: any Repository
         public var catalog: (any TaskCatalog)?
         /// Reads the sentences the rules do not understand; nil when there is no model.
-        public var languageService: (any LanguageService)?
+        public var languageService: (any LanguageService)? = nil
         /// The language the catalogue answers in.
         public var locale: Locale
         /// How long typing must pause before the catalogue is asked.
-        public var suggestionDelay: Duration
-
-        public init(
-            repository: any Repository,
-            catalog: (any TaskCatalog)?,
-            languageService: (any LanguageService)? = nil,
-            locale: Locale,
-            suggestionDelay: Duration = .milliseconds(400)
-        ) {
-            self.repository = repository
-            self.catalog = catalog
-            self.languageService = languageService
-            self.locale = locale
-            self.suggestionDelay = suggestionDelay
-        }
+        public var suggestionDelay: Duration = .milliseconds(400)
     }
 
     static let kinds: [TonyTask.Kind] = [.recurring, .goal, .oneTime]

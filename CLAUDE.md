@@ -19,7 +19,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit) | Simulator (`TonyAppUITests`), then device |
 | `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
 
-- Everything lives in one Xcode project, `Tony.xcodeproj`, committed and edited in Xcode. There are no Swift packages and no project generator.
+- Everything lives in one Xcode project, `Tony.xcodeproj`, committed and edited in Xcode. There is no project generator. The one Swift package is MemberwiseInit (`gohanlon/swift-memberwise-init-macro`, exact version 0.6.0), whose `@MemberwiseInit(.public)` writes the public memberwise init of a struct in `TonyCore`, `TonyUIModels` and `TonyPresentation`. A struct whose init only assigns its properties uses it instead of a hand-written init.
 - Each target has a folder of the same name at the root (its tests in `<Target>Tests/`). The folders are synchronized with the project: adding a file to a folder adds it to its target.
 - A test target links every framework its tests import; a framework does not pass its dependencies on to them.
 - A framework finds its own resources with `#bundle` (`Color("Canvas", bundle: #bundle)`), never `Bundle.main`.
@@ -41,7 +41,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | `make run` | Builds, installs and launches in the simulator |
 | `make clean` | Deletes build output |
 
-The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun simctl` need `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
+The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun simctl` need `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`, and `xcodebuild` needs `-skipMacroValidation` to run the MemberwiseInit macro. Xcode asks once to trust the macro.
 
 ## Architecture ownership and decisions
 
@@ -111,7 +111,7 @@ All of these pass, every time. Never push red.
 4. Look at it when the change is visual: English and French, iPhone and iPad, the largest Dynamic Type size. The app is dark only.
 5. Read your own diff: no secrets, no debug code, no leftover files, no unrelated changes.
 
-During development, run the smallest relevant test first (`xcodebuild test -project Tony.xcodeproj -scheme TonyUnitTests -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -only-testing:TonyCoreTests/<suite>`). Before pushing, run all the gates above.
+During development, run the smallest relevant test first (`xcodebuild test -project Tony.xcodeproj -scheme TonyUnitTests -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -skipMacroValidation -only-testing:TonyCoreTests/<suite>`). Before pushing, run all the gates above.
 
 - Never claim a test passed unless it was actually executed.
 - If a test cannot be executed, report it and explain why.

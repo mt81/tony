@@ -35,6 +35,9 @@
 		E22CB9B766015C2CE0096BA5 /* TonyScreens.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 87B44D5BE11B4381463C7FD2 /* TonyScreens.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E69427A4A40B2F5FEF2EF461 /* TonyUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD8C5F5EF43B0362C7AD07 /* TonyUIKit.framework */; };
 		ED16BCFA107CB333612A4A12 /* TonyUIModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92E1DB3C7EFBF2E4C7182485 /* TonyUIModels.framework */; };
+		A1B2C3D4E5F6071829304A71 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A61 /* MemberwiseInit */; };
+		A1B2C3D4E5F6071829304A72 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A62 /* MemberwiseInit */; };
+		A1B2C3D4E5F6071829304A73 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A63 /* MemberwiseInit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -380,6 +383,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6071829304A73 /* MemberwiseInit in Frameworks */,
 				843158E1973F0EEF8E306D58 /* TonyCore.framework in Frameworks */,
 				41570366FB3A25A0D87F0DA9 /* TonyUIModels.framework in Frameworks */,
 			);
@@ -397,6 +401,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6071829304A71 /* MemberwiseInit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +473,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6071829304A72 /* MemberwiseInit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -624,6 +630,7 @@
 			);
 			name = TonyPresentation;
 			packageProductDependencies = (
+				A1B2C3D4E5F6071829304A63 /* MemberwiseInit */,
 			);
 			productName = TonyPresentation;
 			productReference = 36E925D340CC8E0B1C558AC2 /* TonyPresentation.framework */;
@@ -796,6 +803,7 @@
 			);
 			name = TonyUIModels;
 			packageProductDependencies = (
+				A1B2C3D4E5F6071829304A62 /* MemberwiseInit */,
 			);
 			productName = TonyUIModels;
 			productReference = 92E1DB3C7EFBF2E4C7182485 /* TonyUIModels.framework */;
@@ -843,6 +851,7 @@
 			);
 			name = TonyCore;
 			packageProductDependencies = (
+				A1B2C3D4E5F6071829304A61 /* MemberwiseInit */,
 			);
 			productName = TonyCore;
 			productReference = 7CE18201EBE0DFB0CD1F370B /* TonyCore.framework */;
@@ -872,6 +881,9 @@
 				fr,
 			);
 			mainGroup = 2215C7F6F285C1F18DD63FEF;
+			packageReferences = (
+				A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */,
+			);
 			productRefGroup = 5FA8F5E077A1002A01BC8921 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2377,6 +2389,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gohanlon/swift-memberwise-init-macro";
+			requirement = {
+				kind = exactVersion;
+				version = 0.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1B2C3D4E5F6071829304A61 /* MemberwiseInit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */;
+			productName = MemberwiseInit;
+		};
+		A1B2C3D4E5F6071829304A62 /* MemberwiseInit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */;
+			productName = MemberwiseInit;
+		};
+		A1B2C3D4E5F6071829304A63 /* MemberwiseInit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */;
+			productName = MemberwiseInit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8E9307874BD7A55568573610 /* Project object */;
 }

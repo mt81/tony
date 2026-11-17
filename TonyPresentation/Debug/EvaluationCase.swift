@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import TonyCore
 
 /// One fixed input of the evaluation set and what a good answer must have. The model cannot be pinned to a version,
@@ -60,17 +61,12 @@ public struct EvaluationCase: Sendable, Equatable, Identifiable {
 }
 
 /// What the model gave for a case: its answer, how long it took, and what is wrong with it.
+@MemberwiseInit(.public)
 public struct EvaluationResult: Sendable, Equatable {
     public var output: String
     public var duration: Duration
     /// Empty when the case passes.
     public var problems: [String]
-
-    public init(output: String, duration: Duration, problems: [String]) {
-        self.output = output
-        self.duration = duration
-        self.problems = problems
-    }
 
     public var hasPassed: Bool {
         problems.isEmpty

@@ -1,14 +1,11 @@
 import Foundation
+import MemberwiseInit
 
 /// A task as read from one sentence. It fills the task form; nothing is saved before the user confirms.
+@MemberwiseInit(.public)
 public struct TaskDraft: Sendable, Hashable {
     public var name: String
     public var cadence: Cadence?
-
-    public init(name: String, cadence: Cadence?) {
-        self.name = name
-        self.cadence = cadence
-    }
 
     /// A number of times a week is a goal, another cadence a recurring task, and no cadence a one-time task.
     public var kind: TonyTask.Kind {

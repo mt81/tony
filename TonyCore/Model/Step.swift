@@ -1,6 +1,8 @@
 import Foundation
+import MemberwiseInit
 
 /// One part of a multi-step task. Steps run in the order of `TonyTask.steps`.
+@MemberwiseInit(.public)
 public struct Step: Codable, Sendable, Hashable, Identifiable {
     public enum Mode: String, Codable, Sendable, Hashable, CaseIterable {
         case active
@@ -11,22 +13,6 @@ public struct Step: Codable, Sendable, Hashable, Identifiable {
     public var name: String
     public var mode: Mode
     public var duration: TimeInterval
-    public var minimumGapToNextStep: TimeInterval
-    public var requirements: Requirements
-
-    public init(
-        id: UUID,
-        name: String,
-        mode: Mode,
-        duration: TimeInterval,
-        minimumGapToNextStep: TimeInterval = 0,
-        requirements: Requirements = Requirements()
-    ) {
-        self.id = id
-        self.name = name
-        self.mode = mode
-        self.duration = duration
-        self.minimumGapToNextStep = minimumGapToNextStep
-        self.requirements = requirements
-    }
+    public var minimumGapToNextStep: TimeInterval = 0
+    public var requirements: Requirements = Requirements()
 }

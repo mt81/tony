@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
@@ -34,6 +35,7 @@ public enum ModelCheckFeature: Feature {
         case requestBackgroundCheck
     }
 
+    @MemberwiseInit(.public)
     public struct Environment: Sendable {
         public var languageService: any LanguageService
         public var availability: @Sendable () async -> String
@@ -42,20 +44,6 @@ public enum ModelCheckFeature: Feature {
         public var extensionChecks: @Sendable () async -> [String]
         /// Asks iOS to run the background check, and says whether iOS took the request.
         public var requestBackgroundCheck: @Sendable () async -> String
-
-        public init(
-            languageService: any LanguageService,
-            availability: @escaping @Sendable () async -> String,
-            system: @escaping @Sendable () async -> String,
-            extensionChecks: @escaping @Sendable () async -> [String],
-            requestBackgroundCheck: @escaping @Sendable () async -> String
-        ) {
-            self.languageService = languageService
-            self.availability = availability
-            self.system = system
-            self.extensionChecks = extensionChecks
-            self.requestBackgroundCheck = requestBackgroundCheck
-        }
     }
 
     public static func reduce(_ state: inout State, _ action: Action) -> [Effect] {

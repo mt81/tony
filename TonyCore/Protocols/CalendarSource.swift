@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 
 public enum CalendarAccess: String, Sendable, CaseIterable {
     case notDetermined
@@ -18,6 +19,7 @@ public protocol CalendarSource: Sendable {
 }
 
 /// The few facts read from a calendar event. It has no title, place or people.
+@MemberwiseInit(.public)
 public struct CalendarEvent: Sendable, Hashable {
     public enum ShowsAs: String, Sendable, CaseIterable {
         case busy
@@ -27,19 +29,11 @@ public struct CalendarEvent: Sendable, Hashable {
     }
 
     public var interval: DateInterval
-    public var isAllDay: Bool
-    public var showsAs: ShowsAs
-    public var isCancelled: Bool
+    public var isAllDay: Bool = false
+    public var showsAs: ShowsAs = .busy
+    public var isCancelled: Bool = false
     /// The user declined the invitation.
-    public var isDeclined: Bool
-
-    public init(interval: DateInterval, isAllDay: Bool = false, showsAs: ShowsAs = .busy, isCancelled: Bool = false, isDeclined: Bool = false) {
-        self.interval = interval
-        self.isAllDay = isAllDay
-        self.showsAs = showsAs
-        self.isCancelled = isCancelled
-        self.isDeclined = isDeclined
-    }
+    public var isDeclined: Bool = false
 
     /// Timed events the user has not declined count as busy, tentative ones included.
     /// All-day events would block the whole day, so they do not.
