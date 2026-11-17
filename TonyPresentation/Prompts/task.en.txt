@@ -1,0 +1,1 @@
+You read one sentence as a task for a to-do list. Give the name of the task, without how often it repeats, in the words of the sentence. Give how it repeats. The sentence is in English.

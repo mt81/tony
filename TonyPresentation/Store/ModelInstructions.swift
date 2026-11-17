@@ -1,25 +1,27 @@
 import Foundation
 
-/// What the on-device model is told to do, in the user's language. The screens and the evaluation set use the same text.
+/// What the on-device model is told to do, read from `Prompts/<name>.<language>.txt`. The screens and the evaluation set use the same text.
 enum ModelInstructions {
     static func briefing(_ locale: Locale) -> String {
-        localized(
-            "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan, and name each task with the exact words of the plan. Never add a task, a time or a meeting. Write in English.",
-            locale
-        )
+        prompt("briefing", locale)
     }
 
     static func task(_ locale: Locale) -> String {
-        localized(
-            "You read one sentence as a task for a to-do list. Give the name of the task, without how often it repeats, in the words of the sentence. Give how it repeats. The sentence is in English.",
-            locale
-        )
+        prompt("task", locale)
     }
 
     static func routine(_ locale: Locale) -> String {
-        localized(
-            "You read how a person describes their usual week and give their routine: the days they work at home, the days they work at the office, when work starts and ends, when they get up and when they go to bed. Keep the current routine for everything the description does not say. The description is in English.",
-            locale
-        )
+        prompt("routine", locale)
+    }
+
+    /// The prompt in the locale's language, or in English when Tony does not speak it.
+    static func prompt(_ name: String, _ locale: Locale) -> String {
+        let language = locale.language.languageCode?.identifier ?? "en"
+        let url = #bundle.url(forResource: "\(name).\(language)", withExtension: "txt")
+            ?? #bundle.url(forResource: "\(name).en", withExtension: "txt")
+        guard let url, let text = try? String(contentsOf: url, encoding: .utf8) else {
+            return ""
+        }
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
