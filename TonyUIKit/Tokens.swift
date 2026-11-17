@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension Bundle {
-    static let design = Bundle.module
+    static let design = #bundle
 }
 
 /// The Figma colour variables (`color/*`). The app is dark only, so each has a single value.

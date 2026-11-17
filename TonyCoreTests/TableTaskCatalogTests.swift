@@ -82,7 +82,7 @@ func keywordsMatchAtTheStartOfAWord(name: String, expected: [String]?) {
 @Test func shippedTableIsCompleteInBothLanguages() throws {
     let url = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()
-        .appending(path: "../../../TonyApp/Catalog/TaskCatalog.json")
+        .appending(path: "../TonyApp/Catalog/TaskCatalog.json")
     let shipped = try TableTaskCatalog(json: Data(contentsOf: url))
 
     #expect(!shipped.entries.isEmpty)
