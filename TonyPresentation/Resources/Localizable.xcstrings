@@ -100,23 +100,6 @@
         }
       }
     },
-    "%lld more" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld more"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld de plus"
-          }
-        }
-      }
-    },
     "%lld of %lld this week" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -726,23 +709,6 @@
         }
       }
     },
-    "Do you already have something planned for lunch?" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Do you already have something planned for lunch?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As-tu déjà quelque chose de prévu pour le déjeuner ?"
-          }
-        }
-      }
-    },
     "Done" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -756,23 +722,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fait"
-          }
-        }
-      }
-    },
-    "done / suggested" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "done / suggested"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "fait / suggéré"
           }
         }
       }
@@ -1025,23 +974,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Objectifs"
-          }
-        }
-      }
-    },
-    "Higher means you followed through on more of what Tony suggested. Rest days stay on the path." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Higher means you followed through on more of what Tony suggested. Rest days stay on the path."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus c'est haut, plus tu as suivi ce que Tony suggérait. Les jours de repos restent sur le chemin."
           }
         }
       }
@@ -1495,23 +1427,6 @@
         }
       }
     },
-    "Not yet" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not yet"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas encore"
-          }
-        }
-      }
-    },
     "Nothing is planned today." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1733,23 +1648,6 @@
         }
       }
     },
-    "rest" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "rest"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "repos"
-          }
-        }
-      }
-    },
     "Right after your meetings." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1780,23 +1678,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrer"
-          }
-        }
-      }
-    },
-    "Skip it" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skip it"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passer"
           }
         }
       }
@@ -2311,23 +2192,6 @@
         }
       }
     },
-    "Yes, sorted" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yes, sorted"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oui, c'est réglé"
-          }
-        }
-      }
-    },
     "You" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2399,23 +2263,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ta réponse n'a pas pu être enregistrée"
-          }
-        }
-      }
-    },
-    "Your consistency" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your consistency"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ta régularité"
           }
         }
       }

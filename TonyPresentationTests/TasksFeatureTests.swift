@@ -80,7 +80,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     var state = TasksFeature.State()
     _ = TasksFeature.reduce(&state, .addTapped(id: try Sample.identifier(7), stepID: try Sample.identifier(8), now: try Sample.november(10)))
 
-    #expect(TasksFeature.reduce(&state, .editor(.nameChanged("Laundry"))) == [.suggestSteps(forName: "Laundry")])
+    #expect(TasksFeature.reduce(&state, .editor(.nameChanged("Laundry"))) == [.editor(.suggestSteps(forName: "Laundry"))])
 }
 
 // MARK: Data model

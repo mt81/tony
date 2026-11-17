@@ -22,32 +22,14 @@ enum PreviewSamples {
         )
     }
 
-    static var consistency: ConsistencyDataModel {
-        let values = ["4/5", "rest", "1/3", "3/4", "·", "·", "·"]
-        let levels = [0.8, 0.8, 0.33, 0.75, 0.75, 0.75, 0.75]
-        let kinds: [ConsistencyDataModel.Day.Kind] = [.scored, .rest, .scored, .scored, .upcoming, .upcoming, .upcoming]
-        return ConsistencyDataModel(
-            title: "Your consistency",
-            caption: "done / suggested",
-            days: Array("MTWTFSS").enumerated().map { index, letter in
-                .init(id: index, letter: String(letter), value: values[index], level: levels[index], kind: kinds[index], isToday: index == 3)
-            },
-            footnote: "Higher means you followed through on more of what Tony suggested. Rest days stay on the path.",
-            accessibilityLabel: "Your consistency"
-        )
-    }
-
     static func today(editor: TaskEditorDataModel? = nil, alert: AlertDataModel? = nil) -> TodayScreenDataModel {
         TodayScreenDataModel(
             date: "Thursday, November 12",
             headline: "A light day, Matteo",
-            consistency: consistency,
             briefing: BriefingDataModel(
                 author: "Tony",
                 time: "· 8:00",
-                text: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight.",
-                question: "Do you already have something planned for lunch?",
-                answers: ["Yes, sorted", "Not yet", "Skip it"].map { ButtonDataModel(title: $0) {} }
+                text: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight."
             ),
             timelineTitle: "Your day",
             timelineHint: "Suggestions, not orders",
@@ -90,7 +72,6 @@ enum PreviewSamples {
         TodayScreenDataModel(
             date: "Saturday, November 14",
             headline: "A free day",
-            consistency: nil,
             briefing: BriefingDataModel(author: "Tony", time: "· 9:00", text: "Nothing needs you today. Enjoy it."),
             timelineTitle: "Your day",
             timelineHint: "Suggestions, not orders",

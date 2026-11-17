@@ -37,6 +37,20 @@ public struct PresentationContext: Sendable {
         self.calendar = calendar
         self.locale = locale
     }
+
+    /// A time of day: "8:00", "08:00".
+    var timeStyle: Date.FormatStyle {
+        var style = Date.FormatStyle(date: .omitted, time: .shortened).locale(locale)
+        style.timeZone = calendar.timeZone
+        return style
+    }
+
+    /// A day: "Tuesday 10 November", "mardi 10 novembre".
+    var dayStyle: Date.FormatStyle {
+        var style = Date.FormatStyle.dateTime.weekday(.wide).month(.wide).day().locale(locale)
+        style.timeZone = calendar.timeZone
+        return style
+    }
 }
 
 /// Holds a feature's state. Actions change it through the reducer; views redraw from the data model it gives.

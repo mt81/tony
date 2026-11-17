@@ -72,22 +72,10 @@ private func morningMeetings() throws -> [DateInterval] {
 
 // MARK: Reducer
 
-@Test func appearingAsksForThePlanAndFillsTheMockedParts() {
+@Test func appearingAsksForThePlanAndTheName() {
     var state = TodayFeature.State()
 
     #expect(TodayFeature.reduce(&state, .appeared) == [.plan, .loadName])
-    #expect(state.mocked == .sample)
-}
-
-@Test func answeringTheQuestionRemovesItForGood() {
-    var state = TodayFeature.State()
-    _ = TodayFeature.reduce(&state, .appeared)
-
-    _ = TodayFeature.reduce(&state, .questionAnswered)
-    _ = TodayFeature.reduce(&state, .appeared)
-
-    #expect(state.mocked?.question == nil)
-    #expect(state.mocked?.week == TodayFeature.Mocked.sample.week)
 }
 
 @MainActor
@@ -113,7 +101,7 @@ private func morningMeetings() throws -> [DateInterval] {
     let afternoon = await day.open()
 
     #expect(morning.taskItems.map(\.time) == ["8:00", "8:30"])
-    #expect(morning.meetings == ["10:00 3 meetings, back to back Daily scrum · Weekly sync · 1 more · until 11:00"])
+    #expect(morning.meetings == ["10:00 3 meetings, back to back until 11:00"])
     #expect(morning.briefing.time == "· 8:00")
     #expect(afternoon.taskItems.map(\.time) == ["17:00", "17:30"])
     #expect(afternoon.meetings.isEmpty)
@@ -307,11 +295,10 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(english.timeline.first?.id == "now")
     #expect(english.taskItems[0].reason == "The first moment that fits.")
     #expect(english.taskItems[0].check.title == "Mark Plants as done")
-    #expect(english.briefing.question == "Do you already have something planned for lunch?")
     #expect(french.date == "mardi 10 novembre")
     #expect(french.headline == "Une journée légère")
     #expect(french.briefing.text == "2 choses seraient bien aujourd'hui : Plants et Vacuum. Il te reste 3 réunions aujourd'hui, la prochaine à 10:00.")
-    #expect(french.meetings == ["10:00 3 réunions à la suite Daily scrum · Weekly sync · 1 de plus · jusqu'à 11:00"])
+    #expect(french.meetings == ["10:00 3 réunions à la suite jusqu'à 11:00"])
 }
 
 @MainActor
@@ -342,17 +329,4 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(model.tiles.map(\.tile.title) == ["Vacuum", "Gym", "Plants"])
     #expect(model.tiles.map(\.tile.detail) == ["8 days since last time", "0 of 4 this week", "In 4 days"])
     #expect(model.tiles.map(\.tile.isNeglected) == [true, true, false])
-}
-
-@MainActor
-@Test func theWeekShowsScoresUntilTodayAndDotsAfter() async throws {
-    let day = try Day(hour: 8, tasks: [])
-
-    let consistency = try #require(await day.open().consistency)
-
-    #expect(consistency.days.map(\.letter) == ["M", "T", "W", "T", "F", "S", "S"])
-    #expect(consistency.days.map(\.value) == ["4/5", "rest", "·", "·", "·", "·", "·"])
-    #expect(consistency.days.map(\.isToday) == [false, true, false, false, false, false, false])
-    #expect(consistency.days.map(\.level) == [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8])
-    #expect(consistency.accessibilityLabel == "Your consistency, Monday 4/5, Tuesday rest")
 }

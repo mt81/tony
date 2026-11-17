@@ -99,7 +99,6 @@ public struct TimePickerView: View {
 
     public var body: some View {
         DatePicker(model.title, selection: Binding(get: { model.time }, set: model.onChange), displayedComponents: .hourAndMinute)
-            .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
     }
 }
 

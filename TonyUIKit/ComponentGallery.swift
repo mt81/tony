@@ -89,7 +89,7 @@ public struct ComponentGallery: View {
         ]
     }
 
-    private static func row(icon: String, title: String, subtitle: String, status: ChipDataModel, isNeglected: Bool = false) -> TaskRowDataModel {
+    static func row(icon: String, title: String, subtitle: String, status: ChipDataModel, isNeglected: Bool = false) -> TaskRowDataModel {
         TaskRowDataModel(
             id: UUID(),
             icon: icon,

@@ -13,23 +13,12 @@ extension TodayFeature {
         let wording = TodayWording(state: state, context: context)
 
         return TodayScreenDataModel(
-            date: context.now.formatted(wording.dayStyle),
+            date: context.now.formatted(context.dayStyle),
             headline: wording.headline,
-            consistency: state.mocked.map { consistency(week: $0.week, context: context) },
             briefing: BriefingDataModel(
                 author: localized("Tony", locale),
-                time: state.planned.map { "· \($0.plannedAt.formatted(wording.timeStyle))" } ?? "",
-                text: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing,
-                question: state.mocked?.question.map { question in
-                    switch question {
-                    case .lunchPlanned: localized("Do you already have something planned for lunch?", locale)
-                    }
-                },
-                answers: state.mocked?.question == nil
-                    ? []
-                    : [localized("Yes, sorted", locale), localized("Not yet", locale), localized("Skip it", locale)].map { title in
-                        ButtonDataModel(title: title) { send(.questionAnswered) }
-                    }
+                time: state.planned.map { "· \($0.plannedAt.formatted(context.timeStyle))" } ?? "",
+                text: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing
             ),
             timelineTitle: localized("Your day", locale),
             timelineHint: localized("Suggestions, not orders", locale),
@@ -87,7 +76,7 @@ extension TodayFeature {
             }
             let taskItem = TimelineItemDataModel.TaskItem(
                 icon: task.icon,
-                time: item.interval.start.formatted(wording.timeStyle),
+                time: item.interval.start.formatted(wording.context.timeStyle),
                 title: title,
                 reason: wording.reason(for: item, step: step, task: task),
                 actions: actions,
@@ -102,7 +91,7 @@ extension TodayFeature {
         for block in wording.busyBlocks {
             let start = block.interval.start
             let item = TimelineItemDataModel.meetings(
-                time: start.formatted(wording.timeStyle),
+                time: start.formatted(wording.context.timeStyle),
                 title: localized("\(block.eventCount) meetings, back to back", locale),
                 detail: wording.meetingsDetail(for: block)
             )
@@ -129,45 +118,6 @@ extension TodayFeature {
                 )
             }
     }
-
-    private static func consistency(week: [Mocked.DayScore], context: PresentationContext) -> ConsistencyDataModel {
-        let (calendar, locale) = (context.calendar, context.locale)
-        var localised = calendar
-        localised.locale = locale
-        let todayOffset = (calendar.component(.weekday, from: context.now) - calendar.firstWeekday + 7) % 7
-
-        var level = 0.5
-        var spoken: [String] = []
-        let days = (0..<7).map { offset -> ConsistencyDataModel.Day in
-            let symbol = (calendar.firstWeekday - 1 + offset) % 7
-            let letter = localised.veryShortStandaloneWeekdaySymbols[symbol]
-            guard offset <= todayOffset, week.indices.contains(offset) else {
-                return .init(id: offset, letter: letter, value: "·", level: level, kind: .upcoming, isToday: false)
-            }
-            let value: String
-            let kind: ConsistencyDataModel.Day.Kind
-            switch week[offset] {
-            case .score(let done, let suggested):
-                value = "\(done.formatted(.number.locale(locale)))/\(suggested.formatted(.number.locale(locale)))"
-                level = suggested > 0 ? Double(done) / Double(suggested) : level
-                kind = .scored
-            case .rest:
-                value = localized("rest", locale)
-                kind = .rest
-            }
-            spoken.append("\(localised.standaloneWeekdaySymbols[symbol]) \(value)")
-            return .init(id: offset, letter: letter, value: value, level: level, kind: kind, isToday: offset == todayOffset)
-        }
-
-        let title = localized("Your consistency", locale)
-        return ConsistencyDataModel(
-            title: title,
-            caption: localized("done / suggested", locale),
-            days: days,
-            footnote: localized("Higher means you followed through on more of what Tony suggested. Rest days stay on the path.", locale),
-            accessibilityLabel: ([title] + spoken).formatted(.list(type: .and, width: .narrow).locale(locale))
-        )
-    }
 }
 
 /// The templated sentences of the Today tab, and the request that asks the on-device model to reword the briefing.
@@ -175,16 +125,8 @@ struct TodayWording {
     let state: TodayFeature.State
     let context: PresentationContext
 
-    var timeStyle: Date.FormatStyle {
-        var style = Date.FormatStyle(date: .omitted, time: .shortened).locale(context.locale)
-        style.timeZone = context.calendar.timeZone
-        return style
-    }
-
-    var dayStyle: Date.FormatStyle {
-        var style = Date.FormatStyle.dateTime.weekday(.wide).month(.wide).day().locale(context.locale)
-        style.timeZone = context.calendar.timeZone
-        return style
+    private var timeStyle: Date.FormatStyle {
+        context.timeStyle
     }
 
     /// The meeting blocks that are not over yet.
@@ -255,12 +197,11 @@ struct TodayWording {
 
         return BriefingRequest(
             instructions: ModelInstructions.briefing(locale),
-            header: [context.now.formatted(dayStyle)],
+            header: [context.now.formatted(context.dayStyle)],
             items: items,
             footer: footer,
             allowedMinutes: Set(planItems.map { minutes($0.interval.start) } + busyBlocks.flatMap { [minutes($0.interval.start), minutes($0.interval.end)] }),
-            otherTaskNames: (state.planned?.tasks ?? []).filter { !plannedIDs.contains($0.id) }.map(\.name),
-            fallback: briefing
+            otherTaskNames: (state.planned?.tasks ?? []).filter { !plannedIDs.contains($0.id) }.map(\.name)
         )
     }
 
@@ -308,15 +249,7 @@ struct TodayWording {
     }
 
     func meetingsDetail(for block: DayContext.Block) -> String {
-        let locale = context.locale
-        let titles = Array((state.mocked?.meetingTitles ?? []).prefix(min(2, block.eventCount)))
-        let more = block.eventCount - titles.count
-        var parts = titles
-        if !titles.isEmpty && more > 0 {
-            parts.append(localized("\(more) more", locale))
-        }
-        parts.append(localized("until \(block.interval.end.formatted(timeStyle))", locale))
-        return parts.joined(separator: " · ")
+        localized("until \(block.interval.end.formatted(timeStyle))", context.locale)
     }
 
     func tileDetail(for task: TonyTask) -> String {

@@ -18,17 +18,13 @@ extension EvaluationCase {
                 footer.append(localized("Nothing is planned today.", locale))
             }
             let times = plan.items.map(\.time) + plan.busy.flatMap { [$0.start, $0.end] }
-            let names = plan.items.map(\.title).formatted(.list(type: .and).locale(locale))
             let request = BriefingRequest(
                 instructions: ModelInstructions.briefing(locale),
                 header: [plan.day],
                 items: plan.items,
                 footer: footer,
                 allowedMinutes: BriefingValidator.minutesOfDay(in: times.joined(separator: " ")),
-                otherTaskNames: plan.others,
-                fallback: plan.items.isEmpty
-                    ? localized("Nothing needs you today. Enjoy it.", locale)
-                    : localized("\(plan.items.count) things would be nice today: \(names).", locale)
+                otherTaskNames: plan.others
             )
             return EvaluationCase(id: "B\(index + 1) \(language)", languageCode: language, kind: .briefing(request))
         }

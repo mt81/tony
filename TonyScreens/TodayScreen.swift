@@ -16,9 +16,6 @@ public struct TodayScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TonySpacing.section) {
                 header
-                if let consistency = model.consistency {
-                    ConsistencyGraph(consistency)
-                }
                 briefing
                 timeline
                 if !model.tiles.isEmpty {
@@ -70,26 +67,6 @@ public struct TodayScreen: View {
                 .tonyText(.bodyLarge)
                 .foregroundStyle(TonyColor.ink)
                 .accessibilityIdentifier("todayBriefing")
-            if let question = model.briefing.question {
-                Text(question)
-                    .tonyText(.body)
-                    .foregroundStyle(TonyColor.muted)
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: TonySpacing.small) { answers }
-                    VStack(alignment: .leading, spacing: TonySpacing.small) { answers }
-                }
-            }
-        }
-    }
-
-    private var answers: some View {
-        ForEach(model.briefing.answers.indices, id: \.self) { index in
-            let answer = model.briefing.answers[index]
-            Button(action: answer.action) {
-                Chip(ChipDataModel(title: answer.title))
-                    .frame(minHeight: TonySize.touchTarget)
-            }
-            .buttonStyle(.plain)
         }
     }
 

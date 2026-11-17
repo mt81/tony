@@ -46,12 +46,7 @@ public enum TaskSentenceParser {
         guard !name.isEmpty, sentence.range(of: name, options: [.caseInsensitive, .diacriticInsensitive]) != nil else {
             return false
         }
-        switch draft.cadence {
-        case .afterCompletion(let days): return (1...365).contains(days)
-        case .weekdays(let weekdays): return !weekdays.isEmpty
-        case .timesPerWeek(let times): return (1...7).contains(times)
-        case nil: return true
-        }
+        return draft.cadence?.isSensible ?? true
     }
 }
 

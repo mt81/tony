@@ -1,45 +1,29 @@
 import Foundation
 
-/// A briefing and where its words come from.
-public struct Briefing: Sendable, Hashable {
-    public enum Source: Sendable, Hashable {
-        case model
-        case template
-    }
-
-    public var text: String
-    public var source: Source
-
-    public init(text: String, source: Source) {
-        self.text = text
-        self.source = source
-    }
-}
-
-/// Words the day's briefing with the language service: one try, one retry, then the template.
+/// Words the day's briefing with the language service: one try, one retry, then nil so that the caller shows its template.
 /// A wording is kept for as long as the plan it words does not change.
 public actor BriefingWriter {
     private let service: (any LanguageService)?
-    private var cache: [BriefingRequest: Briefing] = [:]
+    private var cache: [BriefingRequest: String?] = [:]
 
-    /// Without a service every briefing is the template.
+    /// Without a service there is never a wording.
     public init(service: (any LanguageService)?) {
         self.service = service
     }
 
-    public func briefing(for request: BriefingRequest) async -> Briefing {
+    /// The model's wording of the plan, or nil when it gave no valid one.
+    public func briefing(for request: BriefingRequest) async -> String? {
         if let cached = cache[request] {
             return cached
         }
-        let template = Briefing(text: request.fallback, source: .template)
-        guard let service else { return template }
+        guard let service else { return nil }
 
         var hasAnswered = false
         for _ in 0..<2 {
             guard let text = try? await service.briefing(instructions: request.instructions, plan: request.prompt()) else { continue }
             hasAnswered = true
             if BriefingValidator.problems(in: text, for: request).isEmpty {
-                let briefing = Briefing(text: text.trimmingCharacters(in: .whitespacesAndNewlines), source: .model)
+                let briefing = text.trimmingCharacters(in: .whitespacesAndNewlines)
                 cache[request] = briefing
                 return briefing
             }
@@ -47,8 +31,8 @@ public actor BriefingWriter {
         // A model that answered twice with something invalid is not asked again for this plan.
         // One that could not answer (not downloaded yet, busy) is asked again next time.
         if hasAnswered {
-            cache[request] = template
+            cache.updateValue(nil, forKey: request)
         }
-        return template
+        return nil
     }
 }

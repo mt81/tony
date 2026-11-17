@@ -1,7 +1,7 @@
 import Foundation
 import TonyUIModels
 
-/// The Today tab: Tony, the consistency graph, the briefing, the day as a timeline, and the tiles.
+/// The Today tab: Tony, the briefing, the day as a timeline, and the tiles.
 public struct TodayScreenDataModel {
     public struct TimelineEntry: Identifiable {
         public var id: String
@@ -25,7 +25,6 @@ public struct TodayScreenDataModel {
 
     public var date: String
     public var headline: String
-    public var consistency: ConsistencyDataModel?
     public var briefing: BriefingDataModel
     public var timelineTitle: String
     public var timelineHint: String
@@ -42,7 +41,6 @@ public struct TodayScreenDataModel {
     public init(
         date: String,
         headline: String,
-        consistency: ConsistencyDataModel?,
         briefing: BriefingDataModel,
         timelineTitle: String,
         timelineHint: String,
@@ -57,7 +55,6 @@ public struct TodayScreenDataModel {
     ) {
         self.date = date
         self.headline = headline
-        self.consistency = consistency
         self.briefing = briefing
         self.timelineTitle = timelineTitle
         self.timelineHint = timelineHint
@@ -72,19 +69,15 @@ public struct TodayScreenDataModel {
     }
 }
 
-/// What Tony says about the day, with at most one question.
+/// What Tony says about the day.
 public struct BriefingDataModel {
     public var author: String
     public var time: String
     public var text: String
-    public var question: String?
-    public var answers: [ButtonDataModel]
 
-    public init(author: String, time: String, text: String, question: String? = nil, answers: [ButtonDataModel] = []) {
+    public init(author: String, time: String, text: String) {
         self.author = author
         self.time = time
         self.text = text
-        self.question = question
-        self.answers = answers
     }
 }
