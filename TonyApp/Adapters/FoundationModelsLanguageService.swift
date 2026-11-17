@@ -29,14 +29,18 @@ struct FoundationModelsLanguageService: LanguageService {
         var homeDays: [String]
         @Guide(description: "The weekdays worked at the office", .element(.anyOf(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"])))
         var officeDays: [String]
-        @Guide(description: "When work starts, 24-hour HH:mm", /[0-2][0-9]:[0-5][0-9]/)
-        var workStart: String
-        @Guide(description: "When work ends, 24-hour HH:mm", /[0-2][0-9]:[0-5][0-9]/)
-        var workEnd: String
-        @Guide(description: "When the person gets up, 24-hour HH:mm", /[0-2][0-9]:[0-5][0-9]/)
-        var wakeTime: String
-        @Guide(description: "When the person goes to bed, 24-hour HH:mm", /[0-2][0-9]:[0-5][0-9]/)
-        var bedtime: String
+        var workStart: TimeOutput
+        var workEnd: TimeOutput
+        var wakeTime: TimeOutput
+        var bedtime: TimeOutput
+    }
+
+    @Generable
+    struct TimeOutput {
+        @Guide(description: "The hour, on the 24-hour clock", .range(0...23))
+        var hour: Int
+        @Guide(description: "The minutes past the hour", .range(0...59))
+        var minute: Int
     }
 
     enum Failure: Error {
@@ -84,9 +88,7 @@ struct FoundationModelsLanguageService: LanguageService {
         return Set(names.compactMap { weekdays[$0.lowercased()] })
     }
 
-    /// "17:30" as hour and minute. Anything else gives empty components, which the routine check rejects.
-    private static func time(_ text: String) -> DateComponents {
-        let parts = text.split(separator: ":").compactMap { Int($0) }
-        return parts.count == 2 ? DateComponents(hour: parts[0], minute: parts[1]) : DateComponents()
+    private static func time(_ output: TimeOutput) -> DateComponents {
+        DateComponents(hour: output.hour, minute: output.minute)
     }
 }
