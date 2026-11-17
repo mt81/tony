@@ -2,15 +2,11 @@ import SwiftUI
 import TonyCore
 import TonyUIKit
 import TonyPresentation
-import TonyScreens
 import TonyStore
 
 @main
 struct TonyApp: App {
     @State private var stores = AppStores()
-    #if DEBUG
-    @State private var modelCheck = Store<ModelCheckFeature>(state: ModelCheckFeature.State(), environment: ModelCheckEnvironment.live)
-    #endif
 
     var body: some Scene {
         #if DEBUG
@@ -25,26 +21,10 @@ struct TonyApp: App {
 
     private var window: some Scene {
         WindowGroup {
-            content
+            RootView(stores: stores)
                 .tint(TonyColor.accent)
                 .preferredColorScheme(.dark)
         }
-    }
-
-    @ViewBuilder private var content: some View {
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-gallery") {
-            ComponentGallery()
-        } else if let stores, ProcessInfo.processInfo.arguments.contains("-calendar") {
-            StoreView(store: stores.calendarDebug, now: stores.now, content: CalendarDebugScreen.init)
-        } else if ProcessInfo.processInfo.arguments.contains("-model") {
-            StoreView(store: modelCheck, now: { Date() }, content: ModelCheckScreen.init)
-        } else {
-            RootView(stores: stores)
-        }
-        #else
-        RootView(stores: stores)
-        #endif
     }
 }
 
