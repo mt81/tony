@@ -39,7 +39,7 @@ extension YouFeature {
             weekdays.filter { days.contains($0.weekday) }.map(\.shortName).formatted(.list(type: .and, width: .narrow).locale(locale))
         }
         func time(_ components: DateComponents) -> String {
-            date(components, context: context).formatted(timeStyle(context))
+            date(components, context: context).formatted(context.timeStyle)
         }
 
         var places: [String] = []
@@ -155,11 +155,5 @@ extension YouFeature {
     /// The time of day on the day being shown, for formatting and for the time pickers.
     private static func date(_ time: DateComponents, context: PresentationContext) -> Date {
         context.calendar.date(bySettingHour: time.hour ?? 0, minute: time.minute ?? 0, second: 0, of: context.now) ?? context.now
-    }
-
-    private static func timeStyle(_ context: PresentationContext) -> Date.FormatStyle {
-        var style = Date.FormatStyle(date: .omitted, time: .shortened).locale(context.locale)
-        style.timeZone = context.calendar.timeZone
-        return style
     }
 }

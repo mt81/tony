@@ -66,11 +66,6 @@ public actor PlanCoordinator {
         await replan()
     }
 
-    public func stop() {
-        listening?.cancel()
-        listening = nil
-    }
-
     /// The latest plan right away, if there is one, then every new plan.
     public func plans() -> AsyncStream<PlannedDay> {
         let id = UUID()

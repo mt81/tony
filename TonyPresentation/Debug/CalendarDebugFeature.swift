@@ -61,8 +61,7 @@ public enum CalendarDebugFeature: Feature {
         context: PresentationContext,
         send: @escaping @MainActor (Action) -> Void
     ) -> CalendarDebugScreenDataModel {
-        var timeStyle = Date.FormatStyle(date: .omitted, time: .shortened).locale(context.locale)
-        timeStyle.timeZone = context.calendar.timeZone
+        let timeStyle = context.timeStyle
         let access =
             switch state.access {
             case .granted: "Calendar access: granted"

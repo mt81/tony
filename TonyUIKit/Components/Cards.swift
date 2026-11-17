@@ -114,32 +114,34 @@ public struct AreaRow: View {
 }
 
 #if DEBUG
-private func previewRow(_ icon: String, _ title: String, _ subtitle: String, _ status: ChipDataModel, isNeglected: Bool = false) -> TaskRowDataModel {
-    TaskRowDataModel(
-        id: UUID(),
-        icon: icon,
-        title: title,
-        subtitle: subtitle,
-        status: status,
-        isNeglected: isNeglected,
-        accessibilityIdentifier: title,
-        open: {},
-        delete: ButtonDataModel(title: "Delete", role: .destructive) {}
-    )
-}
-
 #Preview("Task row") {
     VStack(spacing: TonySpacing.small) {
-        TaskRow(previewRow("🧺", "Laundry", "Every week · wash, dry, fold", ChipDataModel(title: "Today")))
-        TaskRow(previewRow("🥀", "Water the plants", "Every 5 days after last time", ChipDataModel(title: "Due", style: .warning), isNeglected: true))
+        TaskRow(ComponentGallery.row(icon: "🧺", title: "Laundry", subtitle: "Every week · wash, dry, fold", status: ChipDataModel(title: "Today")))
+        TaskRow(
+            ComponentGallery.row(
+                icon: "🥀",
+                title: "Water the plants",
+                subtitle: "Every 5 days after last time",
+                status: ChipDataModel(title: "Due", style: .warning),
+                isNeglected: true
+            )
+        )
     }
     .tonyPreview()
 }
 
 #Preview("Task row, largest text") {
-    TaskRow(previewRow("🥀", "Water the plants", "Every 5 days after last time", ChipDataModel(title: "Due", style: .warning), isNeglected: true))
-        .tonyPreview()
-        .dynamicTypeSize(.accessibility5)
+    TaskRow(
+        ComponentGallery.row(
+            icon: "🥀",
+            title: "Water the plants",
+            subtitle: "Every 5 days after last time",
+            status: ChipDataModel(title: "Due", style: .warning),
+            isNeglected: true
+        )
+    )
+    .tonyPreview()
+    .dynamicTypeSize(.accessibility5)
 }
 
 #Preview("Tile") {

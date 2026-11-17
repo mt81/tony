@@ -38,7 +38,7 @@ public enum TasksFeature: Feature {
         case save(TonyTask)
         case delete(id: UUID)
         case reorder([UUID])
-        case suggestSteps(forName: String)
+        case editor(TaskEditor.Effect)
         case read(sentence: String, id: UUID, stepID: UUID, now: Date)
     }
 
@@ -95,11 +95,7 @@ public enum TasksFeature: Feature {
             let effects = TaskEditor.fill(&editor, with: draft)
             state.editor = editor
             state.quickAdd = ""
-            return effects.map { effect in
-                switch effect {
-                case .suggestSteps(let name): .suggestSteps(forName: name)
-                }
-            }
+            return effects.map(Effect.editor)
         case .rowTapped(let id, let now):
             if let task = state.tasks.first(where: { $0.id == id }) {
                 state.editor = TaskEditor.State(task: task, isNew: false, today: now)
@@ -119,11 +115,7 @@ public enum TasksFeature: Feature {
             guard var editor = state.editor else { break }
             let effects = TaskEditor.reduce(&editor, editorAction)
             state.editor = editor
-            return effects.map { effect in
-                switch effect {
-                case .suggestSteps(let name): .suggestSteps(forName: name)
-                }
-            }
+            return effects.map(Effect.editor)
         case .editorCancelled:
             state.editor = nil
         case .editorSaved:
@@ -158,7 +150,7 @@ public enum TasksFeature: Feature {
             return await change(repository) { try await repository.deleteTask(id: id) }
         case .reorder(let orderedIDs):
             return await change(repository) { try await repository.reorderTasks(orderedIDs) }
-        case .suggestSteps(let name):
+        case .editor(.suggestSteps(let name)):
             let action = await TaskEditor.suggestSteps(
                 forName: name,
                 catalog: environment.catalog,
@@ -179,7 +171,7 @@ public enum TasksFeature: Feature {
     }
 
     public static func cancellationKey(for effect: Effect) -> String? {
-        if case .suggestSteps = effect { "suggestSteps" } else { nil }
+        if case .editor = effect { "editor" } else { nil }
     }
 
     /// Applies a change, then reads everything back so the screen shows what the store holds.

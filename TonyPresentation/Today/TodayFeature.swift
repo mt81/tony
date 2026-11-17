@@ -4,39 +4,6 @@ import TonyUIModels
 
 /// The Today tab: the day's plan from the coordinator, and the user's answers to it.
 public enum TodayFeature: Feature {
-    /// Parts of the screen that are mocked until the chunk that owns them:
-    /// the consistency week (C25), the briefing question (C22, C24),
-    /// and meeting titles, which the calendar adapter does not read (privacy rule: busy times only).
-    public struct Mocked: Sendable, Equatable {
-        public enum DayScore: Sendable, Equatable {
-            case score(done: Int, suggested: Int)
-            case rest
-        }
-
-        public enum Question: Sendable, Equatable {
-            case lunchPlanned
-        }
-
-        /// One entry per day, from the first day of the week.
-        public var week: [DayScore]
-        public var question: Question?
-        public var meetingTitles: [String]
-
-        public static let sample = Mocked(
-            week: [
-                .score(done: 4, suggested: 5),
-                .rest,
-                .score(done: 1, suggested: 3),
-                .score(done: 3, suggested: 4),
-                .score(done: 2, suggested: 2),
-                .rest,
-                .score(done: 2, suggested: 3),
-            ],
-            question: .lunchPlanned,
-            meetingTitles: ["Daily scrum", "Weekly sync", "Planning review"]
-        )
-    }
-
     /// The model's wording of one plan. It is shown for as long as that plan is the one on screen.
     public struct WordedBriefing: Sendable, Equatable {
         public var plan: DayPlan
@@ -46,7 +13,6 @@ public enum TodayFeature: Feature {
     public struct State: Sendable, Equatable {
         public var planned: PlannedDay?
         public var briefing: WordedBriefing?
-        public var mocked: Mocked?
         /// The name entered in the You tab; nil when there is none.
         public var userName: String?
         public var editor: TaskEditor.State?
@@ -70,7 +36,6 @@ public enum TodayFeature: Feature {
         case checkTapped(DayPlan.Item)
         case laterTapped(DayPlan.Item)
         case notTodayTapped(DayPlan.Item)
-        case questionAnswered
         case addTapped(id: UUID, stepID: UUID, now: Date)
         case editor(TaskEditor.Action)
         case editorCancelled
@@ -85,7 +50,7 @@ public enum TodayFeature: Feature {
         case wordBriefing(PlannedDay)
         case record(PlanAction, on: DayPlan.Item)
         case save(TonyTask)
-        case suggestSteps(forName: String)
+        case editor(TaskEditor.Effect)
     }
 
     public struct Environment: Sendable {
@@ -121,9 +86,6 @@ public enum TodayFeature: Feature {
     public static func reduce(_ state: inout State, _ action: Action) -> [Effect] {
         switch action {
         case .appeared:
-            if state.mocked == nil {
-                state.mocked = .sample
-            }
             return [.plan, .loadName]
         case .nameLoaded(let name):
             state.userName = name
@@ -141,19 +103,13 @@ public enum TodayFeature: Feature {
             return [.record(.later, on: item)]
         case .notTodayTapped(let item):
             return [.record(.notToday, on: item)]
-        case .questionAnswered:
-            state.mocked?.question = nil
         case .addTapped(let id, let stepID, let now):
             state.editor = .newTask(id: id, stepID: stepID, now: now)
         case .editor(let editorAction):
             guard var editor = state.editor else { break }
             let effects = TaskEditor.reduce(&editor, editorAction)
             state.editor = editor
-            return effects.map { effect in
-                switch effect {
-                case .suggestSteps(let name): .suggestSteps(forName: name)
-                }
-            }
+            return effects.map(Effect.editor)
         case .editorCancelled:
             state.editor = nil
         case .editorSaved:
@@ -182,8 +138,7 @@ public enum TodayFeature: Feature {
             state.planned = planned
             let context = PresentationContext(now: planned.plannedAt, calendar: environment.calendar, locale: environment.locale)
             let request = TodayWording(state: state, context: context).briefingRequest
-            let briefing = await environment.briefingWriter.briefing(for: request)
-            return .briefingWorded(plan: planned.plan, text: briefing.source == .model ? briefing.text : nil)
+            return .briefingWorded(plan: planned.plan, text: await environment.briefingWriter.briefing(for: request))
         case .record(let action, let item):
             do {
                 try await coordinator.record(action, on: item)
@@ -197,7 +152,7 @@ public enum TodayFeature: Feature {
                 return .failed(.task)
             }
             await coordinator.refresh()
-        case .suggestSteps(let name):
+        case .editor(.suggestSteps(let name)):
             let action = await TaskEditor.suggestSteps(
                 forName: name,
                 catalog: environment.catalog,
@@ -211,7 +166,7 @@ public enum TodayFeature: Feature {
 
     public static func cancellationKey(for effect: Effect) -> String? {
         switch effect {
-        case .suggestSteps: "suggestSteps"
+        case .editor: "editor"
         case .wordBriefing: "wordBriefing"
         default: nil
         }

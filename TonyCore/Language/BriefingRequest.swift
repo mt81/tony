@@ -25,8 +25,6 @@ public struct BriefingRequest: Sendable, Hashable {
     public var allowedMinutes: Set<Int>
     /// The user's tasks that are not planned today. A briefing must not name them.
     public var otherTaskNames: [String]
-    /// The templated briefing, used when the model cannot give a valid one.
-    public var fallback: String
 
     /// The prompt stays well under the model's context window: about four characters make a token.
     public static let characterBudget = 1200
@@ -37,8 +35,7 @@ public struct BriefingRequest: Sendable, Hashable {
         items: [Item],
         footer: [String],
         allowedMinutes: Set<Int>,
-        otherTaskNames: [String],
-        fallback: String
+        otherTaskNames: [String]
     ) {
         self.instructions = instructions
         self.header = header
@@ -46,7 +43,6 @@ public struct BriefingRequest: Sendable, Hashable {
         self.footer = footer
         self.allowedMinutes = allowedMinutes
         self.otherTaskNames = otherTaskNames
-        self.fallback = fallback
     }
 
     /// The plan as compact text. Over the budget, the reasons go first, then the last tasks.

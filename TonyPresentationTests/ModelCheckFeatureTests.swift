@@ -23,7 +23,7 @@ private struct ObedientService: LanguageService {
 
     func briefing(instructions: String, plan: String) async throws -> String {
         guard case .briefing(let request) = try evaluationCase(input: plan).kind else { return "" }
-        return request.fallback
+        return request.items.isEmpty ? "Nothing needs you today." : request.items.map(\.title).joined(separator: ", ")
     }
 
     func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft {
@@ -73,12 +73,11 @@ private func store(failing: Set<String> = []) -> Store<ModelCheckFeature> {
     #expect(english.filter { $0.group == .routine }.count == 4)
 }
 
-@Test func everyPlanFitsTheBudgetAndItsTemplateWouldPass() throws {
+@Test func everyPlanFitsTheBudget() throws {
     for evaluationCase in EvaluationCase.all {
         guard case .briefing(let request) = evaluationCase.kind else { continue }
 
         #expect(request.prompt().count <= BriefingRequest.characterBudget, "\(evaluationCase.id)")
-        #expect(BriefingValidator.problems(in: request.fallback, for: request).isEmpty, "\(evaluationCase.id)")
     }
     let firstFrench = try #require(EvaluationCase.all.first { $0.id == "B1 fr" })
     #expect(firstFrench.input.hasPrefix("mardi 10 novembre\n08:00 Arroser les plantes. Le premier moment qui convient."))

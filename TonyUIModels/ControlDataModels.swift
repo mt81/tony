@@ -132,13 +132,11 @@ public struct DatePickerDataModel {
 public struct TimePickerDataModel {
     public var title: String
     public var time: Date
-    public var accessibilityIdentifier: String?
     public var onChange: @MainActor (Date) -> Void
 
-    public init(title: String, time: Date, accessibilityIdentifier: String? = nil, onChange: @escaping @MainActor (Date) -> Void) {
+    public init(title: String, time: Date, onChange: @escaping @MainActor (Date) -> Void) {
         self.title = title
         self.time = time
-        self.accessibilityIdentifier = accessibilityIdentifier
         self.onChange = onChange
     }
 }

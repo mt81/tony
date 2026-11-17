@@ -17,8 +17,7 @@ private func request(
         items: items,
         footer: ["Busy from 10:00 to 11:00"],
         allowedMinutes: [480, 750, 1080, 600, 660],
-        otherTaskNames: otherTaskNames,
-        fallback: "3 things would be nice today: Plants, Laundry and Gym."
+        otherTaskNames: otherTaskNames
     )
 }
 
@@ -116,7 +115,7 @@ func aBriefingMayOnlyNameWhatIsInThePlan(_ briefingCase: BriefingCase) {
     let first = await writer.briefing(for: request())
     let second = await writer.briefing(for: request())
 
-    #expect(first == Briefing(text: "Plants at 8:00, then the gym.", source: .model))
+    #expect(first == "Plants at 8:00, then the gym.")
     #expect(second == first)
     #expect(service.plans == [request().prompt()])
 }
@@ -125,28 +124,28 @@ func aBriefingMayOnlyNameWhatIsInThePlan(_ briefingCase: BriefingCase) {
     let service = ScriptedService(["Plants at 9:15.", "Plants at 8:00."])
     let writer = BriefingWriter(service: service)
 
-    #expect(await writer.briefing(for: request()) == Briefing(text: "Plants at 8:00.", source: .model))
+    #expect(await writer.briefing(for: request()) == "Plants at 8:00.")
     #expect(service.plans.count == 2)
 }
 
-@Test func twoInvalidAnswersGiveTheTemplateAndTheModelIsNotAskedAgain() async {
+@Test func twoInvalidAnswersGiveNothingAndTheModelIsNotAskedAgain() async {
     let service = ScriptedService(["Plants at 9:15.", "Vacuum at 8:00.", "Plants at 8:00."])
     let writer = BriefingWriter(service: service)
 
     let first = await writer.briefing(for: request())
     let second = await writer.briefing(for: request())
 
-    #expect(first == Briefing(text: request().fallback, source: .template))
-    #expect(second == first)
+    #expect(first == nil)
+    #expect(second == nil)
     #expect(service.plans.count == 2)
 }
 
-@Test func aModelThatCannotAnswerGivesTheTemplateAndIsAskedAgainNextTime() async {
+@Test func aModelThatCannotAnswerGivesNothingAndIsAskedAgainNextTime() async {
     let service = ScriptedService([nil, nil, "Plants at 8:00."])
     let writer = BriefingWriter(service: service)
 
-    #expect(await writer.briefing(for: request()).source == .template)
-    #expect(await writer.briefing(for: request()) == Briefing(text: "Plants at 8:00.", source: .model))
+    #expect(await writer.briefing(for: request()) == nil)
+    #expect(await writer.briefing(for: request()) == "Plants at 8:00.")
 }
 
 @Test func aChangedPlanIsWordedAgain() async {
@@ -156,9 +155,9 @@ func aBriefingMayOnlyNameWhatIsInThePlan(_ briefingCase: BriefingCase) {
 
     _ = await writer.briefing(for: request())
 
-    #expect(await writer.briefing(for: smaller).text == "Only the plants today.")
+    #expect(await writer.briefing(for: smaller) == "Only the plants today.")
 }
 
-@Test func withoutAServiceTheBriefingIsTheTemplate() async {
-    #expect(await BriefingWriter(service: nil).briefing(for: request()) == Briefing(text: request().fallback, source: .template))
+@Test func withoutAServiceThereIsNoWording() async {
+    #expect(await BriefingWriter(service: nil).briefing(for: request()) == nil)
 }

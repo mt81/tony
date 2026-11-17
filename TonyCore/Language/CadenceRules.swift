@@ -47,7 +47,7 @@ public enum CadenceRules {
             ]
 
         for rule in rules {
-            guard let found = find(rule.pattern), let cadence = rule.cadence(found.number, found.text), isSensible(cadence) else { continue }
+            guard let found = find(rule.pattern), let cadence = rule.cadence(found.number, found.text), cadence.isSensible else { continue }
             let start = folded.distance(from: folded.startIndex, to: found.range.lowerBound)
             let end = folded.distance(from: folded.startIndex, to: found.range.upperBound)
             let characters = Array(sentence)
@@ -58,14 +58,6 @@ public enum CadenceRules {
 
     private static let englishNumbers = ["one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7]
     private static let frenchNumbers = ["un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5, "six": 6, "sept": 7]
-
-    private static func isSensible(_ cadence: Cadence) -> Bool {
-        switch cadence {
-        case .afterCompletion(let days): (1...365).contains(days)
-        case .weekdays(let weekdays): !weekdays.isEmpty
-        case .timesPerWeek(let times): (1...7).contains(times)
-        }
-    }
 
     /// The weekday names of the locale's language, lower case and without accents.
     private static func weekdayNames(locale: Locale) -> [String: Locale.Weekday] {
@@ -89,5 +81,16 @@ public enum CadenceRules {
         let words = text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
         let trimmed = words.trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ",;.:")))
         return trimmed.prefix(1).uppercased(with: locale) + trimmed.dropFirst()
+    }
+}
+
+extension Cadence {
+    /// A cadence the task form can show: 1 to 365 days, at least one weekday, 1 to 7 times a week.
+    var isSensible: Bool {
+        switch self {
+        case .afterCompletion(let days): (1...365).contains(days)
+        case .weekdays(let weekdays): !weekdays.isEmpty
+        case .timesPerWeek(let times): (1...7).contains(times)
+        }
     }
 }
