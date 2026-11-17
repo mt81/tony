@@ -198,7 +198,7 @@ private func morningMeetings() throws -> [DateInterval] {
         8:30 Vacuum. The first moment that fits.
         Busy from 10:00 to 11:00
         """)
-    #expect(service.requests.first?.instructions.hasSuffix("Write in English.") == true)
+    #expect(service.requests.first?.instructions.contains("Write in English") == true)
 }
 
 @MainActor
@@ -229,7 +229,7 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(service.requests.first?.plan == "mardi 10 novembre\n8:00 Plants. Le premier moment qui convient.\n8:30 Vacuum. Le premier moment qui convient.")
     #expect(service.requests.last?.plan == "mardi 10 novembre\n8:00 Vacuum. Le premier moment qui convient.")
     #expect(day.model(language: "fr_FR").briefing.text == "Une chose serait bien aujourd'hui : Vacuum.")
-    #expect(service.requests.first?.instructions.hasSuffix("Écris en français et tutoie la personne.") == true)
+    #expect(service.requests.first?.instructions.contains("Write in French") == true)
 }
 
 // MARK: Adding a task

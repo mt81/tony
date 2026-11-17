@@ -4,13 +4,13 @@ import Testing
 
 struct ModelInstructionsTests {
     @Test(arguments: ["briefing", "task", "routine"])
-    func everyPromptIsWrittenInEnglishAndInFrench(name: String) {
+    func everyPromptNamesTheLanguageToAnswerIn(name: String) {
         let english = ModelInstructions.prompt(name, Locale(identifier: "en_US"))
         let french = ModelInstructions.prompt(name, Locale(identifier: "fr_FR"))
 
-        #expect(!english.isEmpty)
-        #expect(!french.isEmpty)
-        #expect(english != french)
+        #expect(english.contains("English"))
+        #expect(french.contains("French"))
+        #expect(!english.contains("{") && !french.contains("{"))
     }
 
     @Test func theScreensReadThePromptFiles() {
@@ -21,7 +21,8 @@ struct ModelInstructionsTests {
         #expect(ModelInstructions.routine(french) == ModelInstructions.prompt("routine", french))
     }
 
-    @Test func aLanguageTonyDoesNotSpeakGetsTheEnglishPrompt() {
-        #expect(ModelInstructions.prompt("briefing", Locale(identifier: "de_DE")) == ModelInstructions.prompt("briefing", Locale(identifier: "en_US")))
+    @Test(arguments: [("en_GB", "English"), ("fr_CA", "French"), ("de_DE", "English")])
+    func theLanguageIsOneTonySpeaks(identifier: String, expected: String) {
+        #expect(ModelInstructions.languageName(Locale(identifier: identifier)) == expected)
     }
 }
