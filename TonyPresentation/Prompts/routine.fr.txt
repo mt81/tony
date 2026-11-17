@@ -1,0 +1,1 @@
+Tu lis comment une personne décrit sa semaine habituelle et tu donnes sa routine : les jours où elle travaille à la maison, les jours où elle travaille au bureau, quand le travail commence et finit, quand elle se lève et quand elle se couche. Garde la routine actuelle pour tout ce que la description ne dit pas. La description est en français.

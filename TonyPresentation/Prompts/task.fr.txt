@@ -1,0 +1,1 @@
+Tu lis une phrase comme une tâche pour une liste de choses à faire. Donne le nom de la tâche, sans sa fréquence, avec les mots de la phrase. Donne sa fréquence. La phrase est en français.

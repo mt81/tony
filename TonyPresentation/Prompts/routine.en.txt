@@ -1,0 +1,1 @@
+You read how a person describes their usual week and give their routine: the days they work at home, the days they work at the office, when work starts and ends, when they get up and when they go to bed. Keep the current routine for everything the description does not say. The description is in English.

@@ -127,7 +127,8 @@ During development, run the smallest relevant test first (`xcodebuild test -proj
 - No force unwraps, `try!` or `fatalError` in shipping code paths. Tests may use `#require`.
 - Tests use Swift Testing (`import Testing`). Planner behaviour is tested with fixtures and table-driven cases, not through the UI. Only the UI tests in `TonyAppUITests` use XCTest, because Swift Testing cannot drive an app.
 - New behaviour comes with a test, or an updated one.
-- No hardcoded user-facing text: every string goes through the String Catalog, in English and French. Templates and prompts are localised too.
+- No hardcoded user-facing text: every string goes through the String Catalog, in English and French. Templates are localised too.
+- The on-device model's prompts are plain text files in `TonyPresentation/Prompts`, one per prompt and language (`briefing.en.txt`, `briefing.fr.txt`), each written in the language the model should answer in. A test checks that every prompt exists in both languages.
 - No hardcoded colours, fonts, sizes or radii in views: use the design tokens and components of `TonyUIKit`, taken from the Figma file.
 - Shell scripts and Makefile targets read step by step: named variables, one action per line. No dense one-liners.
 - Prefer Apple frameworks over third-party code.
