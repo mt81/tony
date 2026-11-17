@@ -1,70 +1,71 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "Tasks": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tasks"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Tasks" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasks"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tâches"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tâches"
           }
         }
       }
     },
-    "Today": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Today"
+    "Today" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aujourd’hui"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd’hui"
           }
         }
       }
     },
-    "You": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You"
+    "You" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toi"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toi"
           }
         }
       }
     },
-    "Your tasks could not be opened": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your tasks could not be opened"
+    "Your tasks could not be opened" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your tasks could not be opened"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible d’ouvrir tes tâches"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’ouvrir tes tâches"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
