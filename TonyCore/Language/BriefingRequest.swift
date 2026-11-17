@@ -1,18 +1,15 @@
 import Foundation
+import MemberwiseInit
 
 /// Everything needed to word one day's briefing and to check the wording: the plan as text, already in the user's language,
 /// and the facts a briefing may name.
+@MemberwiseInit(.public)
 public struct BriefingRequest: Sendable, Hashable {
+    @MemberwiseInit(.public)
     public struct Item: Sendable, Hashable {
         public var time: String
         public var title: String
         public var reason: String
-
-        public init(time: String, title: String, reason: String) {
-            self.time = time
-            self.title = title
-            self.reason = reason
-        }
     }
 
     public var instructions: String
@@ -28,22 +25,6 @@ public struct BriefingRequest: Sendable, Hashable {
 
     /// The prompt stays well under the model's context window: about four characters make a token.
     public static let characterBudget = 1200
-
-    public init(
-        instructions: String,
-        header: [String],
-        items: [Item],
-        footer: [String],
-        allowedMinutes: Set<Int>,
-        otherTaskNames: [String]
-    ) {
-        self.instructions = instructions
-        self.header = header
-        self.items = items
-        self.footer = footer
-        self.allowedMinutes = allowedMinutes
-        self.otherTaskNames = otherTaskNames
-    }
 
     /// The plan as compact text. Over the budget, the reasons go first, then the last tasks.
     public func prompt(characterBudget: Int = BriefingRequest.characterBudget) -> String {

@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
@@ -83,30 +84,15 @@ public enum YouFeature: Feature {
         case read(description: String, current: Routine)
     }
 
+    @MemberwiseInit(.public)
     public struct Environment: Sendable {
         public var repository: any Repository
         public var calendarSource: any CalendarSource
         public var coordinator: PlanCoordinator
         /// Reads the description of the week; nil when there is no model.
-        public var languageService: (any LanguageService)?
+        public var languageService: (any LanguageService)? = nil
         public var calendar: Calendar
         public var locale: Locale
-
-        public init(
-            repository: any Repository,
-            calendarSource: any CalendarSource,
-            coordinator: PlanCoordinator,
-            languageService: (any LanguageService)? = nil,
-            calendar: Calendar,
-            locale: Locale
-        ) {
-            self.repository = repository
-            self.calendarSource = calendarSource
-            self.coordinator = coordinator
-            self.languageService = languageService
-            self.calendar = calendar
-            self.locale = locale
-        }
     }
 
     public static func reduce(_ state: inout State, _ action: Action) -> [Effect] {

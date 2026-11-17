@@ -1,7 +1,9 @@
 import Foundation
+import MemberwiseInit
 
 // Data models of Tony's own components.
 
+@MemberwiseInit(.public)
 public struct ChipDataModel: Hashable, Sendable {
     public enum Style: Sendable, CaseIterable {
         case neutral
@@ -11,14 +13,10 @@ public struct ChipDataModel: Hashable, Sendable {
     }
 
     public var title: String
-    public var style: Style
-
-    public init(title: String, style: Style = .neutral) {
-        self.title = title
-        self.style = style
-    }
+    public var style: Style = .neutral
 }
 
+@MemberwiseInit(.public)
 public struct TaskRowDataModel: Identifiable {
     public var id: UUID
     /// The task's emoji.
@@ -31,63 +29,22 @@ public struct TaskRowDataModel: Identifiable {
     public var accessibilityIdentifier: String
     public var open: @MainActor () -> Void
     public var delete: ButtonDataModel
-
-    public init(
-        id: UUID,
-        icon: String,
-        title: String,
-        subtitle: String,
-        status: ChipDataModel,
-        isNeglected: Bool,
-        accessibilityIdentifier: String,
-        open: @escaping @MainActor () -> Void,
-        delete: ButtonDataModel
-    ) {
-        self.id = id
-        self.icon = icon
-        self.title = title
-        self.subtitle = subtitle
-        self.status = status
-        self.isNeglected = isNeglected
-        self.accessibilityIdentifier = accessibilityIdentifier
-        self.open = open
-        self.delete = delete
-    }
 }
 
 /// One entry of the Today timeline.
 public enum TimelineItemDataModel {
+    @MemberwiseInit(.public)
     public struct TaskItem {
         public var icon: String
         public var time: String
         public var title: String
         public var reason: String
-        public var actions: [ButtonDataModel]
+        public var actions: [ButtonDataModel] = []
         /// Marks the item as done; its title is the VoiceOver label.
         public var check: ButtonDataModel
         /// Draws the icon and the reason in the neglected mood.
-        public var isNeglected: Bool
-        public var accessibilityIdentifier: String?
-
-        public init(
-            icon: String,
-            time: String,
-            title: String,
-            reason: String,
-            actions: [ButtonDataModel] = [],
-            check: ButtonDataModel,
-            isNeglected: Bool = false,
-            accessibilityIdentifier: String? = nil
-        ) {
-            self.icon = icon
-            self.time = time
-            self.title = title
-            self.reason = reason
-            self.actions = actions
-            self.check = check
-            self.isNeglected = isNeglected
-            self.accessibilityIdentifier = accessibilityIdentifier
-        }
+        public var isNeglected: Bool = false
+        public var accessibilityIdentifier: String? = nil
     }
 
     case now(text: String)
@@ -95,39 +52,24 @@ public enum TimelineItemDataModel {
     case meetings(time: String, title: String, detail: String)
 }
 
+@MemberwiseInit(.public)
 public struct TileDataModel: Hashable, Sendable {
     public var icon: String
     public var title: String
     public var detail: String
-    public var isNeglected: Bool
-
-    public init(icon: String, title: String, detail: String, isNeglected: Bool = false) {
-        self.icon = icon
-        self.title = title
-        self.detail = detail
-        self.isNeglected = isNeglected
-    }
+    public var isNeglected: Bool = false
 }
 
+@MemberwiseInit(.public)
 public struct StatDataModel: Hashable, Sendable {
     public var value: String
     public var label: String
-
-    public init(value: String, label: String) {
-        self.value = value
-        self.label = label
-    }
 }
 
+@MemberwiseInit(.public)
 public struct AreaRowDataModel: Hashable, Sendable {
     public var name: String
     /// From 0 to 1.
     public var progress: Double
     public var status: String
-
-    public init(name: String, progress: Double, status: String) {
-        self.name = name
-        self.progress = progress
-        self.status = status
-    }
 }

@@ -4,6 +4,8 @@ PROJECT := Tony.xcodeproj
 SIMULATOR ?= iPhone 18 Pro
 DESTINATION := platform=iOS Simulator,name=$(SIMULATOR)
 DERIVED := build/DerivedData
+# MemberwiseInit is a macro package; command-line builds run its macros only with this flag.
+MACROS := -skipMacroValidation
 APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 
 .PHONY: test test-ui check-imports build run clean
@@ -12,7 +14,7 @@ APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 test: check-imports
 	xcodebuild -project $(PROJECT) -scheme TonyUnitTests \
 		-destination '$(DESTINATION)' \
-		-derivedDataPath $(DERIVED) -quiet test
+		-derivedDataPath $(DERIVED) $(MACROS) -quiet test
 
 # The business layer and the UI do not know each other; only the presentation layer knows both.
 IMPORT := ^\s*(@preconcurrency\s+)?import\s+
@@ -37,13 +39,13 @@ check-imports:
 build:
 	xcodebuild -project $(PROJECT) -scheme TonyApp \
 		-destination '$(DESTINATION)' \
-		-derivedDataPath $(DERIVED) -quiet build
+		-derivedDataPath $(DERIVED) $(MACROS) -quiet build
 
 # Drives the app in the simulator: slower than `make test`, run it when a screen changes.
 test-ui:
 	xcodebuild -project $(PROJECT) -scheme TonyApp \
 		-destination '$(DESTINATION)' \
-		-derivedDataPath $(DERIVED) -quiet test
+		-derivedDataPath $(DERIVED) $(MACROS) -quiet test
 
 run: build
 	xcrun simctl boot '$(SIMULATOR)' 2>/dev/null || true

@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
@@ -53,6 +54,7 @@ public enum TodayFeature: Feature {
         case editor(TaskEditor.Effect)
     }
 
+    @MemberwiseInit(.public)
     public struct Environment: Sendable {
         public var coordinator: PlanCoordinator
         public var briefingWriter: BriefingWriter
@@ -62,25 +64,7 @@ public enum TodayFeature: Feature {
         /// The language of the briefing and of the catalogue's answers.
         public var locale: Locale
         /// How long typing must pause before the catalogue is asked.
-        public var suggestionDelay: Duration
-
-        public init(
-            coordinator: PlanCoordinator,
-            briefingWriter: BriefingWriter,
-            repository: any Repository,
-            catalog: (any TaskCatalog)?,
-            calendar: Calendar,
-            locale: Locale,
-            suggestionDelay: Duration = .milliseconds(400)
-        ) {
-            self.coordinator = coordinator
-            self.briefingWriter = briefingWriter
-            self.repository = repository
-            self.catalog = catalog
-            self.calendar = calendar
-            self.locale = locale
-            self.suggestionDelay = suggestionDelay
-        }
+        public var suggestionDelay: Duration = .milliseconds(400)
     }
 
     public static func reduce(_ state: inout State, _ action: Action) -> [Effect] {

@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import Observation
 
 /// A screen's logic: what it holds, what can happen to it, the work that happens outside it, and what it shows.
@@ -27,16 +28,11 @@ extension Feature {
 }
 
 /// What a data model is drawn for: the moment, and how dates, numbers and words are shown.
+@MemberwiseInit(.public)
 public struct PresentationContext: Sendable {
     public var now: Date
     public var calendar: Calendar
     public var locale: Locale
-
-    public init(now: Date, calendar: Calendar, locale: Locale) {
-        self.now = now
-        self.calendar = calendar
-        self.locale = locale
-    }
 
     /// A time of day: "8:00", "08:00".
     var timeStyle: Date.FormatStyle {

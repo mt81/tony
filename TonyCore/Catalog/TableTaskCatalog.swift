@@ -1,40 +1,28 @@
 import Foundation
+import MemberwiseInit
 
 /// Stands in for the catalogue service until it exists: answers from a fixed table, in the shape the service will use.
+@MemberwiseInit(.public)
 public struct TableTaskCatalog: TaskCatalog {
+    @MemberwiseInit(.public)
     public struct Entry: Codable, Sendable, Hashable {
         /// Words that identify the task, by language code. A keyword matches at the start of a word of the task's name.
         public var keywords: [String: [String]]
         public var steps: [StepEntry]
-
-        public init(keywords: [String: [String]], steps: [StepEntry]) {
-            self.keywords = keywords
-            self.steps = steps
-        }
     }
 
+    @MemberwiseInit(.public)
     public struct StepEntry: Codable, Sendable, Hashable {
         /// The step's name, by language code.
         public var name: [String: String]
         public var mode: Step.Mode
         public var minutes: Int
-        public var gapMinutes: Int
-
-        public init(name: [String: String], mode: Step.Mode, minutes: Int, gapMinutes: Int = 0) {
-            self.name = name
-            self.mode = mode
-            self.minutes = minutes
-            self.gapMinutes = gapMinutes
-        }
+        public var gapMinutes: Int = 0
     }
 
     static let fallbackLanguage = "en"
 
     public let entries: [Entry]
-
-    public init(entries: [Entry]) {
-        self.entries = entries
-    }
 
     public init(json: Data) throws {
         entries = try JSONDecoder().decode([Entry].self, from: json)

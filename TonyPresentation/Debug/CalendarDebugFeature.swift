@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
@@ -24,14 +25,10 @@ public enum CalendarDebugFeature: Feature {
         case requestAccess
     }
 
+    @MemberwiseInit(.public)
     public struct Environment: Sendable {
         public var calendarSource: any CalendarSource
         public var coordinator: PlanCoordinator
-
-        public init(calendarSource: any CalendarSource, coordinator: PlanCoordinator) {
-            self.calendarSource = calendarSource
-            self.coordinator = coordinator
-        }
     }
 
     public static func reduce(_ state: inout State, _ action: Action) -> [Effect] {

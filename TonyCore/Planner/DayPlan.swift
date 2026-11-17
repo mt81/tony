@@ -1,6 +1,8 @@
 import Foundation
+import MemberwiseInit
 
 /// What the planner suggests for the rest of a day, in time order.
+@MemberwiseInit(.public)
 public struct DayPlan: Codable, Sendable, Hashable {
     /// Why an item sits where it does. Tony puts this into words; the timeline shows it under the title.
     public enum Reason: String, Codable, Sendable, Hashable, CaseIterable {
@@ -10,6 +12,7 @@ public struct DayPlan: Codable, Sendable, Hashable {
         case earliestFit
     }
 
+    @MemberwiseInit(.public)
     public struct Item: Codable, Sendable, Hashable, Identifiable {
         public var taskID: UUID
         public var stepID: UUID
@@ -19,21 +22,9 @@ public struct DayPlan: Codable, Sendable, Hashable {
         public var reason: Reason
 
         public var id: UUID { stepID }
-
-        public init(taskID: UUID, stepID: UUID, interval: DateInterval, latestStart: Date, reason: Reason) {
-            self.taskID = taskID
-            self.stepID = stepID
-            self.interval = interval
-            self.latestStart = latestStart
-            self.reason = reason
-        }
     }
 
     public var items: [Item]
-
-    public init(items: [Item]) {
-        self.items = items
-    }
 }
 
 /// What the user can answer to a suggested item.

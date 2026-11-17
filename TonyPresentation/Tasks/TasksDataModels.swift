@@ -1,6 +1,8 @@
 import Foundation
+import MemberwiseInit
 import TonyUIModels
 
+@MemberwiseInit(.public)
 public struct TasksScreenDataModel {
     public var title: String
     public var add: ButtonDataModel
@@ -12,52 +14,18 @@ public struct TasksScreenDataModel {
     public var dismissEditor: @MainActor () -> Void
     public var alert: AlertDataModel?
     public var onAppear: @MainActor () -> Void
-
-    public init(
-        title: String,
-        add: ButtonDataModel,
-        quickAdd: TextFieldDataModel,
-        sections: [TaskSectionDataModel],
-        addTask: ButtonDataModel,
-        editor: TaskEditorDataModel?,
-        dismissEditor: @escaping @MainActor () -> Void,
-        alert: AlertDataModel?,
-        onAppear: @escaping @MainActor () -> Void
-    ) {
-        self.title = title
-        self.add = add
-        self.quickAdd = quickAdd
-        self.sections = sections
-        self.addTask = addTask
-        self.editor = editor
-        self.dismissEditor = dismissEditor
-        self.alert = alert
-        self.onAppear = onAppear
-    }
 }
 
+@MemberwiseInit(.public)
 public struct TaskSectionDataModel: Identifiable {
     public var id: String
     public var title: String
     public var hint: String?
     public var rows: [TaskRowDataModel]
     public var move: @MainActor (IndexSet, Int) -> Void
-
-    public init(
-        id: String,
-        title: String,
-        hint: String?,
-        rows: [TaskRowDataModel],
-        move: @escaping @MainActor (IndexSet, Int) -> Void
-    ) {
-        self.id = id
-        self.title = title
-        self.hint = hint
-        self.rows = rows
-        self.move = move
-    }
 }
 
+@MemberwiseInit(.public)
 public struct TaskEditorDataModel: Identifiable {
     public var id: UUID
     public var title: String
@@ -73,36 +41,9 @@ public struct TaskEditorDataModel: Identifiable {
     public var delete: ButtonDataModel?
     public var cancel: ButtonDataModel
     public var save: ButtonDataModel
-
-    public init(
-        id: UUID,
-        title: String,
-        name: TextFieldDataModel,
-        icon: TextFieldDataModel,
-        kind: PickerDataModel,
-        cadence: CadenceSectionDataModel?,
-        whenItFits: WhenItFitsSectionDataModel,
-        steps: StepsSectionDataModel,
-        deadline: DeadlineSectionDataModel,
-        delete: ButtonDataModel?,
-        cancel: ButtonDataModel,
-        save: ButtonDataModel
-    ) {
-        self.id = id
-        self.title = title
-        self.name = name
-        self.icon = icon
-        self.kind = kind
-        self.cadence = cadence
-        self.whenItFits = whenItFits
-        self.steps = steps
-        self.deadline = deadline
-        self.delete = delete
-        self.cancel = cancel
-        self.save = save
-    }
 }
 
+@MemberwiseInit(.public)
 public struct CadenceSectionDataModel {
     public var header: String
     public var repeats: PickerDataModel
@@ -110,36 +51,16 @@ public struct CadenceSectionDataModel {
     public var count: StepperDataModel?
     /// One toggle per weekday on fixed days; empty otherwise.
     public var weekdays: [ToggleDataModel]
-
-    public init(
-        header: String,
-        repeats: PickerDataModel,
-        count: StepperDataModel?,
-        weekdays: [ToggleDataModel]
-    ) {
-        self.header = header
-        self.repeats = repeats
-        self.count = count
-        self.weekdays = weekdays
-    }
 }
 
+@MemberwiseInit(.public)
 public struct WhenItFitsSectionDataModel {
     public var header: String
     public var location: PickerDataModel
     public var toggles: [ToggleDataModel]
-
-    public init(
-        header: String,
-        location: PickerDataModel,
-        toggles: [ToggleDataModel]
-    ) {
-        self.header = header
-        self.location = location
-        self.toggles = toggles
-    }
 }
 
+@MemberwiseInit(.public)
 public struct StepsSectionDataModel {
     public var header: String
     public var footer: String?
@@ -149,26 +70,9 @@ public struct StepsSectionDataModel {
     public var canDelete: Bool
     public var move: @MainActor (IndexSet, Int) -> Void
     public var delete: @MainActor (IndexSet) -> Void
-
-    public init(
-        header: String,
-        footer: String?,
-        steps: [StepDataModel],
-        add: ButtonDataModel,
-        canDelete: Bool,
-        move: @escaping @MainActor (IndexSet, Int) -> Void,
-        delete: @escaping @MainActor (IndexSet) -> Void
-    ) {
-        self.header = header
-        self.footer = footer
-        self.steps = steps
-        self.add = add
-        self.canDelete = canDelete
-        self.move = move
-        self.delete = delete
-    }
 }
 
+@MemberwiseInit(.public)
 public struct StepDataModel: Identifiable {
     public var id: UUID
     public var name: TextFieldDataModel
@@ -176,34 +80,11 @@ public struct StepDataModel: Identifiable {
     public var duration: StepperDataModel
     /// Nil for the last step.
     public var gap: StepperDataModel?
-
-    public init(
-        id: UUID,
-        name: TextFieldDataModel,
-        mode: PickerDataModel,
-        duration: StepperDataModel,
-        gap: StepperDataModel?
-    ) {
-        self.id = id
-        self.name = name
-        self.mode = mode
-        self.duration = duration
-        self.gap = gap
-    }
 }
 
+@MemberwiseInit(.public)
 public struct DeadlineSectionDataModel {
     public var header: String
     public var toggle: ToggleDataModel
     public var date: DatePickerDataModel?
-
-    public init(
-        header: String,
-        toggle: ToggleDataModel,
-        date: DatePickerDataModel?
-    ) {
-        self.header = header
-        self.toggle = toggle
-        self.date = date
-    }
 }

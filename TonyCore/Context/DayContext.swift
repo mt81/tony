@@ -1,4 +1,5 @@
 import Foundation
+import MemberwiseInit
 
 public enum DayStatus: String, Codable, Sendable, Hashable, CaseIterable {
     case normal
@@ -7,42 +8,26 @@ public enum DayStatus: String, Codable, Sendable, Hashable, CaseIterable {
     case travelling
 }
 
+@MemberwiseInit(.public)
 public struct DayConditions: Codable, Sendable, Hashable {
-    public var weather: WeatherCondition?
-    public var budgetIsTight: Bool
-
-    public init(weather: WeatherCondition? = nil, budgetIsTight: Bool = false) {
-        self.weather = weather
-        self.budgetIsTight = budgetIsTight
-    }
+    public var weather: WeatherCondition? = nil
+    public var budgetIsTight: Bool = false
 }
 
 /// One day as the planner sees it: time blocks in order, covering the whole day.
+@MemberwiseInit(.public)
 public struct DayContext: Codable, Sendable, Hashable {
+    @MemberwiseInit(.public)
     public struct Block: Codable, Sendable, Hashable {
         public var interval: DateInterval
         public var location: Location
         public var availability: Availability
         public var window: Window
         /// How many calendar events were merged into a busy block; zero for the others.
-        public var eventCount: Int
-
-        public init(interval: DateInterval, location: Location, availability: Availability, window: Window, eventCount: Int = 0) {
-            self.interval = interval
-            self.location = location
-            self.availability = availability
-            self.window = window
-            self.eventCount = eventCount
-        }
+        public var eventCount: Int = 0
     }
 
     public var blocks: [Block]
     public var capacity: Capacity
     public var conditions: DayConditions
-
-    public init(blocks: [Block], capacity: Capacity, conditions: DayConditions) {
-        self.blocks = blocks
-        self.capacity = capacity
-        self.conditions = conditions
-    }
 }
