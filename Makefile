@@ -1,57 +1,48 @@
 # Xcode is not the active developer directory on every machine; point at it explicitly.
 export DEVELOPER_DIR ?= /Applications/Xcode.app/Contents/Developer
-TUIST_VERSION := 4.216.3
+PROJECT := Tony.xcodeproj
 SIMULATOR ?= iPhone 18 Pro
+DESTINATION := platform=iOS Simulator,name=$(SIMULATOR)
 DERIVED := build/DerivedData
 APP := $(DERIVED)/Build/Products/Debug-iphonesimulator/Tony.app
 
-.PHONY: test test-ui check-imports check-tuist project build run clean
+.PHONY: test test-ui check-imports build run clean
 
-# The test command: the import rule, then the unit tests of both packages.
+# The test command: the import rule, then the unit tests of TonyCore, TonyStore and TonyPresentation.
 test: check-imports
-	swift test --package-path TonyCore
-	swift test --package-path TonyStore
-	swift test --package-path TonyPresentation
+	xcodebuild -project $(PROJECT) -scheme TonyUnitTests \
+		-destination '$(DESTINATION)' \
+		-derivedDataPath $(DERIVED) -quiet test
 
 # The business layer and the UI do not know each other; only the presentation layer knows both.
 IMPORT := ^\s*(@preconcurrency\s+)?import\s+
 
 check-imports:
-	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|EventKit|HealthKit|TonyUI)' TonyCore/Sources; then \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|EventKit|HealthKit|TonyUI)' TonyCore; then \
 		echo "error: TonyCore must not import UIKit, SwiftUI, EventKit, HealthKit or the UI modules"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore|TonyPresentation)\b' TonyUIKit/Sources; then \
-		echo "error: the UI must not import TonyCore, TonyStore or TonyPresentation"; exit 1; \
+	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore|TonyPresentation|TonyScreens)\b' TonyUIKit TonyUIModels; then \
+		echo "error: the UI must not import TonyCore, TonyStore, TonyPresentation or the screens"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|TonyUIKit)\b' TonyUIKit/Sources/TonyUIModels; then \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|TonyUIKit)\b' TonyUIModels; then \
 		echo "error: TonyUIModels is plain Swift and must not import UIKit, SwiftUI or the views"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyUIKit|TonyScreens)\b' TonyPresentation/Sources/TonyPresentation; then \
+	@if grep -rnE '$(IMPORT)(UIKit|SwiftUI|SwiftData|TonyStore|TonyUIKit|TonyScreens)\b' TonyPresentation; then \
 		echo "error: the reducers and data models must not import UI frameworks, SwiftData, TonyStore or the views"; exit 1; \
 	fi
-	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore|SwiftData)\b' TonyPresentation/Sources/TonyScreens; then \
+	@if grep -rnE '$(IMPORT)(TonyCore|TonyStore|SwiftData)\b' TonyScreens; then \
 		echo "error: the screens draw data models and must not import TonyCore, TonyStore or SwiftData"; exit 1; \
 	fi
 
-# Everyone generates the project with the same Tuist.
-check-tuist:
-	@INSTALLED_VERSION="$$(tuist version)"; \
-	if [ "$$INSTALLED_VERSION" != "$(TUIST_VERSION)" ]; then \
-		echo "error: Tuist $(TUIST_VERSION) is required, found '$$INSTALLED_VERSION'"; exit 1; \
-	fi
-
-project: check-tuist
-	tuist generate --no-open
-
-build: project
-	xcodebuild -workspace Tony.xcworkspace -scheme TonyApp \
-		-destination 'platform=iOS Simulator,name=$(SIMULATOR)' \
+build:
+	xcodebuild -project $(PROJECT) -scheme TonyApp \
+		-destination '$(DESTINATION)' \
 		-derivedDataPath $(DERIVED) -quiet build
 
 # Drives the app in the simulator: slower than `make test`, run it when a screen changes.
-test-ui: project
-	xcodebuild -workspace Tony.xcworkspace -scheme TonyApp \
-		-destination 'platform=iOS Simulator,name=$(SIMULATOR)' \
+test-ui:
+	xcodebuild -project $(PROJECT) -scheme TonyApp \
+		-destination '$(DESTINATION)' \
 		-derivedDataPath $(DERIVED) -quiet test
 
 run: build
@@ -60,4 +51,4 @@ run: build
 	xcrun simctl launch '$(SIMULATOR)' com.mt81.tony
 
 clean:
-	rm -rf build TonyCore/.build TonyStore/.build TonyPresentation/.build TonyUIKit/.build Tony.xcodeproj Tony.xcworkspace Derived
+	rm -rf build
