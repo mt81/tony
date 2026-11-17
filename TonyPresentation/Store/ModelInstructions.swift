@@ -4,7 +4,7 @@ import Foundation
 enum ModelInstructions {
     static func briefing(_ locale: Locale) -> String {
         localized(
-            "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan. Never add a task, a time or a meeting. Write in English.",
+            "You are Tony, a calm and warm assistant. In two to four short sentences, tell the person about their day from the plan below. Use only the tasks and the times of the plan, and name each task with the exact words of the plan. Never add a task, a time or a meeting. Write in English.",
             locale
         )
     }
