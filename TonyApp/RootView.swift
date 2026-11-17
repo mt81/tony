@@ -36,6 +36,13 @@ struct RootView: View {
             } label: {
                 Label { Text("You") } icon: { TonyIcon.you }
             }
+            #if DEBUG
+            Tab {
+                DebugTab(stores: stores)
+            } label: {
+                Label { Text(verbatim: "Debug") } icon: { Image(systemName: "ladybug") }
+            }
+            #endif
         }
         .task {
             guard let stores else { return }

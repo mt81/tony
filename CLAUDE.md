@@ -13,7 +13,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | `TonyCore` (framework) | Domain model, cadence, context builder, planner, consistency, protocols | Unit tests (`TonyCoreTests`) |
 | `TonyStore` (framework) | SwiftData models and the `Repository` implementation, shared by the app and the extension | Unit tests (`TonyStoreTests`), in memory |
 | `TonyUIModels` (framework) | The data models of controls and components, in plain Swift | Through the previews of `TonyUIKit` |
-| `TonyUIKit` (framework) | The reusable UI, on its own: the SwiftUI controls and components that draw the `TonyUIModels` data models, the colour, type, spacing and radius tokens, fonts and artwork | Xcode previews, and the gallery in the simulator (`-gallery` launch argument, debug builds) |
+| `TonyUIKit` (framework) | The reusable UI, on its own: the SwiftUI controls and components that draw the `TonyUIModels` data models, the colour, type, spacing and radius tokens, fonts and artwork | Xcode previews, and the component gallery in the Debug tab (debug builds) |
 | `TonyPresentation` (framework) | The glue between business and UI, with the `Store` and `Feature` protocol; each screen's state, actions, reducer and effects; each screen's data model and the mapping from state to it; presentation strings | Unit tests (`TonyPresentationTests`) |
 | `TonyScreens` (framework) | The SwiftUI screens that draw the `TonyPresentation` data models with the components of `TonyUIKit` | Xcode previews |
 | `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit) | Simulator (`TonyAppUITests`), then device |
@@ -26,7 +26,8 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 - The `Info.plist` and `.entitlements` files of the app and the extension are in `Configuration/`. The frameworks and test targets generate theirs.
 - Two shared schemes: `TonyApp` builds and runs the app and runs the UI tests; `TonyUnitTests` runs the unit tests.
 - The app and the extension share data through the app group `group.com.mt81.tony`.
-- Debug builds have four launch arguments: `-gallery` shows the component gallery, `-calendar` shows the calendar check (calendar access and today's blocks as the planner sees them), `-model` shows the model check (it runs the evaluation set on the on-device model and reports the pass rate, and shows what the widget and the background task noted), and `-now 08:00` freezes the clock at that time today, to see the plan at another hour.
+- Debug builds have a fourth tab, Debug, with the developer screens: the model check (it runs the evaluation set on the on-device model and reports the pass rate, and shows what the widget and the background task noted), the calendar check (calendar access and today's blocks as the planner sees them) and the component gallery. Its text is for developers, in English and not translated. Release builds have no Debug tab.
+- Debug builds have one launch argument: `-now 08:00` freezes the clock at that time today, to see the plan at another hour.
 - The app declares the background refresh mode with one task identifier, `com.mt81.tony.refresh`. Until C21 only the debug model check uses it.
 - `TonyDebug/` holds debug-only source compiled into both the app and the widget extension.
 
