@@ -212,3 +212,22 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     #expect(after.allow == nil)
     #expect(after.text.hasPrefix("Tony plans around your meetings."))
 }
+
+// MARK: Equality
+
+@MainActor
+@Test func theSameStateGivesEqualDataModelsAndAChangeDoesNot() async throws {
+    let you = try You()
+    let viewModel = try await you.open()
+    let card = viewModel.routine
+
+    #expect(viewModel.routine == card)
+    you.store.startEditing()
+    let editor = try #require(viewModel.editor)
+    #expect(viewModel.editor == editor)
+    #expect(viewModel.routine == card)
+
+    you.store.changeDay(.saturday, to: .home)
+
+    #expect(viewModel.editor != editor)
+}

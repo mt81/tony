@@ -6,7 +6,7 @@ import TonyUIModels
 @MemberwiseInit(.public)
 public struct TodayScreenDataModel {
     @MemberwiseInit(.public)
-    public struct TimelineEntry: Identifiable {
+    public struct TimelineEntry: Identifiable, Equatable {
         public var id: String
         public var item: TimelineItemDataModel
     }
@@ -35,8 +35,26 @@ public struct TodayScreenDataModel {
 
 /// What Tony says about the day.
 @MemberwiseInit(.public)
-public struct BriefingDataModel {
+public struct BriefingDataModel: Equatable {
     public var author: String
     public var time: String
     public var text: String
+}
+
+extension TodayScreenDataModel: Equatable {
+    public static func == (lhs: TodayScreenDataModel, rhs: TodayScreenDataModel) -> Bool {
+        lhs.date == rhs.date
+            && lhs.headline == rhs.headline
+            && lhs.briefing == rhs.briefing
+            && lhs.timelineTitle == rhs.timelineTitle
+            && lhs.timelineHint == rhs.timelineHint
+            && lhs.timeline == rhs.timeline
+            && lhs.addTask == rhs.addTask
+            && lhs.tilesTitle == rhs.tilesTitle
+            && lhs.tiles == rhs.tiles
+            && lhs.editor == rhs.editor
+            && lhs.alert == rhs.alert
+            && lhs.dismissEditor.isEqual(to: rhs.dismissEditor)
+            && lhs.onAppear.isEqual(to: rhs.onAppear)
+    }
 }

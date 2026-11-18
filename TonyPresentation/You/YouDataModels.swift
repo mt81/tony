@@ -4,7 +4,7 @@ import TonyUIModels
 
 /// The usual week in a few lines, with the button that opens its form.
 @MemberwiseInit(.public)
-public struct RoutineCardDataModel {
+public struct RoutineCardDataModel: Equatable {
     public var title: String
     public var edit: ButtonDataModel
     public var lines: [String]
@@ -12,7 +12,7 @@ public struct RoutineCardDataModel {
 
 /// Where calendar access stands, and the button that asks for it while it has not been asked.
 @MemberwiseInit(.public)
-public struct CalendarCardDataModel {
+public struct CalendarCardDataModel: Equatable {
     public var title: String
     public var text: String
     public var allow: ButtonDataModel?
@@ -20,9 +20,9 @@ public struct CalendarCardDataModel {
 
 /// The form for the name and the usual week.
 @MemberwiseInit(.public)
-public struct RoutineEditorDataModel: Identifiable {
+public struct RoutineEditorDataModel: Identifiable, Equatable {
     @MemberwiseInit(.public)
-    public struct Day: Identifiable {
+    public struct Day: Identifiable, Equatable {
         public var id: String
         public var picker: PickerDataModel
     }
