@@ -17,7 +17,18 @@ public struct ButtonDataModel {
     public var role: Role = .normal
     public var isEnabled: Bool = true
     public var accessibilityIdentifier: String? = nil
-    public var action: @MainActor () -> Void
+    public var action: any Executable
+}
+
+extension ButtonDataModel: Equatable {
+    public static func == (lhs: ButtonDataModel, rhs: ButtonDataModel) -> Bool {
+        lhs.title == rhs.title
+            && lhs.systemImage == rhs.systemImage
+            && lhs.role == rhs.role
+            && lhs.isEnabled == rhs.isEnabled
+            && lhs.accessibilityIdentifier == rhs.accessibilityIdentifier
+            && lhs.action.isEqual(to: rhs.action)
+    }
 }
 
 @MemberwiseInit(.public)

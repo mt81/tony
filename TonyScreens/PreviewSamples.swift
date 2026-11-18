@@ -6,7 +6,7 @@ import TonyUIModels
 /// Sample data models for the screen previews. Debug builds only: the text is sample data, not translated.
 @MainActor
 enum PreviewSamples {
-    static let check = ButtonDataModel(title: "Mark as done") {}
+    static let check = ButtonDataModel(title: "Mark as done", action: Action("preview") { _ in })
 
     static func row(_ icon: String, _ title: String, _ subtitle: String, _ status: ChipDataModel, isNeglected: Bool = false) -> TaskRowDataModel {
         TaskRowDataModel(
@@ -18,7 +18,7 @@ enum PreviewSamples {
             isNeglected: isNeglected,
             accessibilityIdentifier: title,
             open: {},
-            delete: ButtonDataModel(title: "Delete", role: .destructive) {}
+            delete: ButtonDataModel(title: "Delete", role: .destructive, action: Action("preview") { _ in })
         )
     }
 
@@ -43,7 +43,7 @@ enum PreviewSamples {
                             time: "8:30",
                             title: "Laundry · Wash",
                             reason: "Before your 10:00 meetings. It runs on its own.",
-                            actions: ["Later", "Not today"].map { ButtonDataModel(title: $0) {} },
+                            actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action("preview") { _ in }) },
                             check: check
                         ),
                         isLast: false
@@ -53,7 +53,7 @@ enum PreviewSamples {
                 .init(id: "plants", item: .task(.init(icon: "🥀", time: "11:15", title: "Water the plants", reason: "8 days since last time", check: check, isNeglected: true), isLast: false)),
                 .init(id: "gym", item: .task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true)),
             ],
-            addTask: ButtonDataModel(title: "+ Add a task") {},
+            addTask: ButtonDataModel(title: "+ Add a task", action: Action("preview") { _ in }),
             tilesTitle: "How things are",
             tiles: [
                 .init(id: UUID(), tile: TileDataModel(icon: "🥀", title: "Water the plants", detail: "8 days since last time", isNeglected: true)),
@@ -76,7 +76,7 @@ enum PreviewSamples {
             timelineTitle: "Your day",
             timelineHint: "Suggestions, not orders",
             timeline: [.init(id: "now", item: .now(text: "Now"))],
-            addTask: ButtonDataModel(title: "+ Add a task") {},
+            addTask: ButtonDataModel(title: "+ Add a task", action: Action("preview") { _ in }),
             tilesTitle: "How things are",
             tiles: [],
             editor: nil,
@@ -89,7 +89,7 @@ enum PreviewSamples {
     static func tasks(editor: TaskEditorDataModel? = nil) -> TasksScreenDataModel {
         TasksScreenDataModel(
             title: "Tasks",
-            add: ButtonDataModel(title: "Add a task", systemImage: "plus") {},
+            add: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action("preview") { _ in }),
             quickAdd: TextFieldDataModel(title: "Tell Tony what to add", text: "", prompt: "Tell Tony… “water the plants every 5 days”", onChange: { _ in }),
             sections: [
                 TaskSectionDataModel(
@@ -118,7 +118,7 @@ enum PreviewSamples {
                     move: { _, _ in }
                 ),
             ],
-            addTask: ButtonDataModel(title: "+ Add a task") {},
+            addTask: ButtonDataModel(title: "+ Add a task", action: Action("preview") { _ in }),
             editor: editor,
             dismissEditor: {},
             alert: nil,
@@ -185,7 +185,7 @@ enum PreviewSamples {
                     step("Wash", mode: "background", minutes: 45, gap: 0),
                     step("Fold", mode: "active", minutes: 15, gap: nil),
                 ],
-                add: ButtonDataModel(title: "Add a step") {},
+                add: ButtonDataModel(title: "Add a step", action: Action("preview") { _ in }),
                 canDelete: true,
                 move: { _, _ in },
                 delete: { _ in }
@@ -195,9 +195,9 @@ enum PreviewSamples {
                 toggle: ToggleDataModel(id: "deadline", title: "Must happen by a date", isOn: true, onChange: { _ in }),
                 date: DatePickerDataModel(title: "Date", date: .now, onChange: { _ in })
             ),
-            delete: ButtonDataModel(title: "Delete task", role: .destructive) {},
-            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel) {},
-            save: ButtonDataModel(title: "Save", systemImage: "checkmark") {}
+            delete: ButtonDataModel(title: "Delete task", role: .destructive, action: Action("preview") { _ in }),
+            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel, action: Action("preview") { _ in }),
+            save: ButtonDataModel(title: "Save", systemImage: "checkmark", action: Action("preview") { _ in })
         )
     }
 
@@ -228,8 +228,8 @@ enum PreviewSamples {
             sleepHeader: "Sleep",
             wakeTime: time("Up around"),
             bedtime: time("Bed around"),
-            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel) {},
-            save: ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: workFooter == nil) {}
+            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel, action: Action("preview") { _ in }),
+            save: ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: workFooter == nil, action: Action("preview") { _ in })
         )
     }
 
@@ -238,8 +238,8 @@ enum PreviewSamples {
         return CalendarDebugScreenDataModel(
             title: "Calendar check",
             access: "Calendar access: not asked yet",
-            requestAccess: ButtonDataModel(title: "Ask for calendar access") {},
-            refresh: ButtonDataModel(title: "Read the calendar again") {},
+            requestAccess: ButtonDataModel(title: "Ask for calendar access", action: Action("preview") { _ in }),
+            refresh: ButtonDataModel(title: "Read the calendar again", action: Action("preview") { _ in }),
             plannedAt: "Read at 8:00",
             rows: [
                 .init(id: start, time: "0:00 to 7:00", detail: "Free · night · home", isBusy: false),
@@ -254,7 +254,7 @@ enum PreviewSamples {
         ModelCheckScreenDataModel(
             title: "Model check",
             availability: "Model: available",
-            run: ButtonDataModel(title: "Run the evaluation set") {},
+            run: ButtonDataModel(title: "Run the evaluation set", action: Action("preview") { _ in }),
             report: "Tony model evaluation\niOS 27.2 · iPhone · 2026-11-15\n\nBriefings (en): 9 of 10 pass · median 1.84 s · slowest 2.71 s\n\nTotal: 50 of 52 pass (96%)",
             shareReport: "Share the report",
             rows: [
@@ -263,7 +263,7 @@ enum PreviewSamples {
                 .init(id: "R1 en", title: "R1 en", input: "I work at the office on Tuesdays and Thursdays", output: nil, verdict: "not run", hasPassed: nil),
             ],
             extensionChecks: ["Widget: has not run yet", "Background task: has not run yet"],
-            requestBackgroundCheck: ButtonDataModel(title: "Ask iOS for a background check") {},
+            requestBackgroundCheck: ButtonDataModel(title: "Ask iOS for a background check", action: Action("preview") { _ in }),
             backgroundCheckRequest: nil,
             onAppear: {}
         )

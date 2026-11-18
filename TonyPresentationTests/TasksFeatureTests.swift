@@ -129,7 +129,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     let row = model.sections[0].rows[1]
 
     model.onAppear()
-    row.delete.action()
+    row.delete.action.execute()
     model.sections[0].move([0], 2)
 
     #expect(sent.actions == [
@@ -172,7 +172,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 
     let (model, sent) = try dataModel(state)
     let alert = try #require(model.alert)
-    alert.dismiss.action()
+    alert.dismiss.action.execute()
     _ = TasksFeature.reduce(&state, sent.actions[0])
 
     #expect(alert.title == "Your tasks could not be saved")

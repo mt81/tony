@@ -79,7 +79,7 @@ Every screen has one store, with its own state, and follows one unidirectional p
 - Today, Tasks and the Debug screens still use the earlier `Store<Feature>` with actions and effects, until they are converted.
 - A screen's view model has a `preview(...)` factory under `#if DEBUG`, on the in-memory sources of `TonyPresentation/Store/PreviewSources.swift`.
 
-- Every component takes its own data model: the values it shows, already localised and formatted, and the closures it calls. A button's data model has its title and its action.
+- Every component takes its own data model: the values it shows, already localised and formatted, and the closures it calls. A button's data model has its title and its action, an `any Executable` it can only `execute()`: an `Action(parameters) { parameters in … }` (`TonyUIModels/Action.swift`), equal when its parameters are, so they hold everything the closure depends on.
 - Views decide nothing: no `if` on domain state, no formatting, no strings of their own. They lay out what the data model says.
 - A control's or a component's data model lives in `TonyUIModels` and its view in `TonyUIKit`. A screen's view model lives beside its store in `TonyPresentation` and its view in `TonyScreens`.
 - Every view has an Xcode preview with sample data, and so do the tokens (colours, type styles, spacings, radii, artwork). Previews and their sample data are inside `#if DEBUG`; their text is sample data, not translated. A new view comes with its preview.

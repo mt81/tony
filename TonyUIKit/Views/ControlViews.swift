@@ -14,9 +14,9 @@ public struct ButtonView: View {
     public var body: some View {
         Group {
             if let systemImage = model.systemImage {
-                Button(model.title, systemImage: systemImage, role: model.role.buttonRole, action: model.action)
+                Button(model.title, systemImage: systemImage, role: model.role.buttonRole, action: { model.action.execute() })
             } else {
-                Button(model.title, role: model.role.buttonRole, action: model.action)
+                Button(model.title, role: model.role.buttonRole, action: { model.action.execute() })
             }
         }
         .disabled(!model.isEnabled)
@@ -109,7 +109,7 @@ extension View {
             model?.title ?? "",
             isPresented: Binding(get: { model != nil }, set: { isPresented in
                 if !isPresented, let model {
-                    model.dismiss.action()
+                    model.dismiss.action.execute()
                 }
             })
         ) {
@@ -162,9 +162,9 @@ extension View {
             TimePickerView(TimePickerDataModel(title: "Starts", time: .now, onChange: { _ in }))
         }
         Section {
-            ButtonView(ButtonDataModel(title: "Add a step") {})
-            ButtonView(ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: false) {})
-            ButtonView(ButtonDataModel(title: "Delete task", role: .destructive) {})
+            ButtonView(ButtonDataModel(title: "Add a step", action: Action("preview") { _ in }))
+            ButtonView(ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: false, action: Action("preview") { _ in }))
+            ButtonView(ButtonDataModel(title: "Delete task", role: .destructive, action: Action("preview") { _ in }))
         }
     }
     .scrollContentBackground(.hidden)
@@ -173,7 +173,7 @@ extension View {
 
 #Preview("Alert") {
     TonyColor.canvas
-        .alert(AlertDataModel(title: "Your tasks could not be saved", dismiss: ButtonDataModel(title: "OK", role: .cancel) {}))
+        .alert(AlertDataModel(title: "Your tasks could not be saved", dismiss: ButtonDataModel(title: "OK", role: .cancel, action: Action("preview") { _ in })))
         .tonyPreview(padding: 0)
 }
 #endif

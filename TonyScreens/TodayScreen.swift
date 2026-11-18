@@ -141,7 +141,7 @@ public struct TodayScreen: View {
 }
 
 #Preview("Today, answer not saved") {
-    TodayScreen(PreviewSamples.today(alert: AlertDataModel(title: "Your answer could not be saved", dismiss: ButtonDataModel(title: "OK") {})))
+    TodayScreen(PreviewSamples.today(alert: AlertDataModel(title: "Your answer could not be saved", dismiss: ButtonDataModel(title: "OK", action: Action("preview") { _ in }))))
         .tonyPreview(padding: 0)
 }
 #endif

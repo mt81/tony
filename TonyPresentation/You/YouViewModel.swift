@@ -61,7 +61,11 @@ public struct YouViewModel {
         }
         return RoutineCardDataModel(
             title: localized("Your routine", locale),
-            edit: ButtonDataModel(title: localized("Edit", locale), accessibilityIdentifier: "editRoutine") { store.startEditing() },
+            edit: ButtonDataModel(
+                title: localized("Edit", locale),
+                accessibilityIdentifier: "editRoutine",
+                action: Action("edit_routine") { _ in store.startEditing() }
+            ),
             lines: [
                 places.isEmpty ? localized("No working days", locale) : places.joined(separator: " · "),
                 localized("Workday \(time(routine.workStart)) to \(time(routine.workEnd))", locale),
@@ -83,9 +87,11 @@ public struct YouViewModel {
             title: localized("Calendar", locale),
             text: text,
             allow: state.calendarAccess == .notDetermined
-                ? ButtonDataModel(title: localized("Allow calendar access", locale), accessibilityIdentifier: "allowCalendar") {
-                    Task { await store.allowCalendar() }
-                }
+                ? ButtonDataModel(
+                    title: localized("Allow calendar access", locale),
+                    accessibilityIdentifier: "allowCalendar",
+                    action: Action("allow_calendar") { _ in Task { await store.allowCalendar() } }
+                )
                 : nil
         )
     }
@@ -151,13 +157,18 @@ public struct YouViewModel {
             sleepHeader: localized("Sleep", locale),
             wakeTime: timePicker(localized("Up around", locale), .wakeTime, editor.routine.wakeTime),
             bedtime: timePicker(localized("Bed around", locale), .bedtime, editor.routine.bedtime),
-            cancel: ButtonDataModel(title: localized("Cancel", locale), systemImage: "xmark", role: .cancel) { store.cancelEditing() },
+            cancel: ButtonDataModel(
+                title: localized("Cancel", locale),
+                systemImage: "xmark",
+                role: .cancel,
+                action: Action("cancel_editing") { _ in store.cancelEditing() }
+            ),
             save: ButtonDataModel(
                 title: localized("Save", locale),
                 systemImage: "checkmark",
                 isEnabled: editor.isValid,
                 accessibilityIdentifier: "saveRoutine",
-                action: { Task { await store.save() } }
+                action: Action("save_routine") { _ in Task { await store.save() } }
             )
         )
     }
@@ -166,7 +177,11 @@ public struct YouViewModel {
         guard state.hasFailed else { return nil }
         return AlertDataModel(
             title: localized("Your routine could not be saved", context.locale),
-            dismiss: ButtonDataModel(title: localized("OK", context.locale), role: .cancel) { store.dismissAlert() }
+            dismiss: ButtonDataModel(
+                title: localized("OK", context.locale),
+                role: .cancel,
+                action: Action("dismiss_alert") { _ in store.dismissAlert() }
+            )
         )
     }
 

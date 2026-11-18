@@ -85,7 +85,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 @MainActor
 @Test func savingTheFormStoresTheNameAndTheRoutine() async throws {
     let you = try You()
-    try await you.open().routine.edit.action()
+    try await you.open().routine.edit.action.execute()
     let editor = try #require(try you.viewModel().editor)
 
     editor.name.onChange(" Matteo ")
@@ -112,7 +112,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 @MainActor
 @Test func invalidWorkHoursDisableSavingAndSayWhy() async throws {
     let you = try You()
-    try await you.open().routine.edit.action()
+    try await you.open().routine.edit.action.execute()
 
     try #require(try you.viewModel().editor).workStart.onChange(try time(18))
     let editor = try #require(try you.viewModel().editor)
@@ -124,12 +124,12 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 @MainActor
 @Test func aRoutineThatCannotBeSavedShowsAnAlert() async throws {
     let you = try You()
-    try await you.open().routine.edit.action()
+    try await you.open().routine.edit.action.execute()
     await you.repository.setFailsOnSave(true)
 
     await you.store.save()
     let alert = try #require(try you.viewModel().alert)
-    alert.dismiss.action()
+    alert.dismiss.action.execute()
 
     #expect(alert.title == "Your routine could not be saved")
     #expect(try you.viewModel().alert == nil)
@@ -156,7 +156,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     read.workEnd = DateComponents(hour: 17, minute: 30)
     let service = FakeLanguageService(routine: read)
     let you = try You(languageService: service)
-    try await you.open().routine.edit.action()
+    try await you.open().routine.edit.action.execute()
 
     let empty = try #require(try you.viewModel().editor)
     empty.description.onChange("Office on Tuesdays and Thursdays, until 5:30")
@@ -186,7 +186,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     let wrongAnswer = try You(languageService: FakeLanguageService(routine: backwards))
 
     for you in [withoutModel, wrongAnswer] {
-        try await you.open().routine.edit.action()
+        try await you.open().routine.edit.action.execute()
         you.store.changeDescription("Bureau le mardi")
         await you.store.readDescription()
     }

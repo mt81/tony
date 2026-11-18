@@ -71,9 +71,17 @@ public enum CalendarDebugFeature: Feature {
             title: "Calendar check",
             access: access,
             requestAccess: state.access == .notDetermined
-                ? ButtonDataModel(title: "Ask for calendar access", accessibilityIdentifier: "requestCalendarAccess") { send(.requestAccessTapped) }
+                ? ButtonDataModel(
+                    title: "Ask for calendar access",
+                    accessibilityIdentifier: "requestCalendarAccess",
+                    action: TonyUIModels.Action(Action.requestAccessTapped, executionClosure: send)
+                )
                 : nil,
-            refresh: ButtonDataModel(title: "Read the calendar again", accessibilityIdentifier: "refreshCalendar") { send(.refreshTapped) },
+            refresh: ButtonDataModel(
+                title: "Read the calendar again",
+                accessibilityIdentifier: "refreshCalendar",
+                action: TonyUIModels.Action(Action.refreshTapped, executionClosure: send)
+            ),
             plannedAt: state.planned.map { "Read at \($0.plannedAt.formatted(timeStyle))" },
             rows: (state.planned?.context.blocks ?? []).map { block in
                 let time = "\(block.interval.start.formatted(timeStyle)) to \(block.interval.end.formatted(timeStyle))"

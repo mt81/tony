@@ -44,7 +44,9 @@ public struct TasksScreen: View {
                 .foregroundStyle(TonyColor.ink)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
-            Button(action: model.add.action) {
+            Button {
+                model.add.action.execute()
+            } label: {
                 Image(systemName: model.add.systemImage ?? "plus")
                     .tonyText(.heading)
                     .foregroundStyle(TonyColor.onAccent)

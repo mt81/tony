@@ -56,8 +56,8 @@ private func environment(access: CalendarAccess, busy: [DateInterval] = []) thro
     let loaded = try #require(await CalendarDebugFeature.run(.load, in: try environment(access: .notDetermined)))
     _ = CalendarDebugFeature.reduce(&state, loaded)
     let undecided = CalendarDebugFeature.dataModel(for: state, context: try Sample.context(day: 2), send: sent.send)
-    undecided.requestAccess?.action()
-    undecided.refresh.action()
+    undecided.requestAccess?.action.execute()
+    undecided.refresh.action.execute()
 
     #expect(undecided.access == "Calendar access: not asked yet")
     #expect(undecided.rows.allSatisfy { !$0.isBusy })

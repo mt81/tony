@@ -79,7 +79,7 @@ private struct RoutineCard: View {
 
     private func editButton(_ edit: ButtonDataModel) -> some View {
         Button {
-            edit.action()
+            edit.action.execute()
         } label: {
             Text(edit.title)
                 .tonyText(.caption)
@@ -102,7 +102,7 @@ private struct CalendarCard: View {
                 .accessibilityIdentifier("calendarAccess")
             if let allow = calendar.allow {
                 Button {
-                    allow.action()
+                    allow.action.execute()
                 } label: {
                     Chip(ChipDataModel(title: allow.title, style: .accent))
                         .frame(minHeight: TonySize.touchTarget)

@@ -119,15 +119,18 @@ public enum ModelCheckFeature: Feature {
             run: ButtonDataModel(
                 title: state.isRunning ? "Running \(state.results.count + 1) of \(rows.count)" : "Run the evaluation set",
                 isEnabled: !state.isRunning,
-                accessibilityIdentifier: "runEvaluation"
-            ) { send(.runTapped) },
+                accessibilityIdentifier: "runEvaluation",
+                action: TonyUIModels.Action(Action.runTapped, executionClosure: send)
+            ),
             report: isComplete ? report(state, date: context.now.formatted(Date.ISO8601FormatStyle(timeZone: context.calendar.timeZone).year().month().day())) : nil,
             shareReport: "Share the report",
             rows: rows,
             extensionChecks: state.extensionChecks,
-            requestBackgroundCheck: ButtonDataModel(title: "Ask iOS for a background check", accessibilityIdentifier: "requestBackgroundCheck") {
-                send(.backgroundCheckTapped)
-            },
+            requestBackgroundCheck: ButtonDataModel(
+                title: "Ask iOS for a background check",
+                accessibilityIdentifier: "requestBackgroundCheck",
+                action: TonyUIModels.Action(Action.backgroundCheckTapped, executionClosure: send)
+            ),
             backgroundCheckRequest: state.backgroundCheckRequest,
             onAppear: { send(.appeared) }
         )

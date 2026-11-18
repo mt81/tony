@@ -10,7 +10,7 @@ extension TasksFeature {
         send: @escaping @MainActor (Action) -> Void
     ) -> TasksScreenDataModel {
         let locale = context.locale
-        let addTask: @MainActor () -> Void = { send(.addTapped(id: UUID(), stepID: UUID(), now: Date())) }
+        let addTask = TonyUIModels.Action("add_task") { _ in send(.addTapped(id: UUID(), stepID: UUID(), now: Date())) }
 
         return TasksScreenDataModel(
             title: localized("Tasks", locale),
@@ -32,16 +32,20 @@ extension TasksFeature {
                     for: editor,
                     context: context,
                     edit: { send(.editor($0)) },
-                    cancel: { send(.editorCancelled) },
-                    save: { send(.editorSaved) },
-                    delete: { send(.editorDeleted) }
+                    cancel: TonyUIModels.Action(Action.editorCancelled, executionClosure: send),
+                    save: TonyUIModels.Action(Action.editorSaved, executionClosure: send),
+                    delete: TonyUIModels.Action(Action.editorDeleted, executionClosure: send)
                 )
             },
             dismissEditor: { send(.editorCancelled) },
             alert: state.hasFailed
                 ? AlertDataModel(
                     title: localized("Your tasks could not be saved", locale),
-                    dismiss: ButtonDataModel(title: localized("OK", locale), role: .cancel) { send(.alertDismissed) }
+                    dismiss: ButtonDataModel(
+                        title: localized("OK", locale),
+                        role: .cancel,
+                        action: TonyUIModels.Action(Action.alertDismissed, executionClosure: send)
+                    )
                 )
                 : nil,
             onAppear: { send(.appeared) }
@@ -79,7 +83,11 @@ extension TasksFeature {
                     isNeglected: summary.isNeglected,
                     accessibilityIdentifier: "task-\(task.name)",
                     open: { send(.rowTapped(id: task.id, now: Date())) },
-                    delete: ButtonDataModel(title: localized("Delete", locale), role: .destructive) { send(.deleteTapped(id: task.id)) }
+                    delete: ButtonDataModel(
+                        title: localized("Delete", locale),
+                        role: .destructive,
+                        action: TonyUIModels.Action(Action.deleteTapped(id: task.id), executionClosure: send)
+                    )
                 )
             },
             move: { source, destination in send(.moved(kind: kind, from: source, to: destination)) }

@@ -9,9 +9,9 @@ extension TaskEditor {
         for state: State,
         context: PresentationContext,
         edit: @escaping @MainActor (Action) -> Void,
-        cancel: @escaping @MainActor () -> Void,
-        save: @escaping @MainActor () -> Void,
-        delete: @escaping @MainActor () -> Void
+        cancel: any Executable,
+        save: any Executable,
+        delete: any Executable
     ) -> TaskEditorDataModel {
         let locale = context.locale
         let task = state.task
@@ -222,7 +222,7 @@ extension TaskEditor {
                         )
                 )
             },
-            add: ButtonDataModel(title: localized("Add a step", locale)) { edit(.stepAdded(id: UUID())) },
+            add: ButtonDataModel(title: localized("Add a step", locale), action: TonyUIModels.Action("add_step") { _ in edit(.stepAdded(id: UUID())) }),
             canDelete: steps.count > 1,
             move: { source, destination in edit(.stepsMoved(from: source, to: destination)) },
             delete: { offsets in edit(.stepsDeleted(offsets)) }
