@@ -35,7 +35,7 @@ struct AppStores {
     let coordinator: PlanCoordinator
     let today: Store<TodayFeature>
     let tasks: Store<TasksFeature>
-    let you: Store<YouFeature>
+    let you: YouStore
     #if DEBUG
     let calendarDebug: Store<CalendarDebugFeature>
     #endif
@@ -67,16 +67,13 @@ struct AppStores {
             state: TasksFeature.State(),
             environment: TasksFeature.Environment(repository: repository, catalog: catalog, languageService: languageService, locale: .current)
         )
-        you = Store(
-            state: YouFeature.State(),
-            environment: YouFeature.Environment(
-                repository: repository,
-                calendarSource: calendarSource,
-                coordinator: coordinator,
-                languageService: languageService,
-                calendar: .current,
-                locale: .current
-            )
+        you = YouStore(
+            repository: repository,
+            calendarSource: calendarSource,
+            coordinator: coordinator,
+            languageService: languageService,
+            calendar: .current,
+            locale: .current
         )
         #if DEBUG
         calendarDebug = Store(

@@ -220,7 +220,7 @@ enum PreviewSamples {
             editor: editor,
             dismissEditor: {},
             alert: nil,
-            onAppear: {}
+            load: {}
         )
     }
 

@@ -7,32 +7,30 @@ import TonyUIModels
 @MainActor
 private struct You {
     let repository = FakeRepository(tasks: [])
-    let store: Store<YouFeature>
+    let store: YouStore
+    let now: Date
 
     init(calendarSource: any CalendarSource = FakeCalendarSource(), languageService: (any LanguageService)? = nil, language: String = "en") throws {
         let now = try Sample.november(10)
         let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Sample.calendar) { now }
-        store = Store(
-            state: YouFeature.State(),
-            environment: YouFeature.Environment(
-                repository: repository,
-                calendarSource: calendarSource,
-                coordinator: coordinator,
-                languageService: languageService,
-                calendar: Sample.calendar,
-                locale: Locale(identifier: language)
-            )
+        self.now = now
+        store = YouStore(
+            repository: repository,
+            calendarSource: calendarSource,
+            coordinator: coordinator,
+            languageService: languageService,
+            calendar: Sample.calendar,
+            locale: Locale(identifier: language)
         )
     }
 
     func open(language: String = "en_GB") async throws -> YouScreenDataModel {
-        store.send(.appeared)
-        await store.waitForEffects()
+        try await model(language: language).load()
         return try model(language: language)
     }
 
     func model(language: String = "en_GB") throws -> YouScreenDataModel {
-        store.dataModel(context: try Sample.context(language: language))
+        YouReducer.reduce(store.state, context: try Sample.context(language: language), store: store)
     }
 }
 
@@ -40,31 +38,35 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     try #require(Sample.calendar.date(from: DateComponents(year: 2026, month: 11, day: 10, hour: hour, minute: minute)))
 }
 
+// MARK: Store
+
+@MainActor
+@Test func changingADayMovesItBetweenHomeOfficeAndOff() throws {
+    let you = try You()
+    you.store.startEditing()
+
+    you.store.changeDay(.tuesday, to: .office)
+    you.store.changeDay(.friday, to: .off)
+    you.store.changeDay(.saturday, to: .home)
+
+    #expect(you.store.state.editor?.routine.homeDays == [.monday, .wednesday, .thursday, .saturday])
+    #expect(you.store.state.editor?.routine.officeDays == [.tuesday])
+    #expect(you.store.state.routine == .standard)
+}
+
+@MainActor
+@Test func workThatEndsBeforeItStartsIsNotSaved() async throws {
+    let you = try You()
+    you.store.startEditing()
+    you.store.changeTime(.workEnd, to: DateComponents(hour: 8, minute: 30))
+
+    await you.store.save(now: you.now)
+
+    #expect(you.store.state.editor != nil)
+    #expect(await you.repository.routine() == nil)
+}
+
 // MARK: Reducer
-
-@Test func changingADayMovesItBetweenHomeOfficeAndOff() {
-    var state = YouFeature.State()
-    _ = YouFeature.reduce(&state, .editTapped)
-
-    _ = YouFeature.reduce(&state, .dayChanged(.tuesday, .office))
-    _ = YouFeature.reduce(&state, .dayChanged(.friday, .off))
-    _ = YouFeature.reduce(&state, .dayChanged(.saturday, .home))
-
-    #expect(state.editor?.routine.homeDays == [.monday, .wednesday, .thursday, .saturday])
-    #expect(state.editor?.routine.officeDays == [.tuesday])
-    #expect(state.routine == .standard)
-}
-
-@Test func workThatEndsBeforeItStartsIsNotSaved() throws {
-    var state = YouFeature.State()
-    _ = YouFeature.reduce(&state, .editTapped)
-    _ = YouFeature.reduce(&state, .timeChanged(.workEnd, DateComponents(hour: 8, minute: 30)))
-
-    #expect(YouFeature.reduce(&state, .editorSaved(now: try Sample.november(10))).isEmpty)
-    #expect(state.editor != nil)
-}
-
-// MARK: Data model
 
 @MainActor
 @Test func aNewUserSeesTheStandardRoutineInBothLanguages() async throws {
@@ -87,12 +89,12 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     let editor = try #require(try you.model().editor)
 
     editor.name.onChange(" Matteo ")
-    editor.days[1].picker.onSelect(YouFeature.DayKind.office.rawValue)
-    editor.days[5].picker.onSelect(YouFeature.DayKind.home.rawValue)
+    editor.days[1].picker.onSelect(YouState.DayKind.office.rawValue)
+    editor.days[5].picker.onSelect(YouState.DayKind.home.rawValue)
     editor.workEnd.onChange(try time(17, 30))
     editor.bedtime.onChange(try time(22, 15))
-    try #require(try you.model().editor).save.action()
-    await you.store.waitForEffects()
+    #expect(try #require(try you.model().editor).save.isEnabled)
+    await you.store.save(now: you.now)
     let model = try you.model()
     let stored = try #require(await you.repository.routine())
 
@@ -125,13 +127,23 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     try await you.open().routine.edit.action()
     await you.repository.setFailsOnSave(true)
 
-    try #require(try you.model().editor).save.action()
-    await you.store.waitForEffects()
+    await you.store.save(now: you.now)
     let alert = try #require(try you.model().alert)
     alert.dismiss.action()
 
     #expect(alert.title == "Your routine could not be saved")
     #expect(try you.model().alert == nil)
+}
+
+@MainActor
+@Test func theFormSaysWhileTonyIsReading() throws {
+    let you = try You()
+    var state = YouState()
+    state.editor = YouState.Editor(name: "", routine: .standard, description: "Office on Tuesdays", reading: .inProgress)
+
+    let editor = try #require(YouReducer.reduce(state, context: try Sample.context(language: "en"), store: you.store).editor)
+
+    #expect(editor.descriptionFooter == "Tony is reading…")
 }
 
 // MARK: Describing the week
@@ -148,14 +160,10 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 
     let empty = try #require(try you.model().editor)
     empty.description.onChange("Office on Tuesdays and Thursdays, until 5:30")
-    let submit = try #require(empty.description.onSubmit)
-    submit()
-    let reading = try #require(try you.model().editor)
-    await you.store.waitForEffects()
+    await you.store.readDescription()
     let filled = try #require(try you.model().editor)
 
     #expect(empty.descriptionFooter == nil)
-    #expect(reading.descriptionFooter == "Tony is reading…")
     #expect(filled.descriptionFooter == "Tony filled in the form below. Check it before you save.")
     #expect(filled.days.map(\.picker.selectedID) == ["home", "office", "home", "office", "home", "off", "off"])
     #expect(await you.repository.routine() == nil)
@@ -179,9 +187,8 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 
     for you in [withoutModel, wrongAnswer] {
         try await you.open().routine.edit.action()
-        you.store.send(.descriptionChanged("Bureau le mardi"))
-        you.store.send(.descriptionSubmitted)
-        await you.store.waitForEffects()
+        you.store.changeDescription("Bureau le mardi")
+        await you.store.readDescription()
     }
 
     #expect(try withoutModel.model(language: "fr").editor?.descriptionFooter == "Tony n’a pas pu lire ça. Remplis le formulaire ci-dessous.")
@@ -196,8 +203,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     let you = try You(calendarSource: UnansweredCalendarSource())
 
     let before = try await you.open()
-    try #require(before.calendar.allow).action()
-    await you.store.waitForEffects()
+    await you.store.allowCalendar()
     let after = try you.model()
 
     #expect(before.calendar.allow?.title == "Allow calendar access")

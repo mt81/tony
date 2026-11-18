@@ -23,7 +23,7 @@ public struct YouScreen: View {
             .padding(.bottom, TonySpacing.section)
         }
         .background { PageBackground() }
-        .onAppear(perform: model.onAppear)
+        .task { await model.load() }
         .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor() } })) { editor in
             RoutineEditorScreen(editor)
         }

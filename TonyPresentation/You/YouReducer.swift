@@ -2,13 +2,10 @@ import Foundation
 import TonyCore
 import TonyUIModels
 
-extension YouFeature {
+/// Turns the You tab's state into what the screen shows. Every user action goes to a method of the store.
+public enum YouReducer {
     @MainActor
-    public static func dataModel(
-        for state: State,
-        context: PresentationContext,
-        send: @escaping @MainActor (Action) -> Void
-    ) -> YouScreenDataModel {
+    public static func reduce(_ state: YouState, context: PresentationContext, store: YouStore) -> YouScreenDataModel {
         let locale = context.locale
 
         return YouScreenDataModel(
@@ -16,19 +13,19 @@ extension YouFeature {
             name: state.name.isEmpty ? localized("You", locale) : state.name,
             routine: RoutineCardDataModel(
                 title: localized("Your routine", locale),
-                edit: ButtonDataModel(title: localized("Edit", locale), accessibilityIdentifier: "editRoutine") { send(.editTapped) },
+                edit: ButtonDataModel(title: localized("Edit", locale), accessibilityIdentifier: "editRoutine") { store.startEditing() },
                 lines: routineLines(state.routine, context: context)
             ),
-            calendar: calendarCard(state.calendarAccess, locale: locale, send: send),
-            editor: state.editor.map { editorDataModel($0, context: context, send: send) },
-            dismissEditor: { send(.editorCancelled) },
+            calendar: calendarCard(state.calendarAccess, locale: locale, store: store),
+            editor: state.editor.map { editorDataModel($0, context: context, store: store) },
+            dismissEditor: { store.cancelEditing() },
             alert: state.hasFailed
                 ? AlertDataModel(
                     title: localized("Your routine could not be saved", locale),
-                    dismiss: ButtonDataModel(title: localized("OK", locale), role: .cancel) { send(.alertDismissed) }
+                    dismiss: ButtonDataModel(title: localized("OK", locale), role: .cancel) { store.dismissAlert() }
                 )
                 : nil,
-            onAppear: { send(.appeared) }
+            load: { await store.load() }
         )
     }
 
@@ -60,7 +57,7 @@ extension YouFeature {
     private static func calendarCard(
         _ access: CalendarAccess?,
         locale: Locale,
-        send: @escaping @MainActor (Action) -> Void
+        store: YouStore
     ) -> CalendarCardDataModel {
         let text =
             switch access {
@@ -74,7 +71,7 @@ extension YouFeature {
             text: text,
             allow: access == .notDetermined
                 ? ButtonDataModel(title: localized("Allow calendar access", locale), accessibilityIdentifier: "allowCalendar") {
-                    send(.allowCalendarTapped)
+                    Task { await store.allowCalendar() }
                 }
                 : nil
         )
@@ -82,19 +79,19 @@ extension YouFeature {
 
     @MainActor
     private static func editorDataModel(
-        _ editor: Editor,
+        _ editor: YouState.Editor,
         context: PresentationContext,
-        send: @escaping @MainActor (Action) -> Void
+        store: YouStore
     ) -> RoutineEditorDataModel {
         let locale = context.locale
         let kinds: [PickerDataModel.Option] = [
-            .init(id: DayKind.home.rawValue, title: localized("At home", locale)),
-            .init(id: DayKind.office.rawValue, title: localized("At the office", locale)),
-            .init(id: DayKind.off.rawValue, title: localized("Day off", locale)),
+            .init(id: YouState.DayKind.home.rawValue, title: localized("At home", locale)),
+            .init(id: YouState.DayKind.office.rawValue, title: localized("At the office", locale)),
+            .init(id: YouState.DayKind.off.rawValue, title: localized("Day off", locale)),
         ]
-        func timePicker(_ title: String, _ field: TimeField, _ components: DateComponents) -> TimePickerDataModel {
+        func timePicker(_ title: String, _ field: YouState.TimeField, _ components: DateComponents) -> TimePickerDataModel {
             TimePickerDataModel(title: title, time: date(components, context: context)) { newTime in
-                send(.timeChanged(field, context.calendar.dateComponents([.hour, .minute], from: newTime)))
+                store.changeTime(field, to: context.calendar.dateComponents([.hour, .minute], from: newTime))
             }
         }
 
@@ -104,15 +101,15 @@ extension YouFeature {
                 title: localized("Your name", locale),
                 text: editor.name,
                 accessibilityIdentifier: "userName",
-                onChange: { send(.nameChanged($0)) }
+                onChange: { store.changeName($0) }
             ),
             description: TextFieldDataModel(
                 title: localized("Describe your week", locale),
                 text: editor.description,
                 prompt: localized("Tell Tony… “office on Tuesdays and Thursdays, 9 to 5:30”", locale),
                 accessibilityIdentifier: "routineDescription",
-                onChange: { send(.descriptionChanged($0)) },
-                onSubmit: { send(.descriptionSubmitted) }
+                onChange: { store.changeDescription($0) },
+                onSubmit: { Task { await store.readDescription() } }
             ),
             descriptionFooter: {
                 switch editor.reading {
@@ -130,7 +127,7 @@ extension YouFeature {
                         title: day.name.capitalized(with: locale),
                         options: kinds,
                         selectedID: editor.kind(of: day.weekday).rawValue,
-                        onSelect: { id in DayKind(rawValue: id).map { send(.dayChanged(day.weekday, $0)) } }
+                        onSelect: { id in YouState.DayKind(rawValue: id).map { store.changeDay(day.weekday, to: $0) } }
                     )
                 )
             },
@@ -141,13 +138,13 @@ extension YouFeature {
             sleepHeader: localized("Sleep", locale),
             wakeTime: timePicker(localized("Up around", locale), .wakeTime, editor.routine.wakeTime),
             bedtime: timePicker(localized("Bed around", locale), .bedtime, editor.routine.bedtime),
-            cancel: ButtonDataModel(title: localized("Cancel", locale), systemImage: "xmark", role: .cancel) { send(.editorCancelled) },
+            cancel: ButtonDataModel(title: localized("Cancel", locale), systemImage: "xmark", role: .cancel) { store.cancelEditing() },
             save: ButtonDataModel(
                 title: localized("Save", locale),
                 systemImage: "checkmark",
                 isEnabled: editor.isValid,
                 accessibilityIdentifier: "saveRoutine",
-                action: { send(.editorSaved(now: context.now)) }
+                action: { Task { await store.save(now: context.now) } }
             )
         )
     }

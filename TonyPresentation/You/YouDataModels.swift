@@ -13,7 +13,7 @@ public struct YouScreenDataModel {
     public var editor: RoutineEditorDataModel?
     public var dismissEditor: @MainActor () -> Void
     public var alert: AlertDataModel?
-    public var onAppear: @MainActor () -> Void
+    public var load: @MainActor () async -> Void
 }
 
 /// The usual week in a few lines, with the button that opens its form.
