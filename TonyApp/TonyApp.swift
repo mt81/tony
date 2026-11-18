@@ -73,7 +73,8 @@ struct AppStores {
             coordinator: coordinator,
             languageService: languageService,
             calendar: .current,
-            locale: .current
+            locale: .current,
+            now: now
         )
         #if DEBUG
         calendarDebug = Store(

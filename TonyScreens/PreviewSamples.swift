@@ -201,29 +201,6 @@ enum PreviewSamples {
         )
     }
 
-    static func you(name: String = "Matteo", canAllowCalendar: Bool = true, editor: RoutineEditorDataModel? = nil) -> YouScreenDataModel {
-        YouScreenDataModel(
-            initial: name.first.map { String($0) },
-            name: name.isEmpty ? "You" : name,
-            routine: RoutineCardDataModel(
-                title: "Your routine",
-                edit: ButtonDataModel(title: "Edit") {},
-                lines: ["Home on Mon, Wed, Fri · Office on Tue, Thu", "Workday 9:00 to 17:30", "Up around 7:00 · bed around 23:00"]
-            ),
-            calendar: CalendarCardDataModel(
-                title: "Calendar",
-                text: canAllowCalendar
-                    ? "Let Tony plan around your meetings. He reads when you are busy, never what the events are about."
-                    : "Tony plans around your meetings. He reads when you are busy, never what the events are about.",
-                allow: canAllowCalendar ? ButtonDataModel(title: "Allow calendar access") {} : nil
-            ),
-            editor: editor,
-            dismissEditor: {},
-            alert: nil,
-            load: {}
-        )
-    }
-
     static func routineEditor(workFooter: String? = nil, descriptionFooter: String? = nil) -> RoutineEditorDataModel {
         let kinds: [PickerDataModel.Option] = [.init(id: "home", title: "At home"), .init(id: "office", title: "At the office"), .init(id: "off", title: "Day off")]
         let week = [("Monday", "home"), ("Tuesday", "office"), ("Wednesday", "home"), ("Thursday", "office"), ("Friday", "home"), ("Saturday", "off"), ("Sunday", "off")]

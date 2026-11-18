@@ -1,20 +1,19 @@
 import Foundation
-import Observation
 import TonyCore
 
 /// Holds the You tab's state and is the only thing that changes it.
 @MainActor
-@Observable
 public final class YouStore {
-    public private(set) var state = YouState()
+    let state = YouState()
 
-    @ObservationIgnored private let repository: any Repository
-    @ObservationIgnored private let calendarSource: any CalendarSource
-    @ObservationIgnored private let coordinator: PlanCoordinator
+    private let repository: any Repository
+    private let calendarSource: any CalendarSource
+    private let coordinator: PlanCoordinator
     /// Reads the description of the week; nil when there is no model.
-    @ObservationIgnored private let languageService: (any LanguageService)?
-    @ObservationIgnored private let calendar: Calendar
-    @ObservationIgnored private let locale: Locale
+    private let languageService: (any LanguageService)?
+    private let calendar: Calendar
+    private let locale: Locale
+    private let now: @Sendable () -> Date
 
     public init(
         repository: any Repository,
@@ -22,7 +21,8 @@ public final class YouStore {
         coordinator: PlanCoordinator,
         languageService: (any LanguageService)? = nil,
         calendar: Calendar,
-        locale: Locale
+        locale: Locale,
+        now: @escaping @Sendable () -> Date
     ) {
         self.repository = repository
         self.calendarSource = calendarSource
@@ -30,9 +30,10 @@ public final class YouStore {
         self.languageService = languageService
         self.calendar = calendar
         self.locale = locale
+        self.now = now
     }
 
-    public func load() async {
+    func load() async {
         do {
             let name = try await repository.preferences().first { $0.key == Preference.userNameKey }?.value ?? ""
             let routine = try await repository.routine() ?? .standard
@@ -45,15 +46,15 @@ public final class YouStore {
         }
     }
 
-    public func startEditing() {
+    func startEditing() {
         state.editor = YouState.Editor(name: state.name, routine: state.routine)
     }
 
-    public func changeName(_ name: String) {
+    func changeName(_ name: String) {
         state.editor?.name = name
     }
 
-    public func changeDay(_ weekday: Locale.Weekday, to kind: YouState.DayKind) {
+    func changeDay(_ weekday: Locale.Weekday, to kind: YouState.DayKind) {
         state.editor?.routine.homeDays.remove(weekday)
         state.editor?.routine.officeDays.remove(weekday)
         switch kind {
@@ -63,7 +64,7 @@ public final class YouStore {
         }
     }
 
-    public func changeTime(_ field: YouState.TimeField, to time: DateComponents) {
+    func changeTime(_ field: YouState.TimeField, to time: DateComponents) {
         let time = DateComponents(hour: time.hour ?? 0, minute: time.minute ?? 0)
         switch field {
         case .workStart: state.editor?.routine.workStart = time
@@ -73,12 +74,12 @@ public final class YouStore {
         }
     }
 
-    public func changeDescription(_ description: String) {
+    func changeDescription(_ description: String) {
         state.editor?.description = description
     }
 
     /// Has the model read the description into the form. The form is not saved.
-    public func readDescription() async {
+    func readDescription() async {
         guard let editor = state.editor, editor.reading != .inProgress else { return }
         let description = editor.description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !description.isEmpty else { return }
@@ -96,18 +97,18 @@ public final class YouStore {
         }
     }
 
-    public func cancelEditing() {
+    func cancelEditing() {
         state.editor = nil
     }
 
-    public func save(now: Date) async {
+    func save() async {
         guard let editor = state.editor, editor.isValid else { return }
         state.name = editor.trimmedName
         state.routine = editor.routine
         state.editor = nil
         do {
             try await repository.save(editor.routine)
-            try await repository.save(Preference(key: Preference.userNameKey, value: editor.trimmedName, sourceSentence: "", date: now))
+            try await repository.save(Preference(key: Preference.userNameKey, value: editor.trimmedName, sourceSentence: "", date: now()))
         } catch {
             state.hasFailed = true
             return
@@ -116,13 +117,13 @@ public final class YouStore {
         await load()
     }
 
-    public func allowCalendar() async {
+    func allowCalendar() async {
         _ = await calendarSource.requestAccess()
         await coordinator.refresh()
         await load()
     }
 
-    public func dismissAlert() {
+    func dismissAlert() {
         state.hasFailed = false
     }
 }

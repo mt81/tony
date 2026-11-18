@@ -8,29 +8,29 @@ import TonyUIModels
 private struct You {
     let repository = FakeRepository(tasks: [])
     let store: YouStore
-    let now: Date
 
     init(calendarSource: any CalendarSource = FakeCalendarSource(), languageService: (any LanguageService)? = nil, language: String = "en") throws {
         let now = try Sample.november(10)
         let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Sample.calendar) { now }
-        self.now = now
         store = YouStore(
             repository: repository,
             calendarSource: calendarSource,
             coordinator: coordinator,
             languageService: languageService,
             calendar: Sample.calendar,
-            locale: Locale(identifier: language)
+            locale: Locale(identifier: language),
+            now: { now }
         )
     }
 
-    func open(language: String = "en_GB") async throws -> YouScreenDataModel {
-        try await model(language: language).load()
-        return try model(language: language)
+    func open(language: String = "en_GB") async throws -> YouViewModel {
+        let viewModel = try viewModel(language: language)
+        await viewModel.load()
+        return viewModel
     }
 
-    func model(language: String = "en_GB") throws -> YouScreenDataModel {
-        YouReducer.reduce(store.state, context: try Sample.context(language: language), store: store)
+    func viewModel(language: String = "en_GB") throws -> YouViewModel {
+        YouViewModel(store: store, context: try Sample.context(language: language))
     }
 }
 
@@ -60,20 +60,20 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     you.store.startEditing()
     you.store.changeTime(.workEnd, to: DateComponents(hour: 8, minute: 30))
 
-    await you.store.save(now: you.now)
+    await you.store.save()
 
     #expect(you.store.state.editor != nil)
     #expect(await you.repository.routine() == nil)
 }
 
-// MARK: Reducer
+// MARK: View model
 
 @MainActor
 @Test func aNewUserSeesTheStandardRoutineInBothLanguages() async throws {
     let you = try You()
 
     let english = try await you.open()
-    let french = try you.model(language: "fr_FR")
+    let french = try you.viewModel(language: "fr_FR")
 
     #expect(english.name == "You")
     #expect(english.initial == nil)
@@ -86,24 +86,24 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 @Test func savingTheFormStoresTheNameAndTheRoutine() async throws {
     let you = try You()
     try await you.open().routine.edit.action()
-    let editor = try #require(try you.model().editor)
+    let editor = try #require(try you.viewModel().editor)
 
     editor.name.onChange(" Matteo ")
     editor.days[1].picker.onSelect(YouState.DayKind.office.rawValue)
     editor.days[5].picker.onSelect(YouState.DayKind.home.rawValue)
     editor.workEnd.onChange(try time(17, 30))
     editor.bedtime.onChange(try time(22, 15))
-    #expect(try #require(try you.model().editor).save.isEnabled)
-    await you.store.save(now: you.now)
-    let model = try you.model()
+    #expect(try #require(try you.viewModel().editor).save.isEnabled)
+    await you.store.save()
+    let viewModel = try you.viewModel()
     let stored = try #require(await you.repository.routine())
 
     #expect(editor.days.map(\.picker.title) == ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
     #expect(editor.days.map(\.picker.selectedID) == ["home", "home", "home", "home", "home", "off", "off"])
-    #expect(model.editor == nil)
-    #expect(model.name == "Matteo")
-    #expect(model.initial == "M")
-    #expect(model.routine.lines == ["Home on Mon, Wed, Thu, Fri, Sat · Office on Tue", "Workday 9:00 to 17:30", "Up around 7:00 · bed around 22:15"])
+    #expect(viewModel.editor == nil)
+    #expect(viewModel.name == "Matteo")
+    #expect(viewModel.initial == "M")
+    #expect(viewModel.routine.lines == ["Home on Mon, Wed, Thu, Fri, Sat · Office on Tue", "Workday 9:00 to 17:30", "Up around 7:00 · bed around 22:15"])
     #expect(stored.officeDays == [.tuesday])
     #expect(stored.workEnd == DateComponents(hour: 17, minute: 30))
     #expect(await you.repository.preferences().map(\.value) == ["Matteo"])
@@ -114,8 +114,8 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     let you = try You()
     try await you.open().routine.edit.action()
 
-    try #require(try you.model().editor).workStart.onChange(try time(18))
-    let editor = try #require(try you.model().editor)
+    try #require(try you.viewModel().editor).workStart.onChange(try time(18))
+    let editor = try #require(try you.viewModel().editor)
 
     #expect(!editor.save.isEnabled)
     #expect(editor.workFooter == "Work has to end after it starts.")
@@ -127,21 +127,21 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     try await you.open().routine.edit.action()
     await you.repository.setFailsOnSave(true)
 
-    await you.store.save(now: you.now)
-    let alert = try #require(try you.model().alert)
+    await you.store.save()
+    let alert = try #require(try you.viewModel().alert)
     alert.dismiss.action()
 
     #expect(alert.title == "Your routine could not be saved")
-    #expect(try you.model().alert == nil)
+    #expect(try you.viewModel().alert == nil)
 }
 
 @MainActor
 @Test func theFormSaysWhileTonyIsReading() throws {
     let you = try You()
-    var state = YouState()
+    let state = YouState()
     state.editor = YouState.Editor(name: "", routine: .standard, description: "Office on Tuesdays", reading: .inProgress)
 
-    let editor = try #require(YouReducer.reduce(state, context: try Sample.context(language: "en"), store: you.store).editor)
+    let editor = try #require(YouViewModel.editor(state, context: try Sample.context(language: "en"), store: you.store))
 
     #expect(editor.descriptionFooter == "Tony is reading…")
 }
@@ -158,10 +158,10 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     let you = try You(languageService: service)
     try await you.open().routine.edit.action()
 
-    let empty = try #require(try you.model().editor)
+    let empty = try #require(try you.viewModel().editor)
     empty.description.onChange("Office on Tuesdays and Thursdays, until 5:30")
     await you.store.readDescription()
-    let filled = try #require(try you.model().editor)
+    let filled = try #require(try you.viewModel().editor)
 
     #expect(empty.descriptionFooter == nil)
     #expect(filled.descriptionFooter == "Tony filled in the form below. Check it before you save.")
@@ -191,8 +191,8 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
         await you.store.readDescription()
     }
 
-    #expect(try withoutModel.model(language: "fr").editor?.descriptionFooter == "Tony n’a pas pu lire ça. Remplis le formulaire ci-dessous.")
-    #expect(try wrongAnswer.model().editor?.descriptionFooter == "Tony could not read that. Fill in the form below.")
+    #expect(try withoutModel.viewModel(language: "fr").editor?.descriptionFooter == "Tony n’a pas pu lire ça. Remplis le formulaire ci-dessous.")
+    #expect(try wrongAnswer.viewModel().editor?.descriptionFooter == "Tony could not read that. Fill in the form below.")
     #expect(wrongAnswer.store.state.editor?.routine == .standard)
 }
 
@@ -202,12 +202,13 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 @Test func calendarAccessIsAskedOnlyFromItsButton() async throws {
     let you = try You(calendarSource: UnansweredCalendarSource())
 
-    let before = try await you.open()
+    let viewModel = try await you.open()
+    let before = viewModel.calendar
     await you.store.allowCalendar()
-    let after = try you.model()
+    let after = viewModel.calendar
 
-    #expect(before.calendar.allow?.title == "Allow calendar access")
-    #expect(before.calendar.text.hasPrefix("Let Tony plan around your meetings."))
-    #expect(after.calendar.allow == nil)
-    #expect(after.calendar.text.hasPrefix("Tony plans around your meetings."))
+    #expect(before.allow?.title == "Allow calendar access")
+    #expect(before.text.hasPrefix("Let Tony plan around your meetings."))
+    #expect(after.allow == nil)
+    #expect(after.text.hasPrefix("Tony plans around your meetings."))
 }

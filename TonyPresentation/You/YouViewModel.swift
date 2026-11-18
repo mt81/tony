@@ -2,35 +2,48 @@ import Foundation
 import TonyCore
 import TonyUIModels
 
-/// Turns the You tab's state into what the screen shows. Every user action goes to a method of the store.
-public enum YouReducer {
-    @MainActor
-    public static func reduce(_ state: YouState, context: PresentationContext, store: YouStore) -> YouScreenDataModel {
-        let locale = context.locale
+/// What the You tab shows, read from its store. Each value comes from a reducer that takes the whole state,
+/// and a view redraws only when the parts of the state its reducers read change.
+@MainActor
+public struct YouViewModel {
+    private let store: YouStore
+    private let context: PresentationContext
 
-        return YouScreenDataModel(
-            initial: state.name.first.map { String($0).uppercased(with: locale) },
-            name: state.name.isEmpty ? localized("You", locale) : state.name,
-            routine: RoutineCardDataModel(
-                title: localized("Your routine", locale),
-                edit: ButtonDataModel(title: localized("Edit", locale), accessibilityIdentifier: "editRoutine") { store.startEditing() },
-                lines: routineLines(state.routine, context: context)
-            ),
-            calendar: calendarCard(state.calendarAccess, locale: locale, store: store),
-            editor: state.editor.map { editorDataModel($0, context: context, store: store) },
-            dismissEditor: { store.cancelEditing() },
-            alert: state.hasFailed
-                ? AlertDataModel(
-                    title: localized("Your routine could not be saved", locale),
-                    dismiss: ButtonDataModel(title: localized("OK", locale), role: .cancel) { store.dismissAlert() }
-                )
-                : nil,
-            load: { await store.load() }
-        )
+    public init(store: YouStore, context: PresentationContext) {
+        self.store = store
+        self.context = context
     }
 
-    private static func routineLines(_ routine: Routine, context: PresentationContext) -> [String] {
+    /// The first letter of the name; nil when there is no name.
+    public var initial: String? { Self.initial(store.state, context: context) }
+    public var name: String { Self.name(store.state, context: context) }
+    public var routine: RoutineCardDataModel { Self.routine(store.state, context: context, store: store) }
+    public var calendar: CalendarCardDataModel { Self.calendar(store.state, context: context, store: store) }
+    public var isEditing: Bool { Self.isEditing(store.state) }
+    public var editor: RoutineEditorDataModel? { Self.editor(store.state, context: context, store: store) }
+    public var alert: AlertDataModel? { Self.alert(store.state, context: context, store: store) }
+
+    public func load() async {
+        await store.load()
+    }
+
+    public func dismissEditor() {
+        store.cancelEditing()
+    }
+
+    // MARK: Reducers
+
+    static func initial(_ state: YouState, context: PresentationContext) -> String? {
+        state.name.first.map { String($0).uppercased(with: context.locale) }
+    }
+
+    static func name(_ state: YouState, context: PresentationContext) -> String {
+        state.name.isEmpty ? localized("You", context.locale) : state.name
+    }
+
+    static func routine(_ state: YouState, context: PresentationContext, store: YouStore) -> RoutineCardDataModel {
         let locale = context.locale
+        let routine = state.routine
         let weekdays = context.calendar.orderedWeekdays(locale: locale)
         func names(_ days: Set<Locale.Weekday>) -> String {
             weekdays.filter { days.contains($0.weekday) }.map(\.shortName).formatted(.list(type: .and, width: .narrow).locale(locale))
@@ -46,21 +59,21 @@ public enum YouReducer {
         if !routine.officeDays.isEmpty {
             places.append(localized("Office on \(names(routine.officeDays))", locale))
         }
-        return [
-            places.isEmpty ? localized("No working days", locale) : places.joined(separator: " · "),
-            localized("Workday \(time(routine.workStart)) to \(time(routine.workEnd))", locale),
-            localized("Up around \(time(routine.wakeTime)) · bed around \(time(routine.bedtime))", locale),
-        ]
+        return RoutineCardDataModel(
+            title: localized("Your routine", locale),
+            edit: ButtonDataModel(title: localized("Edit", locale), accessibilityIdentifier: "editRoutine") { store.startEditing() },
+            lines: [
+                places.isEmpty ? localized("No working days", locale) : places.joined(separator: " · "),
+                localized("Workday \(time(routine.workStart)) to \(time(routine.workEnd))", locale),
+                localized("Up around \(time(routine.wakeTime)) · bed around \(time(routine.bedtime))", locale),
+            ]
+        )
     }
 
-    @MainActor
-    private static func calendarCard(
-        _ access: CalendarAccess?,
-        locale: Locale,
-        store: YouStore
-    ) -> CalendarCardDataModel {
+    static func calendar(_ state: YouState, context: PresentationContext, store: YouStore) -> CalendarCardDataModel {
+        let locale = context.locale
         let text =
-            switch access {
+            switch state.calendarAccess {
             case .granted: localized("Tony plans around your meetings. He reads when you are busy, never what the events are about.", locale)
             case .denied: localized("Calendar access is off. Turn it on in Settings so Tony can plan around your meetings.", locale)
             case .notDetermined, nil:
@@ -69,7 +82,7 @@ public enum YouReducer {
         return CalendarCardDataModel(
             title: localized("Calendar", locale),
             text: text,
-            allow: access == .notDetermined
+            allow: state.calendarAccess == .notDetermined
                 ? ButtonDataModel(title: localized("Allow calendar access", locale), accessibilityIdentifier: "allowCalendar") {
                     Task { await store.allowCalendar() }
                 }
@@ -77,12 +90,12 @@ public enum YouReducer {
         )
     }
 
-    @MainActor
-    private static func editorDataModel(
-        _ editor: YouState.Editor,
-        context: PresentationContext,
-        store: YouStore
-    ) -> RoutineEditorDataModel {
+    static func isEditing(_ state: YouState) -> Bool {
+        state.editor != nil
+    }
+
+    static func editor(_ state: YouState, context: PresentationContext, store: YouStore) -> RoutineEditorDataModel? {
+        guard let editor = state.editor else { return nil }
         let locale = context.locale
         let kinds: [PickerDataModel.Option] = [
             .init(id: YouState.DayKind.home.rawValue, title: localized("At home", locale)),
@@ -144,8 +157,16 @@ public enum YouReducer {
                 systemImage: "checkmark",
                 isEnabled: editor.isValid,
                 accessibilityIdentifier: "saveRoutine",
-                action: { Task { await store.save(now: context.now) } }
+                action: { Task { await store.save() } }
             )
+        )
+    }
+
+    static func alert(_ state: YouState, context: PresentationContext, store: YouStore) -> AlertDataModel? {
+        guard state.hasFailed else { return nil }
+        return AlertDataModel(
+            title: localized("Your routine could not be saved", context.locale),
+            dismiss: ButtonDataModel(title: localized("OK", context.locale), role: .cancel) { store.dismissAlert() }
         )
     }
 

@@ -3,36 +3,40 @@ import TonyPresentation
 import TonyUIKit
 import TonyUIModels
 
-/// The You tab, drawn from its data model.
+/// The You tab, drawn from its view model. Each part reads only its own values, so it redraws on its own.
 public struct YouScreen: View {
-    private let model: YouScreenDataModel
+    private let viewModel: YouViewModel
 
-    public init(_ model: YouScreenDataModel) {
-        self.model = model
+    public init(_ viewModel: YouViewModel) {
+        self.viewModel = viewModel
     }
 
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TonySpacing.section) {
-                header
-                routine
-                calendar
+                YouHeader(viewModel: viewModel)
+                RoutineCard(viewModel: viewModel)
+                CalendarCard(viewModel: viewModel)
             }
             .padding(.horizontal, TonySpacing.page)
             .padding(.top, TonySpacing.small)
             .padding(.bottom, TonySpacing.section)
         }
         .background { PageBackground() }
-        .task { await model.load() }
-        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor() } })) { editor in
-            RoutineEditorScreen(editor)
+        .task { await viewModel.load() }
+        .sheet(isPresented: Binding(get: { viewModel.isEditing }, set: { if !$0 { viewModel.dismissEditor() } })) {
+            RoutineEditorSheet(viewModel: viewModel)
         }
-        .alert(model.alert)
+        .alert(viewModel.alert)
     }
+}
 
-    private var header: some View {
+private struct YouHeader: View {
+    let viewModel: YouViewModel
+
+    var body: some View {
         HStack(spacing: TonySpacing.inset) {
-            if let initial = model.initial {
+            if let initial = viewModel.initial {
                 Text(initial)
                     .tonyText(.heading)
                     .foregroundStyle(TonyColor.ink)
@@ -40,7 +44,7 @@ public struct YouScreen: View {
                     .background(TonyColor.surfaceRaised, in: .circle)
                     .accessibilityHidden(true)
             }
-            Text(model.name)
+            Text(viewModel.name)
                 .tonyText(.display)
                 .foregroundStyle(TonyColor.ink)
                 .accessibilityAddTraits(.isHeader)
@@ -48,44 +52,58 @@ public struct YouScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    private var routine: some View {
-        card {
+private struct RoutineCard: View {
+    let viewModel: YouViewModel
+
+    var body: some View {
+        let routine = viewModel.routine
+        YouCard {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline, spacing: TonySpacing.small) {
-                    cardTitle(model.routine.title)
+                    YouCardTitle(routine.title)
                     Spacer()
-                    editButton
+                    editButton(routine.edit)
                 }
                 VStack(alignment: .leading, spacing: 0) {
-                    cardTitle(model.routine.title)
-                    editButton
+                    YouCardTitle(routine.title)
+                    editButton(routine.edit)
                 }
             }
-            ForEach(model.routine.lines, id: \.self) { line in
-                cardText(line)
+            ForEach(routine.lines, id: \.self) { line in
+                YouCardText(line)
             }
         }
     }
 
-    private var editButton: some View {
-        Button(action: model.routine.edit.action) {
-            Text(model.routine.edit.title)
+    private func editButton(_ edit: ButtonDataModel) -> some View {
+        Button {
+            edit.action()
+        } label: {
+            Text(edit.title)
                 .tonyText(.caption)
                 .foregroundStyle(TonyColor.muted)
                 .frame(minWidth: TonySize.touchTarget, minHeight: TonySize.touchTarget, alignment: .trailing)
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier(ifPresent: model.routine.edit.accessibilityIdentifier)
+        .accessibilityIdentifier(ifPresent: edit.accessibilityIdentifier)
     }
+}
 
-    private var calendar: some View {
-        card {
-            cardTitle(model.calendar.title)
-            cardText(model.calendar.text)
+private struct CalendarCard: View {
+    let viewModel: YouViewModel
+
+    var body: some View {
+        let calendar = viewModel.calendar
+        YouCard {
+            YouCardTitle(calendar.title)
+            YouCardText(calendar.text)
                 .accessibilityIdentifier("calendarAccess")
-            if let allow = model.calendar.allow {
-                Button(action: allow.action) {
+            if let allow = calendar.allow {
+                Button {
+                    allow.action()
+                } label: {
                     Chip(ChipDataModel(title: allow.title, style: .accent))
                         .frame(minHeight: TonySize.touchTarget)
                 }
@@ -94,22 +112,52 @@ public struct YouScreen: View {
             }
         }
     }
+}
 
-    private func card(@ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: TonySpacing.small, content: content)
+private struct RoutineEditorSheet: View {
+    let viewModel: YouViewModel
+
+    var body: some View {
+        if let editor = viewModel.editor {
+            RoutineEditorScreen(editor)
+        }
+    }
+}
+
+private struct YouCard<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TonySpacing.small) { content }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(TonySpacing.panelInset)
             .background(TonyColor.surface, in: .rect(cornerRadius: TonyRadius.tile))
     }
+}
 
-    private func cardTitle(_ title: String) -> some View {
+private struct YouCardTitle: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
         Text(title)
             .tonyText(.heading)
             .foregroundStyle(TonyColor.ink)
             .accessibilityAddTraits(.isHeader)
     }
+}
 
-    private func cardText(_ text: String) -> some View {
+private struct YouCardText: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
         Text(text)
             .tonyText(.body)
             .foregroundStyle(TonyColor.muted)
@@ -118,17 +166,22 @@ public struct YouScreen: View {
 
 #if DEBUG
 #Preview("You") {
-    YouScreen(PreviewSamples.you())
+    YouScreen(.preview())
         .tonyPreview(padding: 0)
 }
 
 #Preview("You, no name, calendar allowed") {
-    YouScreen(PreviewSamples.you(name: "", canAllowCalendar: false))
+    YouScreen(.preview(name: "", canAllowCalendar: false))
+        .tonyPreview(padding: 0)
+}
+
+#Preview("You, editing") {
+    YouScreen(.preview(isEditing: true))
         .tonyPreview(padding: 0)
 }
 
 #Preview("You, largest text") {
-    YouScreen(PreviewSamples.you())
+    YouScreen(.preview())
         .tonyPreview(padding: 0)
         .dynamicTypeSize(.accessibility5)
 }

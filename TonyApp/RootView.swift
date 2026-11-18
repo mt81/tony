@@ -29,7 +29,7 @@ struct RootView: View {
             }
             Tab {
                 if let stores {
-                    StoreView(now: stores.now, dataModel: { YouReducer.reduce(stores.you.state, context: $0, store: stores.you) }, content: YouScreen.init)
+                    StoreView(now: stores.now, dataModel: { YouViewModel(store: stores.you, context: $0) }, content: YouScreen.init)
                 } else {
                     unavailable
                 }
