@@ -14,7 +14,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 | `TonyStore` (framework) | SwiftData models and the `Repository` implementation, shared by the app and the extension | Unit tests (`TonyStoreTests`), in memory |
 | `TonyUIModels` (framework) | The data models of controls and components, in plain Swift | Through the previews of `TonyUIKit` |
 | `TonyUIKit` (framework) | The reusable UI, on its own: the SwiftUI controls and components that draw the `TonyUIModels` data models, the colour, type, spacing and radius tokens, fonts and artwork | Xcode previews, and the component gallery in the Debug tab (debug builds) |
-| `TonyPresentation` (framework) | The glue between business and UI, with each screen's state, its store and its reducer; each screen's data model; presentation strings | Unit tests (`TonyPresentationTests`) |
+| `TonyPresentation` (framework) | The glue between business and UI, with each screen's state, its store and its view model; the data models of its parts; presentation strings | Unit tests (`TonyPresentationTests`) |
 | `TonyScreens` (framework) | The SwiftUI screens that draw the `TonyPresentation` data models with the components of `TonyUIKit` | Xcode previews |
 | `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit) | Simulator (`TonyAppUITests`), then device |
 | `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
@@ -61,27 +61,29 @@ The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun 
 - The planner is deterministic: the current time, calendar and locale are passed in (`plan(..., now:)`), never read from `Date()`, `Calendar.current` or `Locale.current` inside `TonyCore`.
 - The on-device model only words and parses. It never decides the plan. Model output is validated against the plan, and every model feature has a template or rule-based fallback.
 - The business layer (`TonyCore`) and the views (`TonyUIKit`, `TonyUIModels`, `TonyScreens`) do not know each other. A view never sees a business object such as `TonyTask`: it only sees data models.
-- The `TonyPresentation` target is the only one that knows both. Its stores turn user actions into changes, and its reducers turn business state into data models. It imports `TonyUIModels`, never SwiftUI or the views.
-- The `TonyScreens` target imports `TonyPresentation` for the screens' data models and `TonyUIKit` for the components. It never imports `TonyCore`.
+- The `TonyPresentation` target is the only one that knows both. Its stores turn user actions into changes, and its view models turn business state into what the views show. It imports `TonyUIModels`, never SwiftUI or the views.
+- The `TonyScreens` target imports `TonyPresentation` for the screens' view models and data models, and `TonyUIKit` for the components. It never imports `TonyCore`.
 - `TonyApp` wires the stores to their adapters and shows the screens. `make check-imports` enforces all of these boundaries.
 
 ## Screens
 
-Every screen has one store, with its own state, and follows one unidirectional pattern (the You tab: `YouState`, `YouStore`, `YouReducer`):
+Every screen has one store, with its own state, and follows one unidirectional pattern (the You tab: `YouState`, `YouStore`, `YouViewModel`):
 
-1. The state is a plain struct of business values (`YouState`).
-2. The store is an `@Observable` class that holds the state and is the only thing that changes it. It exposes one method per change (`startEditing()`, `save(now:)`), and does the async work (repository, calendar, model) inside them. Its dependencies are passed to its `init`.
-3. The reducer turns the state into the screen's data model: `reduce(state, context:, store:)`. It is pure: formatting, strings and the closures that call the store's methods live here, and nothing else.
-4. The user acts on a view, which calls a closure of its data model, which calls a method of the store. The state changes, Observation redraws the screen, and the reducer runs again.
+1. The state is an internal `@Observable` class of business values (`YouState`). Only `TonyPresentation` sees it.
+2. The store holds the state and is the only thing that writes to it. It has one method per change (`startEditing()`, `save()`), and does the async work (repository, calendar, model) inside them. Its dependencies, clock included, are passed to its `init`.
+3. The view model is a struct over the store and the presentation context. Each public property calls a static reducer that takes the whole state and returns what the view shows (`name(state, context:)`): formatting, strings, the components' data models and the closures that call the store's methods. Reducers are pure.
+4. The view takes the view model, and each part of the screen is its own small view that reads only its own properties. Observation tracks the state properties each reducer reads, so a change redraws only the parts that read it.
+5. The user acts on a view, which calls a closure of a data model, which calls a method of the store.
 
 - A form with its own lifetime may get a child store, created by its screen's store when it opens.
 - Today, Tasks and the Debug screens still use the earlier `Store<Feature>` with actions and effects, until they are converted.
+- A screen's view model has a `preview(...)` factory under `#if DEBUG`, on the in-memory sources of `TonyPresentation/Store/PreviewSources.swift`.
 
-- Every view takes its own data model: the values it shows, already localised and formatted, and the closures it calls. A button's data model has its title and its action.
+- Every component takes its own data model: the values it shows, already localised and formatted, and the closures it calls. A button's data model has its title and its action.
 - Views decide nothing: no `if` on domain state, no formatting, no strings of their own. They lay out what the data model says.
-- A control's or a component's data model lives in `TonyUIModels` and its view in `TonyUIKit`. A screen's data model lives beside its feature in `TonyPresentation` and its view in `TonyScreens`.
+- A control's or a component's data model lives in `TonyUIModels` and its view in `TonyUIKit`. A screen's view model lives beside its store in `TonyPresentation` and its view in `TonyScreens`.
 - Every view has an Xcode preview with sample data, and so do the tokens (colours, type styles, spacings, radii, artwork). Previews and their sample data are inside `#if DEBUG`; their text is sample data, not translated. A new view comes with its preview.
-- Stores and reducers are tested in `TonyPresentation` with fakes: call the store's methods and check its state, or reduce a state built by hand; UI tests only check that the screens are wired.
+- Stores and view models are tested in `TonyPresentation` with fakes: call the store's methods and read the view model, or call a reducer on a state built by hand; UI tests only check that the screens are wired.
 - Domain types are `Codable` and `Sendable`. Swift 6 strict concurrency stays on.
 
 ## Git flow
