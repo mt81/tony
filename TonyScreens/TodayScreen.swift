@@ -27,8 +27,8 @@ public struct TodayScreen: View {
             .padding(.bottom, TonySpacing.section)
         }
         .background { PageBackground() }
-        .onAppear(perform: model.onAppear)
-        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor() } })) { editor in
+        .onAppear { model.onAppear.execute() }
+        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor.execute() } })) { editor in
             TaskEditorScreen(editor)
         }
         .alert(model.alert)
@@ -141,7 +141,7 @@ public struct TodayScreen: View {
 }
 
 #Preview("Today, answer not saved") {
-    TodayScreen(PreviewSamples.today(alert: AlertDataModel(title: "Your answer could not be saved", dismiss: ButtonDataModel(title: "OK", action: Action("preview") { _ in }))))
+    TodayScreen(PreviewSamples.today(alert: AlertDataModel(title: "Your answer could not be saved", dismiss: ButtonDataModel(title: "OK", action: Action(id: "preview") { _ in }))))
         .tonyPreview(padding: 0)
 }
 #endif

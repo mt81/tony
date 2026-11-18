@@ -71,8 +71,8 @@ public struct TaskEditorScreen: View {
                     }
                 }
             }
-            .onMove(perform: steps.move)
-            .onDelete(perform: steps.delete)
+            .onMove { steps.move.execute(Move(source: $0, destination: $1)) }
+            .onDelete { steps.delete.execute($0) }
             .deleteDisabled(!steps.canDelete)
             ButtonView(steps.add)
         } header: {

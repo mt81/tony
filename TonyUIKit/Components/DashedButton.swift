@@ -30,7 +30,7 @@ public struct DashedButton: View {
 
 #if DEBUG
 #Preview("Dashed button") {
-    DashedButton(ButtonDataModel(title: "+ Add a task", action: Action("preview") { _ in }))
+    DashedButton(ButtonDataModel(title: "+ Add a task", action: Action(id: "preview") { _ in }))
         .tonyPreview()
 }
 #endif

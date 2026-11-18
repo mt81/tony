@@ -229,7 +229,7 @@ private func morningMeetings() throws -> [DateInterval] {
 
     empty.addTask.action.execute()
     let editor = try #require(day.model().editor)
-    editor.name.onChange("Laundry")
+    editor.name.onChange.execute("Laundry")
     await day.store.waitForEffects()
     try #require(day.model().editor).save.action.execute()
     await day.store.waitForEffects()

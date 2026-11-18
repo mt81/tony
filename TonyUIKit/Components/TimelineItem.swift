@@ -133,7 +133,7 @@ public struct TimelineItem: View {
 
 #if DEBUG
 #Preview("Timeline items") {
-    let check = ButtonDataModel(title: "Mark as done", action: Action("preview") { _ in })
+    let check = ButtonDataModel(title: "Mark as done", action: Action(id: "preview") { _ in })
     let items: [TimelineItemDataModel] = [
         .now(text: "Now · a good moment to start the laundry"),
         .task(
@@ -142,7 +142,7 @@ public struct TimelineItem: View {
                 time: "8:30",
                 title: "Start a load of laundry",
                 reason: "Before your 10:00 meetings. It runs on its own.",
-                actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action("preview") { _ in }) },
+                actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
                 check: check
             ),
             isLast: false

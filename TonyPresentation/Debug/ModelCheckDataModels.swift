@@ -28,5 +28,5 @@ public struct ModelCheckScreenDataModel {
     public var extensionChecks: [String]
     public var requestBackgroundCheck: ButtonDataModel
     public var backgroundCheckRequest: String?
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
 }

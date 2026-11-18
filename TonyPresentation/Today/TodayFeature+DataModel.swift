@@ -26,7 +26,7 @@ extension TodayFeature {
             addTask: ButtonDataModel(
                 title: localized("+ Add a task", locale),
                 accessibilityIdentifier: "todayAddTask",
-                action: TonyUIModels.Action(context.now) { now in send(.addTapped(id: UUID(), stepID: UUID(), now: now)) }
+                action: TonyUIModels.Action(id: "addTapped", parameters: context.now) { now, _ in send(.addTapped(id: UUID(), stepID: UUID(), now: now)) }
             ),
             tilesTitle: localized("How things are", locale),
             tiles: tiles(state: state, wording: wording),
@@ -35,21 +35,21 @@ extension TodayFeature {
                     for: editor,
                     context: context,
                     edit: { send(.editor($0)) },
-                    cancel: TonyUIModels.Action(Action.editorCancelled, executionClosure: send),
-                    save: TonyUIModels.Action(Action.editorSaved, executionClosure: send),
-                    delete: TonyUIModels.Action("nothing") { _ in }
+                    cancel: TonyUIModels.Action(id: "editorCancelled", parameters: Action.editorCancelled) { action, _ in send(action) },
+                    save: TonyUIModels.Action(id: "editorSaved", parameters: Action.editorSaved) { action, _ in send(action) },
+                    delete: TonyUIModels.Action(id: "nothing") { _ in }
                 )
             },
-            dismissEditor: { send(.editorCancelled) },
+            dismissEditor: TonyUIModels.Action(id: "editorCancelled") { _ in send(.editorCancelled) },
             alert: state.failure.map { failure in
                 let title =
                     switch failure {
                     case .answer: localized("Your answer could not be saved", locale)
                     case .task: localized("Your tasks could not be saved", locale)
                     }
-                return AlertDataModel(title: title, dismiss: ButtonDataModel(title: localized("OK", locale), action: TonyUIModels.Action(Action.alertDismissed, executionClosure: send)))
+                return AlertDataModel(title: title, dismiss: ButtonDataModel(title: localized("OK", locale), action: TonyUIModels.Action(id: "alertDismissed", parameters: Action.alertDismissed) { action, _ in send(action) }))
             },
-            onAppear: { send(.appeared) }
+            onAppear: TonyUIModels.Action(id: "appeared") { _ in send(.appeared) }
         )
     }
 
@@ -73,7 +73,7 @@ extension TodayFeature {
                     ButtonDataModel(
                         title: localized("Later", locale),
                         accessibilityIdentifier: "today-later",
-                        action: TonyUIModels.Action(Action.laterTapped(item), executionClosure: send)
+                        action: TonyUIModels.Action(id: "laterTapped", parameters: Action.laterTapped(item)) { action, _ in send(action) }
                     )
                 )
                 if task.mustHappenBy == nil {
@@ -81,7 +81,7 @@ extension TodayFeature {
                         ButtonDataModel(
                             title: localized("Not today", locale),
                             accessibilityIdentifier: "today-notToday",
-                            action: TonyUIModels.Action(Action.notTodayTapped(item), executionClosure: send)
+                            action: TonyUIModels.Action(id: "notTodayTapped", parameters: Action.notTodayTapped(item)) { action, _ in send(action) }
                         )
                     )
                 }
@@ -95,7 +95,7 @@ extension TodayFeature {
                 check: ButtonDataModel(
                     title: localized("Mark \(title) as done", locale),
                     accessibilityIdentifier: "today-check-\(title)",
-                    action: TonyUIModels.Action(Action.checkTapped(item), executionClosure: send)
+                    action: TonyUIModels.Action(id: "checkTapped", parameters: Action.checkTapped(item)) { action, _ in send(action) }
                 ),
                 isNeglected: wording.isNeglected(task),
                 accessibilityIdentifier: "today-item-\(title)"

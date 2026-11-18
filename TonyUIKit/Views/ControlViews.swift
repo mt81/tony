@@ -32,8 +32,8 @@ public struct TextFieldView: View {
     }
 
     public var body: some View {
-        TextField(model.title, text: Binding(get: { model.text }, set: model.onChange), prompt: Text(model.prompt ?? model.title))
-            .onSubmit { model.onSubmit?() }
+        TextField(model.title, text: Binding(get: { model.text }, set: { model.onChange.execute($0) }), prompt: Text(model.prompt ?? model.title))
+            .onSubmit { model.onSubmit?.execute() }
             .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
     }
 }
@@ -46,7 +46,7 @@ public struct ToggleView: View {
     }
 
     public var body: some View {
-        Toggle(model.title, isOn: Binding(get: { model.isOn }, set: model.onChange))
+        Toggle(model.title, isOn: Binding(get: { model.isOn }, set: { model.onChange.execute($0) }))
     }
 }
 
@@ -58,7 +58,7 @@ public struct StepperView: View {
     }
 
     public var body: some View {
-        Stepper(model.title, value: Binding(get: { model.value }, set: model.onChange), in: model.range, step: model.step)
+        Stepper(model.title, value: Binding(get: { model.value }, set: { model.onChange.execute($0) }), in: model.range, step: model.step)
     }
 }
 
@@ -70,7 +70,7 @@ public struct PickerView: View {
     }
 
     public var body: some View {
-        Picker(model.title, selection: Binding(get: { model.selectedID }, set: model.onSelect)) {
+        Picker(model.title, selection: Binding(get: { model.selectedID }, set: { model.onSelect.execute($0) })) {
             ForEach(model.options) { option in
                 Text(option.title).tag(option.id)
             }
@@ -86,7 +86,7 @@ public struct DatePickerView: View {
     }
 
     public var body: some View {
-        DatePicker(model.title, selection: Binding(get: { model.date }, set: model.onChange), displayedComponents: .date)
+        DatePicker(model.title, selection: Binding(get: { model.date }, set: { model.onChange.execute($0) }), displayedComponents: .date)
     }
 }
 
@@ -98,7 +98,7 @@ public struct TimePickerView: View {
     }
 
     public var body: some View {
-        DatePicker(model.title, selection: Binding(get: { model.time }, set: model.onChange), displayedComponents: .hourAndMinute)
+        DatePicker(model.title, selection: Binding(get: { model.time }, set: { model.onChange.execute($0) }), displayedComponents: .hourAndMinute)
     }
 }
 
@@ -146,25 +146,25 @@ extension View {
 #Preview("Controls") {
     Form {
         Section {
-            TextFieldView(TextFieldDataModel(title: "Name", text: "", onChange: { _ in }))
-            TextFieldView(TextFieldDataModel(title: "Name", text: "Water the plants", onChange: { _ in }))
+            TextFieldView(TextFieldDataModel(title: "Name", text: "", onChange: Action(id: "preview") { _ in }))
+            TextFieldView(TextFieldDataModel(title: "Name", text: "Water the plants", onChange: Action(id: "preview") { _ in }))
             PickerView(
                 PickerDataModel(
                     title: "Kind",
                     options: [.init(id: "recurring", title: "Recurring task"), .init(id: "goal", title: "Goal")],
                     selectedID: "recurring",
-                    onSelect: { _ in }
+                    onSelect: Action(id: "preview") { _ in }
                 )
             )
-            ToggleView(ToggleDataModel(id: "evening", title: "Evening", isOn: true, onChange: { _ in }))
-            StepperView(StepperDataModel(title: "Every 5 days", value: 5, range: 1...365, onChange: { _ in }))
-            DatePickerView(DatePickerDataModel(title: "Date", date: .now, onChange: { _ in }))
-            TimePickerView(TimePickerDataModel(title: "Starts", time: .now, onChange: { _ in }))
+            ToggleView(ToggleDataModel(id: "evening", title: "Evening", isOn: true, onChange: Action(id: "preview") { _ in }))
+            StepperView(StepperDataModel(title: "Every 5 days", value: 5, range: 1...365, onChange: Action(id: "preview") { _ in }))
+            DatePickerView(DatePickerDataModel(title: "Date", date: .now, onChange: Action(id: "preview") { _ in }))
+            TimePickerView(TimePickerDataModel(title: "Starts", time: .now, onChange: Action(id: "preview") { _ in }))
         }
         Section {
-            ButtonView(ButtonDataModel(title: "Add a step", action: Action("preview") { _ in }))
-            ButtonView(ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: false, action: Action("preview") { _ in }))
-            ButtonView(ButtonDataModel(title: "Delete task", role: .destructive, action: Action("preview") { _ in }))
+            ButtonView(ButtonDataModel(title: "Add a step", action: Action(id: "preview") { _ in }))
+            ButtonView(ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: false, action: Action(id: "preview") { _ in }))
+            ButtonView(ButtonDataModel(title: "Delete task", role: .destructive, action: Action(id: "preview") { _ in }))
         }
     }
     .scrollContentBackground(.hidden)
@@ -173,7 +173,7 @@ extension View {
 
 #Preview("Alert") {
     TonyColor.canvas
-        .alert(AlertDataModel(title: "Your tasks could not be saved", dismiss: ButtonDataModel(title: "OK", role: .cancel, action: Action("preview") { _ in })))
+        .alert(AlertDataModel(title: "Your tasks could not be saved", dismiss: ButtonDataModel(title: "OK", role: .cancel, action: Action(id: "preview") { _ in })))
         .tonyPreview(padding: 0)
 }
 #endif

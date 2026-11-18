@@ -64,8 +64,9 @@ public final class YouStore {
         }
     }
 
-    func changeTime(_ field: YouState.TimeField, to time: DateComponents) {
-        let time = DateComponents(hour: time.hour ?? 0, minute: time.minute ?? 0)
+    func changeTime(_ field: YouState.TimeField, to date: Date) {
+        let picked = calendar.dateComponents([.hour, .minute], from: date)
+        let time = DateComponents(hour: picked.hour ?? 0, minute: picked.minute ?? 0)
         switch field {
         case .workStart: state.editor?.routine.workStart = time
         case .workEnd: state.editor?.routine.workEnd = time

@@ -58,7 +58,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 @Test func workThatEndsBeforeItStartsIsNotSaved() async throws {
     let you = try You()
     you.store.startEditing()
-    you.store.changeTime(.workEnd, to: DateComponents(hour: 8, minute: 30))
+    you.store.changeTime(.workEnd, to: try time(8, 30))
 
     await you.store.save()
 
@@ -88,11 +88,11 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     try await you.open().routine.edit.action.execute()
     let editor = try #require(try you.viewModel().editor)
 
-    editor.name.onChange(" Matteo ")
-    editor.days[1].picker.onSelect(YouState.DayKind.office.rawValue)
-    editor.days[5].picker.onSelect(YouState.DayKind.home.rawValue)
-    editor.workEnd.onChange(try time(17, 30))
-    editor.bedtime.onChange(try time(22, 15))
+    editor.name.onChange.execute(" Matteo ")
+    editor.days[1].picker.onSelect.execute(YouState.DayKind.office.rawValue)
+    editor.days[5].picker.onSelect.execute(YouState.DayKind.home.rawValue)
+    editor.workEnd.onChange.execute(try time(17, 30))
+    editor.bedtime.onChange.execute(try time(22, 15))
     #expect(try #require(try you.viewModel().editor).save.isEnabled)
     await you.store.save()
     let viewModel = try you.viewModel()
@@ -114,7 +114,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     let you = try You()
     try await you.open().routine.edit.action.execute()
 
-    try #require(try you.viewModel().editor).workStart.onChange(try time(18))
+    try #require(try you.viewModel().editor).workStart.onChange.execute(try time(18))
     let editor = try #require(try you.viewModel().editor)
 
     #expect(!editor.save.isEnabled)
@@ -159,7 +159,7 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
     try await you.open().routine.edit.action.execute()
 
     let empty = try #require(try you.viewModel().editor)
-    empty.description.onChange("Office on Tuesdays and Thursdays, until 5:30")
+    empty.description.onChange.execute("Office on Tuesdays and Thursdays, until 5:30")
     await you.store.readDescription()
     let filled = try #require(try you.viewModel().editor)
 

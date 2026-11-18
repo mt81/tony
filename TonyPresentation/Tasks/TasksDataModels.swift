@@ -11,9 +11,9 @@ public struct TasksScreenDataModel {
     public var sections: [TaskSectionDataModel]
     public var addTask: ButtonDataModel
     public var editor: TaskEditorDataModel?
-    public var dismissEditor: @MainActor () -> Void
+    public var dismissEditor: any Executable<Void>
     public var alert: AlertDataModel?
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
 }
 
 @MemberwiseInit(.public)
@@ -22,7 +22,7 @@ public struct TaskSectionDataModel: Identifiable {
     public var title: String
     public var hint: String?
     public var rows: [TaskRowDataModel]
-    public var move: @MainActor (IndexSet, Int) -> Void
+    public var move: any Executable<Move>
 }
 
 @MemberwiseInit(.public)
@@ -68,8 +68,8 @@ public struct StepsSectionDataModel {
     public var add: ButtonDataModel
     /// The last step cannot be deleted.
     public var canDelete: Bool
-    public var move: @MainActor (IndexSet, Int) -> Void
-    public var delete: @MainActor (IndexSet) -> Void
+    public var move: any Executable<Move>
+    public var delete: any Executable<IndexSet>
 }
 
 @MemberwiseInit(.public)

@@ -27,8 +27,8 @@ public struct YouViewModel {
         await store.load()
     }
 
-    public func dismissEditor() {
-        store.cancelEditing()
+    public var dismissEditor: any Executable<Void> {
+        Action(id: "cancel_editing") { [store] _ in store.cancelEditing() }
     }
 
     // MARK: Reducers
@@ -64,7 +64,7 @@ public struct YouViewModel {
             edit: ButtonDataModel(
                 title: localized("Edit", locale),
                 accessibilityIdentifier: "editRoutine",
-                action: Action("edit_routine") { _ in store.startEditing() }
+                action: Action(id: "edit_routine") { _ in store.startEditing() }
             ),
             lines: [
                 places.isEmpty ? localized("No working days", locale) : places.joined(separator: " · "),
@@ -90,7 +90,7 @@ public struct YouViewModel {
                 ? ButtonDataModel(
                     title: localized("Allow calendar access", locale),
                     accessibilityIdentifier: "allowCalendar",
-                    action: Action("allow_calendar") { _ in Task { await store.allowCalendar() } }
+                    action: Action(id: "allow_calendar") { _ in Task { await store.allowCalendar() } }
                 )
                 : nil
         )
@@ -109,9 +109,11 @@ public struct YouViewModel {
             .init(id: YouState.DayKind.off.rawValue, title: localized("Day off", locale)),
         ]
         func timePicker(_ title: String, _ field: YouState.TimeField, _ components: DateComponents) -> TimePickerDataModel {
-            TimePickerDataModel(title: title, time: date(components, context: context)) { newTime in
-                store.changeTime(field, to: context.calendar.dateComponents([.hour, .minute], from: newTime))
-            }
+            TimePickerDataModel(
+                title: title,
+                time: date(components, context: context),
+                onChange: Action(id: "change_time", parameters: field) { field, time in store.changeTime(field, to: time) }
+            )
         }
 
         return RoutineEditorDataModel(
@@ -120,15 +122,15 @@ public struct YouViewModel {
                 title: localized("Your name", locale),
                 text: editor.name,
                 accessibilityIdentifier: "userName",
-                onChange: { store.changeName($0) }
+                onChange: Action(id: "change_name") { store.changeName($0) }
             ),
             description: TextFieldDataModel(
                 title: localized("Describe your week", locale),
                 text: editor.description,
                 prompt: localized("Tell Tony… “office on Tuesdays and Thursdays, 9 to 5:30”", locale),
                 accessibilityIdentifier: "routineDescription",
-                onChange: { store.changeDescription($0) },
-                onSubmit: { Task { await store.readDescription() } }
+                onChange: Action(id: "change_description") { store.changeDescription($0) },
+                onSubmit: Action(id: "read_description") { _ in Task { await store.readDescription() } }
             ),
             descriptionFooter: {
                 switch editor.reading {
@@ -146,7 +148,9 @@ public struct YouViewModel {
                         title: day.name.capitalized(with: locale),
                         options: kinds,
                         selectedID: editor.kind(of: day.weekday).rawValue,
-                        onSelect: { id in YouState.DayKind(rawValue: id).map { store.changeDay(day.weekday, to: $0) } }
+                        onSelect: Action(id: "change_day", parameters: day.weekday) { weekday, id in
+                            YouState.DayKind(rawValue: id).map { store.changeDay(weekday, to: $0) }
+                        }
                     )
                 )
             },
@@ -161,14 +165,14 @@ public struct YouViewModel {
                 title: localized("Cancel", locale),
                 systemImage: "xmark",
                 role: .cancel,
-                action: Action("cancel_editing") { _ in store.cancelEditing() }
+                action: Action(id: "cancel_editing") { _ in store.cancelEditing() }
             ),
             save: ButtonDataModel(
                 title: localized("Save", locale),
                 systemImage: "checkmark",
                 isEnabled: editor.isValid,
                 accessibilityIdentifier: "saveRoutine",
-                action: Action("save_routine") { _ in Task { await store.save() } }
+                action: Action(id: "save_routine") { _ in Task { await store.save() } }
             )
         )
     }
@@ -180,7 +184,7 @@ public struct YouViewModel {
             dismiss: ButtonDataModel(
                 title: localized("OK", context.locale),
                 role: .cancel,
-                action: Action("dismiss_alert") { _ in store.dismissAlert() }
+                action: Action(id: "dismiss_alert") { _ in store.dismissAlert() }
             )
         )
     }

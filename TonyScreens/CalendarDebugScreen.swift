@@ -43,7 +43,7 @@ public struct CalendarDebugScreen: View {
         .scrollContentBackground(.hidden)
         .background(TonyColor.canvas)
         .navigationTitle(model.title)
-        .onAppear(perform: model.onAppear)
+        .onAppear { model.onAppear.execute() }
     }
 }
 

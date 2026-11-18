@@ -20,5 +20,5 @@ public struct CalendarDebugScreenDataModel {
     public var refresh: ButtonDataModel
     public var plannedAt: String?
     public var rows: [Row]
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
 }

@@ -28,9 +28,9 @@ public struct TodayScreenDataModel {
     public var tiles: [IdentifiedTile]
     /// The task form, while a task is being added.
     public var editor: TaskEditorDataModel?
-    public var dismissEditor: @MainActor () -> Void
+    public var dismissEditor: any Executable<Void>
     public var alert: AlertDataModel?
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
 }
 
 /// What Tony says about the day.

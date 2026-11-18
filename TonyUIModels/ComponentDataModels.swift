@@ -27,7 +27,7 @@ public struct TaskRowDataModel: Identifiable {
     /// Draws the icon in the neglected mood.
     public var isNeglected: Bool
     public var accessibilityIdentifier: String
-    public var open: @MainActor () -> Void
+    public var open: any Executable<Void>
     public var delete: ButtonDataModel
 }
 

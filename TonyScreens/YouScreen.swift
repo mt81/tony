@@ -24,7 +24,7 @@ public struct YouScreen: View {
         }
         .background { PageBackground() }
         .task { await viewModel.load() }
-        .sheet(isPresented: Binding(get: { viewModel.isEditing }, set: { if !$0 { viewModel.dismissEditor() } })) {
+        .sheet(isPresented: Binding(get: { viewModel.isEditing }, set: { if !$0 { viewModel.dismissEditor.execute() } })) {
             RoutineEditorSheet(viewModel: viewModel)
         }
         .alert(viewModel.alert)
