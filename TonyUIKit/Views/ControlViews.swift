@@ -26,13 +26,16 @@ public struct ButtonView: View {
 
 public struct TextFieldView: View {
     private let model: TextFieldDataModel
+    private let axis: Axis
 
-    public init(_ model: TextFieldDataModel) {
+    /// A vertical axis lets long text wrap onto more lines.
+    public init(_ model: TextFieldDataModel, axis: Axis = .horizontal) {
         self.model = model
+        self.axis = axis
     }
 
     public var body: some View {
-        TextField(model.title, text: Binding(get: { model.text }, set: { model.onChange.execute($0) }), prompt: Text(model.prompt ?? model.title))
+        TextField(model.title, text: Binding(get: { model.text }, set: { model.onChange.execute($0) }), prompt: Text(model.prompt ?? model.title), axis: axis)
             .onSubmit { model.onSubmit?.execute() }
             .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
     }

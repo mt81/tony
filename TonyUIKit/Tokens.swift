@@ -19,6 +19,10 @@ public enum TonyColor {
     public static let warning = Color("Warning", bundle: .design)
     public static let warningSoft = Color("WarningSoft", bundle: .design)
     public static let onAccent = Color("OnAccent", bundle: .design)
+    /// The see-through fill of cards over a background.
+    public static let glass = Color("Glass", bundle: .design)
+    /// The edge of a glass card, and the lines between its rows.
+    public static let glassEdge = Color("GlassEdge", bundle: .design)
 }
 
 /// The spacings used in the Figma file, in points.
@@ -54,6 +58,8 @@ public enum TonySize {
     public static let iconCircle: CGFloat = 40
     public static let checkbox: CGFloat = 26
     public static let border: CGFloat = 1.5
+    /// The edge of a glass card.
+    public static let glassEdge: CGFloat = 1
     public static let rail: CGFloat = 2
     public static let nowDot: CGFloat = 14
     public static let meetingsDot: CGFloat = 10
@@ -73,13 +79,17 @@ public enum TonyIcon {
 
 /// Tony's artwork. It is decorative, so VoiceOver skips it.
 public struct TonyImage: View {
-    public init() {}
+    private let color: Color
+
+    public init(color: Color = TonyColor.ink) {
+        self.color = color
+    }
 
     public var body: some View {
         Image("Tony", bundle: .design)
             .resizable()
             .scaledToFit()
-            .foregroundStyle(TonyColor.ink)
+            .foregroundStyle(color)
             .accessibilityHidden(true)
     }
 }

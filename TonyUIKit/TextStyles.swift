@@ -6,6 +6,10 @@ public enum TonyTextStyle: Sendable, CaseIterable {
     case display
     case heading
     case numeral
+    /// What the user types in the task composer.
+    case titleLarge
+    /// A task's name at the top of its form.
+    case title
     case bodyLarge
     case body
     case bodySmall
@@ -20,6 +24,8 @@ public enum TonyTextStyle: Sendable, CaseIterable {
         case .display: 21
         case .heading: 22
         case .numeral: 26
+        case .titleLarge: 22
+        case .title: 20
         case .bodyLarge: 17
         case .body, .label, .labelStrong: 14
         case .bodySmall: 13
@@ -30,7 +36,7 @@ public enum TonyTextStyle: Sendable, CaseIterable {
 
     var weight: Font.Weight {
         switch self {
-        case .display, .heading, .bodyLarge, .body, .bodySmall, .caption: .regular
+        case .display, .heading, .titleLarge, .title, .bodyLarge, .body, .bodySmall, .caption: .regular
         case .labelLarge, .label, .labelSmall: .medium
         case .numeral, .labelStrong: .semibold
         }
@@ -46,7 +52,8 @@ public enum TonyTextStyle: Sendable, CaseIterable {
     /// The system text style whose Dynamic Type scaling this style follows.
     var scalesWith: Font.TextStyle {
         switch self {
-        case .display, .heading, .numeral: .title2
+        case .display, .heading, .numeral, .titleLarge: .title2
+        case .title: .title3
         case .bodyLarge: .body
         case .labelLarge: .callout
         case .body, .label, .labelStrong: .subheadline
