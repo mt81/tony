@@ -2,23 +2,9 @@ import Foundation
 import MemberwiseInit
 import TonyUIModels
 
-/// The You tab: who the user is, their routine and what Tony may read. The rest of the tab comes with C25.
-@MemberwiseInit(.public)
-public struct YouScreenDataModel {
-    /// The first letter of the name; nil when there is no name.
-    public var initial: String?
-    public var name: String
-    public var routine: RoutineCardDataModel
-    public var calendar: CalendarCardDataModel
-    public var editor: RoutineEditorDataModel?
-    public var dismissEditor: @MainActor () -> Void
-    public var alert: AlertDataModel?
-    public var onAppear: @MainActor () -> Void
-}
-
 /// The usual week in a few lines, with the button that opens its form.
 @MemberwiseInit(.public)
-public struct RoutineCardDataModel {
+public struct RoutineCardDataModel: Equatable {
     public var title: String
     public var edit: ButtonDataModel
     public var lines: [String]
@@ -26,7 +12,7 @@ public struct RoutineCardDataModel {
 
 /// Where calendar access stands, and the button that asks for it while it has not been asked.
 @MemberwiseInit(.public)
-public struct CalendarCardDataModel {
+public struct CalendarCardDataModel: Equatable {
     public var title: String
     public var text: String
     public var allow: ButtonDataModel?
@@ -34,9 +20,9 @@ public struct CalendarCardDataModel {
 
 /// The form for the name and the usual week.
 @MemberwiseInit(.public)
-public struct RoutineEditorDataModel: Identifiable {
+public struct RoutineEditorDataModel: Identifiable, Equatable {
     @MemberwiseInit(.public)
-    public struct Day: Identifiable {
+    public struct Day: Identifiable, Equatable {
         public var id: String
         public var picker: PickerDataModel
     }

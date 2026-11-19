@@ -113,7 +113,7 @@ private func morningMeetings() throws -> [DateInterval] {
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")])
     let before = await day.open()
 
-    before.taskItems[0].check.action()
+    before.taskItems[0].check.action.execute()
     await day.store.waitForEffects()
     let after = day.model()
 
@@ -133,13 +133,13 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(before.taskItems[0].actions.map(\.title) == ["Later", "Not today"])
     #expect(before.taskItems[1].actions.isEmpty)
 
-    before.taskItems[0].actions[0].action()
+    before.taskItems[0].actions[0].action.execute()
     await day.store.waitForEffects()
     let later = day.model()
     #expect(later.taskItems.map(\.title) == ["Vacuum", "Plants"])
     #expect(later.taskItems.map(\.time) == ["8:00", "17:00"])
 
-    later.taskItems[0].actions[1].action()
+    later.taskItems[0].actions[1].action.execute()
     await day.store.waitForEffects()
     #expect(day.model().taskItems.map(\.title) == ["Plants"])
 }
@@ -160,10 +160,10 @@ private func morningMeetings() throws -> [DateInterval] {
     let model = await day.open()
     await day.repository.setFailsOnSave(true)
 
-    model.taskItems[0].check.action()
+    model.taskItems[0].check.action.execute()
     await day.store.waitForEffects()
     let alert = try #require(day.model().alert)
-    alert.dismiss.action()
+    alert.dismiss.action.execute()
 
     #expect(alert.title == "Your answer could not be saved")
     #expect(day.model().alert == nil)
@@ -208,7 +208,7 @@ private func morningMeetings() throws -> [DateInterval] {
 
     let first = await day.open(language: "fr_FR")
     _ = await day.open(language: "fr_FR")
-    first.taskItems[0].check.action()
+    first.taskItems[0].check.action.execute()
     await day.store.waitForEffects()
 
     // Opening twice asks once. The new plan is asked twice: the answer still names Plants, now done, so it is retried, then dropped.
@@ -227,11 +227,11 @@ private func morningMeetings() throws -> [DateInterval] {
     let day = try Day(hour: 8, tasks: [])
     let empty = await day.open()
 
-    empty.addTask.action()
+    empty.addTask.action.execute()
     let editor = try #require(day.model().editor)
-    editor.name.onChange("Laundry")
+    editor.name.onChange.execute("Laundry")
     await day.store.waitForEffects()
-    try #require(day.model().editor).save.action()
+    try #require(day.model().editor).save.action.execute()
     await day.store.waitForEffects()
     let model = day.model()
 
@@ -248,8 +248,8 @@ private func morningMeetings() throws -> [DateInterval] {
 @Test func cancellingTheFormSavesNothing() async throws {
     let day = try Day(hour: 8, tasks: [])
 
-    await day.open().addTask.action()
-    try #require(day.model().editor).cancel.action()
+    await day.open().addTask.action.execute()
+    try #require(day.model().editor).cancel.action.execute()
     await day.store.waitForEffects()
 
     #expect(day.model().editor == nil)
@@ -259,7 +259,7 @@ private func morningMeetings() throws -> [DateInterval] {
 @MainActor
 @Test func aTaskThatCannotBeSavedShowsAnAlert() async throws {
     let day = try Day(hour: 8, tasks: [])
-    await day.open().addTask.action()
+    await day.open().addTask.action.execute()
     day.store.send(.editor(.nameChanged("Passport")))
     await day.repository.setFailsOnSave(true)
 

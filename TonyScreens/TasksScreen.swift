@@ -20,7 +20,7 @@ public struct TasksScreen: View {
                     ForEach(section.rows) { row in
                         taskRow(row)
                     }
-                    .onMove(perform: section.move)
+                    .onMove { section.move.execute(Move(source: $0, destination: $1)) }
                 } header: {
                     sectionHeader(section)
                 }
@@ -30,8 +30,8 @@ public struct TasksScreen: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background { PageBackground() }
-        .onAppear(perform: model.onAppear)
-        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor() } })) { editor in
+        .onAppear { model.onAppear.execute() }
+        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor.execute() } })) { editor in
             TaskEditorScreen(editor)
         }
         .alert(model.alert)
@@ -44,7 +44,9 @@ public struct TasksScreen: View {
                 .foregroundStyle(TonyColor.ink)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
-            Button(action: model.add.action) {
+            Button {
+                model.add.action.execute()
+            } label: {
                 Image(systemName: model.add.systemImage ?? "plus")
                     .tonyText(.heading)
                     .foregroundStyle(TonyColor.onAccent)
@@ -105,7 +107,9 @@ public struct TasksScreen: View {
     }
 
     private func taskRow(_ row: TaskRowDataModel) -> some View {
-        Button(action: row.open) {
+        Button {
+            row.open.execute()
+        } label: {
             TaskRow(row)
         }
         .buttonStyle(.plain)

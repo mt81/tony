@@ -10,7 +10,7 @@ extension TasksFeature {
         send: @escaping @MainActor (Action) -> Void
     ) -> TasksScreenDataModel {
         let locale = context.locale
-        let addTask: @MainActor () -> Void = { send(.addTapped(id: UUID(), stepID: UUID(), now: Date())) }
+        let addTask: any Executable<Void> = TonyUIModels.Action(id: "add_task") { _ in send(.addTapped(id: UUID(), stepID: UUID(), now: Date())) }
 
         return TasksScreenDataModel(
             title: localized("Tasks", locale),
@@ -20,8 +20,8 @@ extension TasksFeature {
                 text: state.quickAdd,
                 prompt: localized("Tell Tony… “water the plants every 5 days”", locale),
                 accessibilityIdentifier: "quickAdd",
-                onChange: { send(.quickAddChanged($0)) },
-                onSubmit: { send(.quickAddSubmitted(id: UUID(), stepID: UUID(), now: Date())) }
+                onChange: TonyUIModels.Action(id: "quickAddChanged") { send(.quickAddChanged($0)) },
+                onSubmit: TonyUIModels.Action(id: "quickAddSubmitted") { _ in send(.quickAddSubmitted(id: UUID(), stepID: UUID(), now: Date())) }
             ),
             sections: kinds.compactMap { kind in
                 section(kind, state: state, context: context, send: send)
@@ -32,19 +32,23 @@ extension TasksFeature {
                     for: editor,
                     context: context,
                     edit: { send(.editor($0)) },
-                    cancel: { send(.editorCancelled) },
-                    save: { send(.editorSaved) },
-                    delete: { send(.editorDeleted) }
+                    cancel: TonyUIModels.Action(id: "editorCancelled", parameters: Action.editorCancelled) { action, _ in send(action) },
+                    save: TonyUIModels.Action(id: "editorSaved", parameters: Action.editorSaved) { action, _ in send(action) },
+                    delete: TonyUIModels.Action(id: "editorDeleted", parameters: Action.editorDeleted) { action, _ in send(action) }
                 )
             },
-            dismissEditor: { send(.editorCancelled) },
+            dismissEditor: TonyUIModels.Action(id: "editorCancelled") { _ in send(.editorCancelled) },
             alert: state.hasFailed
                 ? AlertDataModel(
                     title: localized("Your tasks could not be saved", locale),
-                    dismiss: ButtonDataModel(title: localized("OK", locale), role: .cancel) { send(.alertDismissed) }
+                    dismiss: ButtonDataModel(
+                        title: localized("OK", locale),
+                        role: .cancel,
+                        action: TonyUIModels.Action(id: "alertDismissed", parameters: Action.alertDismissed) { action, _ in send(action) }
+                    )
                 )
                 : nil,
-            onAppear: { send(.appeared) }
+            onAppear: TonyUIModels.Action(id: "appeared") { _ in send(.appeared) }
         )
     }
 
@@ -78,11 +82,15 @@ extension TasksFeature {
                     status: ChipDataModel(title: summary.status, style: summary.isNeglected ? .warning : .neutral),
                     isNeglected: summary.isNeglected,
                     accessibilityIdentifier: "task-\(task.name)",
-                    open: { send(.rowTapped(id: task.id, now: Date())) },
-                    delete: ButtonDataModel(title: localized("Delete", locale), role: .destructive) { send(.deleteTapped(id: task.id)) }
+                    open: TonyUIModels.Action(id: "rowTapped", parameters: task.id) { id, _ in send(.rowTapped(id: id, now: Date())) },
+                    delete: ButtonDataModel(
+                        title: localized("Delete", locale),
+                        role: .destructive,
+                        action: TonyUIModels.Action(id: "deleteTapped", parameters: Action.deleteTapped(id: task.id)) { action, _ in send(action) }
+                    )
                 )
             },
-            move: { source, destination in send(.moved(kind: kind, from: source, to: destination)) }
+            move: TonyUIModels.Action(id: "moved", parameters: kind) { kind, move in send(.moved(kind: kind, from: move.source, to: move.destination)) }
         )
     }
 }

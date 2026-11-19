@@ -11,7 +11,7 @@ struct RootView: View {
         TabView {
             Tab {
                 if let stores {
-                    StoreView(store: stores.today, now: stores.now, content: TodayScreen.init)
+                    StoreView(now: stores.now, dataModel: stores.today.dataModel, content: TodayScreen.init)
                 } else {
                     unavailable
                 }
@@ -20,7 +20,7 @@ struct RootView: View {
             }
             Tab {
                 if let stores {
-                    StoreView(store: stores.tasks, now: stores.now, content: TasksScreen.init)
+                    StoreView(now: stores.now, dataModel: stores.tasks.dataModel, content: TasksScreen.init)
                 } else {
                     unavailable
                 }
@@ -29,7 +29,7 @@ struct RootView: View {
             }
             Tab {
                 if let stores {
-                    StoreView(store: stores.you, now: stores.now, content: YouScreen.init)
+                    StoreView(now: stores.now, dataModel: { YouViewModel(store: stores.you, context: $0) }, content: YouScreen.init)
                 } else {
                     unavailable
                 }
@@ -63,14 +63,14 @@ struct RootView: View {
 }
 
 /// Draws a store's data model, and draws it again whenever the store's state changes.
-struct StoreView<F: Feature, Content: View>: View {
-    let store: Store<F>
+struct StoreView<DataModel, Content: View>: View {
     let now: @Sendable () -> Date
-    let content: (F.DataModel) -> Content
+    let dataModel: @MainActor (PresentationContext) -> DataModel
+    let content: (DataModel) -> Content
     @Environment(\.calendar) private var calendar
     @Environment(\.locale) private var locale
 
     var body: some View {
-        content(store.dataModel(context: PresentationContext(now: now(), calendar: calendar, locale: locale)))
+        content(dataModel(PresentationContext(now: now(), calendar: calendar, locale: locale)))
     }
 }

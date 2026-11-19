@@ -71,9 +71,17 @@ public enum CalendarDebugFeature: Feature {
             title: "Calendar check",
             access: access,
             requestAccess: state.access == .notDetermined
-                ? ButtonDataModel(title: "Ask for calendar access", accessibilityIdentifier: "requestCalendarAccess") { send(.requestAccessTapped) }
+                ? ButtonDataModel(
+                    title: "Ask for calendar access",
+                    accessibilityIdentifier: "requestCalendarAccess",
+                    action: TonyUIModels.Action(id: "requestAccessTapped", parameters: Action.requestAccessTapped) { action, _ in send(action) }
+                )
                 : nil,
-            refresh: ButtonDataModel(title: "Read the calendar again", accessibilityIdentifier: "refreshCalendar") { send(.refreshTapped) },
+            refresh: ButtonDataModel(
+                title: "Read the calendar again",
+                accessibilityIdentifier: "refreshCalendar",
+                action: TonyUIModels.Action(id: "refreshTapped", parameters: Action.refreshTapped) { action, _ in send(action) }
+            ),
             plannedAt: state.planned.map { "Read at \($0.plannedAt.formatted(timeStyle))" },
             rows: (state.planned?.context.blocks ?? []).map { block in
                 let time = "\(block.interval.start.formatted(timeStyle)) to \(block.interval.end.formatted(timeStyle))"
@@ -90,7 +98,7 @@ public enum CalendarDebugFeature: Feature {
                     isBusy: block.availability == .busy
                 )
             },
-            onAppear: { send(.appeared) }
+            onAppear: TonyUIModels.Action(id: "appeared") { _ in send(.appeared) }
         )
     }
 }

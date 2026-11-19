@@ -11,9 +11,9 @@ public struct TasksScreenDataModel {
     public var sections: [TaskSectionDataModel]
     public var addTask: ButtonDataModel
     public var editor: TaskEditorDataModel?
-    public var dismissEditor: @MainActor () -> Void
+    public var dismissEditor: any Executable<Void>
     public var alert: AlertDataModel?
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
 }
 
 @MemberwiseInit(.public)
@@ -22,11 +22,11 @@ public struct TaskSectionDataModel: Identifiable {
     public var title: String
     public var hint: String?
     public var rows: [TaskRowDataModel]
-    public var move: @MainActor (IndexSet, Int) -> Void
+    public var move: any Executable<Move>
 }
 
 @MemberwiseInit(.public)
-public struct TaskEditorDataModel: Identifiable {
+public struct TaskEditorDataModel: Identifiable, Equatable {
     public var id: UUID
     public var title: String
     public var name: TextFieldDataModel
@@ -44,7 +44,7 @@ public struct TaskEditorDataModel: Identifiable {
 }
 
 @MemberwiseInit(.public)
-public struct CadenceSectionDataModel {
+public struct CadenceSectionDataModel: Equatable {
     public var header: String
     public var repeats: PickerDataModel
     /// The number of days or of times a week; nil on fixed days.
@@ -54,7 +54,7 @@ public struct CadenceSectionDataModel {
 }
 
 @MemberwiseInit(.public)
-public struct WhenItFitsSectionDataModel {
+public struct WhenItFitsSectionDataModel: Equatable {
     public var header: String
     public var location: PickerDataModel
     public var toggles: [ToggleDataModel]
@@ -68,12 +68,12 @@ public struct StepsSectionDataModel {
     public var add: ButtonDataModel
     /// The last step cannot be deleted.
     public var canDelete: Bool
-    public var move: @MainActor (IndexSet, Int) -> Void
-    public var delete: @MainActor (IndexSet) -> Void
+    public var move: any Executable<Move>
+    public var delete: any Executable<IndexSet>
 }
 
 @MemberwiseInit(.public)
-public struct StepDataModel: Identifiable {
+public struct StepDataModel: Identifiable, Equatable {
     public var id: UUID
     public var name: TextFieldDataModel
     public var mode: PickerDataModel
@@ -83,8 +83,44 @@ public struct StepDataModel: Identifiable {
 }
 
 @MemberwiseInit(.public)
-public struct DeadlineSectionDataModel {
+public struct DeadlineSectionDataModel: Equatable {
     public var header: String
     public var toggle: ToggleDataModel
     public var date: DatePickerDataModel?
+}
+
+extension TasksScreenDataModel: Equatable {
+    public static func == (lhs: TasksScreenDataModel, rhs: TasksScreenDataModel) -> Bool {
+        lhs.title == rhs.title
+            && lhs.add == rhs.add
+            && lhs.quickAdd == rhs.quickAdd
+            && lhs.sections == rhs.sections
+            && lhs.addTask == rhs.addTask
+            && lhs.editor == rhs.editor
+            && lhs.alert == rhs.alert
+            && lhs.dismissEditor.isEqual(to: rhs.dismissEditor)
+            && lhs.onAppear.isEqual(to: rhs.onAppear)
+    }
+}
+
+extension TaskSectionDataModel: Equatable {
+    public static func == (lhs: TaskSectionDataModel, rhs: TaskSectionDataModel) -> Bool {
+        lhs.id == rhs.id
+            && lhs.title == rhs.title
+            && lhs.hint == rhs.hint
+            && lhs.rows == rhs.rows
+            && lhs.move.isEqual(to: rhs.move)
+    }
+}
+
+extension StepsSectionDataModel: Equatable {
+    public static func == (lhs: StepsSectionDataModel, rhs: StepsSectionDataModel) -> Bool {
+        lhs.header == rhs.header
+            && lhs.footer == rhs.footer
+            && lhs.steps == rhs.steps
+            && lhs.add == rhs.add
+            && lhs.canDelete == rhs.canDelete
+            && lhs.move.isEqual(to: rhs.move)
+            && lhs.delete.isEqual(to: rhs.delete)
+    }
 }

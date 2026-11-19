@@ -23,9 +23,11 @@ extension TodayFeature {
             timelineTitle: localized("Your day", locale),
             timelineHint: localized("Suggestions, not orders", locale),
             timeline: timeline(state: state, wording: wording, send: send),
-            addTask: ButtonDataModel(title: localized("+ Add a task", locale), accessibilityIdentifier: "todayAddTask") {
-                send(.addTapped(id: UUID(), stepID: UUID(), now: context.now))
-            },
+            addTask: ButtonDataModel(
+                title: localized("+ Add a task", locale),
+                accessibilityIdentifier: "todayAddTask",
+                action: TonyUIModels.Action(id: "addTapped", parameters: context.now) { now, _ in send(.addTapped(id: UUID(), stepID: UUID(), now: now)) }
+            ),
             tilesTitle: localized("How things are", locale),
             tiles: tiles(state: state, wording: wording),
             editor: state.editor.map { editor in
@@ -33,21 +35,21 @@ extension TodayFeature {
                     for: editor,
                     context: context,
                     edit: { send(.editor($0)) },
-                    cancel: { send(.editorCancelled) },
-                    save: { send(.editorSaved) },
-                    delete: {}
+                    cancel: TonyUIModels.Action(id: "editorCancelled", parameters: Action.editorCancelled) { action, _ in send(action) },
+                    save: TonyUIModels.Action(id: "editorSaved", parameters: Action.editorSaved) { action, _ in send(action) },
+                    delete: TonyUIModels.Action(id: "nothing") { _ in }
                 )
             },
-            dismissEditor: { send(.editorCancelled) },
+            dismissEditor: TonyUIModels.Action(id: "editorCancelled") { _ in send(.editorCancelled) },
             alert: state.failure.map { failure in
                 let title =
                     switch failure {
                     case .answer: localized("Your answer could not be saved", locale)
                     case .task: localized("Your tasks could not be saved", locale)
                     }
-                return AlertDataModel(title: title, dismiss: ButtonDataModel(title: localized("OK", locale)) { send(.alertDismissed) })
+                return AlertDataModel(title: title, dismiss: ButtonDataModel(title: localized("OK", locale), action: TonyUIModels.Action(id: "alertDismissed", parameters: Action.alertDismissed) { action, _ in send(action) }))
             },
-            onAppear: { send(.appeared) }
+            onAppear: TonyUIModels.Action(id: "appeared") { _ in send(.appeared) }
         )
     }
 
@@ -67,10 +69,20 @@ extension TodayFeature {
             let title = wording.title(of: step, in: task)
             var actions: [ButtonDataModel] = []
             if item.id == firstItemID {
-                actions.append(ButtonDataModel(title: localized("Later", locale), accessibilityIdentifier: "today-later") { send(.laterTapped(item)) })
+                actions.append(
+                    ButtonDataModel(
+                        title: localized("Later", locale),
+                        accessibilityIdentifier: "today-later",
+                        action: TonyUIModels.Action(id: "laterTapped", parameters: Action.laterTapped(item)) { action, _ in send(action) }
+                    )
+                )
                 if task.mustHappenBy == nil {
                     actions.append(
-                        ButtonDataModel(title: localized("Not today", locale), accessibilityIdentifier: "today-notToday") { send(.notTodayTapped(item)) }
+                        ButtonDataModel(
+                            title: localized("Not today", locale),
+                            accessibilityIdentifier: "today-notToday",
+                            action: TonyUIModels.Action(id: "notTodayTapped", parameters: Action.notTodayTapped(item)) { action, _ in send(action) }
+                        )
                     )
                 }
             }
@@ -80,9 +92,11 @@ extension TodayFeature {
                 title: title,
                 reason: wording.reason(for: item, step: step, task: task),
                 actions: actions,
-                check: ButtonDataModel(title: localized("Mark \(title) as done", locale), accessibilityIdentifier: "today-check-\(title)") {
-                    send(.checkTapped(item))
-                },
+                check: ButtonDataModel(
+                    title: localized("Mark \(title) as done", locale),
+                    accessibilityIdentifier: "today-check-\(title)",
+                    action: TonyUIModels.Action(id: "checkTapped", parameters: Action.checkTapped(item)) { action, _ in send(action) }
+                ),
                 isNeglected: wording.isNeglected(task),
                 accessibilityIdentifier: "today-item-\(title)"
             )

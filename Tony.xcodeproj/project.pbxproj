@@ -26,6 +26,10 @@
 		8914F48177BD3077895E9EFE /* TonyCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CE18201EBE0DFB0CD1F370B /* TonyCore.framework */; };
 		8DFF9B70407F4151E69AA7E6 /* TonyUIModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92E1DB3C7EFBF2E4C7182485 /* TonyUIModels.framework */; };
 		980646D8C60CA37DE001382E /* TonyWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C7046FE42E4BC915F63A57D1 /* TonyWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1B2C3D4E5F6071829304A71 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A61 /* MemberwiseInit */; };
+		A1B2C3D4E5F6071829304A72 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A62 /* MemberwiseInit */; };
+		A1B2C3D4E5F6071829304A73 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A63 /* MemberwiseInit */; };
+		A1B2C3D4E5F6071829304A74 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A64 /* MemberwiseInit */; };
 		A8F9F7CF50DA325756E68731 /* TonyCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CE18201EBE0DFB0CD1F370B /* TonyCore.framework */; };
 		C15EF5186B7675D6A2ECE4B3 /* TonyCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CE18201EBE0DFB0CD1F370B /* TonyCore.framework */; };
 		C8395C4B7CCCFBC8101B52B3 /* TonyCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7CE18201EBE0DFB0CD1F370B /* TonyCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -35,9 +39,6 @@
 		E22CB9B766015C2CE0096BA5 /* TonyScreens.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 87B44D5BE11B4381463C7FD2 /* TonyScreens.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E69427A4A40B2F5FEF2EF461 /* TonyUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD8C5F5EF43B0362C7AD07 /* TonyUIKit.framework */; };
 		ED16BCFA107CB333612A4A12 /* TonyUIModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92E1DB3C7EFBF2E4C7182485 /* TonyUIModels.framework */; };
-		A1B2C3D4E5F6071829304A71 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A61 /* MemberwiseInit */; };
-		A1B2C3D4E5F6071829304A72 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A62 /* MemberwiseInit */; };
-		A1B2C3D4E5F6071829304A73 /* MemberwiseInit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6071829304A63 /* MemberwiseInit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -416,6 +417,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6071829304A74 /* MemberwiseInit in Frameworks */,
 				C15EF5186B7675D6A2ECE4B3 /* TonyCore.framework in Frameworks */,
 				D7B096CE7B257BBA14C8CD9D /* TonyPresentation.framework in Frameworks */,
 				66A8DB9C1780DA1C76D7A16B /* TonyScreens.framework in Frameworks */,
@@ -605,6 +607,7 @@
 			);
 			name = TonyApp;
 			packageProductDependencies = (
+				A1B2C3D4E5F6071829304A64 /* MemberwiseInit */,
 			);
 			productName = Tony;
 			productReference = 8FF3AB73EDEE9CBF4764965E /* Tony.app */;
@@ -2413,6 +2416,11 @@
 			productName = MemberwiseInit;
 		};
 		A1B2C3D4E5F6071829304A63 /* MemberwiseInit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */;
+			productName = MemberwiseInit;
+		};
+		A1B2C3D4E5F6071829304A64 /* MemberwiseInit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A1B2C3D4E5F6071829304A5B /* XCRemoteSwiftPackageReference "swift-memberwise-init-macro" */;
 			productName = MemberwiseInit;

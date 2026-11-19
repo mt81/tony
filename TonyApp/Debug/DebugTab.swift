@@ -13,13 +13,13 @@ struct DebugTab: View {
         NavigationStack {
             List {
                 NavigationLink {
-                    StoreView(store: modelCheck, now: { Date() }, content: ModelCheckScreen.init)
+                    StoreView(now: { Date() }, dataModel: modelCheck.dataModel, content: ModelCheckScreen.init)
                 } label: {
                     Text(verbatim: "Model check")
                 }
                 if let stores {
                     NavigationLink {
-                        StoreView(store: stores.calendarDebug, now: stores.now, content: CalendarDebugScreen.init)
+                        StoreView(now: stores.now, dataModel: stores.calendarDebug.dataModel, content: CalendarDebugScreen.init)
                     } label: {
                         Text(verbatim: "Calendar check")
                     }

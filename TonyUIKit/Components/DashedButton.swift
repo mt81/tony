@@ -10,7 +10,9 @@ public struct DashedButton: View {
     }
 
     public var body: some View {
-        Button(action: model.action) {
+        Button {
+            model.action.execute()
+        } label: {
             Text(model.title)
                 .tonyText(.label)
                 .foregroundStyle(TonyColor.muted)
@@ -28,7 +30,7 @@ public struct DashedButton: View {
 
 #if DEBUG
 #Preview("Dashed button") {
-    DashedButton(ButtonDataModel(title: "+ Add a task") {})
+    DashedButton(ButtonDataModel(title: "+ Add a task", action: Action(id: "preview") { _ in }))
         .tonyPreview()
 }
 #endif

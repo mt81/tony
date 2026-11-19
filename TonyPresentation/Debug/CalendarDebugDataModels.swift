@@ -20,5 +20,17 @@ public struct CalendarDebugScreenDataModel {
     public var refresh: ButtonDataModel
     public var plannedAt: String?
     public var rows: [Row]
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
+}
+
+extension CalendarDebugScreenDataModel: Equatable {
+    public static func == (lhs: CalendarDebugScreenDataModel, rhs: CalendarDebugScreenDataModel) -> Bool {
+        lhs.title == rhs.title
+            && lhs.access == rhs.access
+            && lhs.requestAccess == rhs.requestAccess
+            && lhs.refresh == rhs.refresh
+            && lhs.plannedAt == rhs.plannedAt
+            && lhs.rows == rhs.rows
+            && lhs.onAppear.isEqual(to: rhs.onAppear)
+    }
 }

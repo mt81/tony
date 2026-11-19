@@ -69,7 +69,7 @@ public struct ComponentGallery: View {
     }
 
     private var timeline: [TimelineItemDataModel] {
-        let check = ButtonDataModel(title: "Mark as done") {}
+        let check = ButtonDataModel(title: "Mark as done", action: Action(id: "preview") { _ in })
         return [
             .now(text: "Now · a good moment to start the laundry"),
             .task(
@@ -78,7 +78,7 @@ public struct ComponentGallery: View {
                     time: "8:30",
                     title: "Start a load of laundry",
                     reason: "Before your 10:00 meetings. It runs on its own.",
-                    actions: ["Move to noon", "Swap", "Not today"].map { ButtonDataModel(title: $0) {} },
+                    actions: ["Move to noon", "Swap", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
                     check: check
                 ),
                 isLast: false
@@ -98,8 +98,8 @@ public struct ComponentGallery: View {
             status: status,
             isNeglected: isNeglected,
             accessibilityIdentifier: title,
-            open: {},
-            delete: ButtonDataModel(title: "Delete", role: .destructive) {}
+            open: Action(id: "preview") { _ in },
+            delete: ButtonDataModel(title: "Delete", role: .destructive, action: Action(id: "preview") { _ in })
         )
     }
 }

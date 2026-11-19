@@ -27,14 +27,14 @@ public struct TaskRowDataModel: Identifiable {
     /// Draws the icon in the neglected mood.
     public var isNeglected: Bool
     public var accessibilityIdentifier: String
-    public var open: @MainActor () -> Void
+    public var open: any Executable<Void>
     public var delete: ButtonDataModel
 }
 
 /// One entry of the Today timeline.
-public enum TimelineItemDataModel {
+public enum TimelineItemDataModel: Equatable {
     @MemberwiseInit(.public)
-    public struct TaskItem {
+    public struct TaskItem: Equatable {
         public var icon: String
         public var time: String
         public var title: String
@@ -72,4 +72,18 @@ public struct AreaRowDataModel: Hashable, Sendable {
     /// From 0 to 1.
     public var progress: Double
     public var status: String
+}
+
+extension TaskRowDataModel: Equatable {
+    public static func == (lhs: TaskRowDataModel, rhs: TaskRowDataModel) -> Bool {
+        lhs.id == rhs.id
+            && lhs.icon == rhs.icon
+            && lhs.title == rhs.title
+            && lhs.subtitle == rhs.subtitle
+            && lhs.status == rhs.status
+            && lhs.isNeglected == rhs.isNeglected
+            && lhs.accessibilityIdentifier == rhs.accessibilityIdentifier
+            && lhs.delete == rhs.delete
+            && lhs.open.isEqual(to: rhs.open)
+    }
 }

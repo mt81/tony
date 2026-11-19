@@ -28,5 +28,20 @@ public struct ModelCheckScreenDataModel {
     public var extensionChecks: [String]
     public var requestBackgroundCheck: ButtonDataModel
     public var backgroundCheckRequest: String?
-    public var onAppear: @MainActor () -> Void
+    public var onAppear: any Executable<Void>
+}
+
+extension ModelCheckScreenDataModel: Equatable {
+    public static func == (lhs: ModelCheckScreenDataModel, rhs: ModelCheckScreenDataModel) -> Bool {
+        lhs.title == rhs.title
+            && lhs.availability == rhs.availability
+            && lhs.run == rhs.run
+            && lhs.report == rhs.report
+            && lhs.shareReport == rhs.shareReport
+            && lhs.rows == rhs.rows
+            && lhs.extensionChecks == rhs.extensionChecks
+            && lhs.requestBackgroundCheck == rhs.requestBackgroundCheck
+            && lhs.backgroundCheckRequest == rhs.backgroundCheckRequest
+            && lhs.onAppear.isEqual(to: rhs.onAppear)
+    }
 }

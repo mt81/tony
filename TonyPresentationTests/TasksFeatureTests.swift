@@ -128,9 +128,9 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     let (model, sent) = try dataModel(try loadedState())
     let row = model.sections[0].rows[1]
 
-    model.onAppear()
-    row.delete.action()
-    model.sections[0].move([0], 2)
+    model.onAppear.execute()
+    row.delete.action.execute()
+    model.sections[0].move.execute(Move(source: [0], destination: 2))
 
     #expect(sent.actions == [
         .appeared,
@@ -160,8 +160,8 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     #expect(editor.cadence?.weekdays.first?.title == "Lundi")
     #expect(!editor.save.isEnabled)
 
-    editor.cadence?.weekdays.first?.onChange(true)
-    editor.name.onChange("Water")
+    editor.cadence?.weekdays.first?.onChange.execute(true)
+    editor.name.onChange.execute("Water")
     #expect(sent.actions == [.editor(.weekdayToggled(.monday, isOn: true)), .editor(.nameChanged("Water"))])
 }
 
@@ -172,7 +172,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 
     let (model, sent) = try dataModel(state)
     let alert = try #require(model.alert)
-    alert.dismiss.action()
+    alert.dismiss.action.execute()
     _ = TasksFeature.reduce(&state, sent.actions[0])
 
     #expect(alert.title == "Your tasks could not be saved")
@@ -253,9 +253,9 @@ private func quickAdd(_ sentence: String, language: String = "en", languageServi
     let store = Store<TasksFeature>(state: TasksFeature.State(), environment: environment)
     let context = try Sample.context(language: language)
 
-    store.dataModel(context: context).quickAdd.onChange(sentence)
+    store.dataModel(context: context).quickAdd.onChange.execute(sentence)
     let submit = try #require(store.dataModel(context: context).quickAdd.onSubmit)
-    submit()
+    submit.execute()
     await store.waitForEffects()
     return (store, try #require(store.dataModel(context: context).editor))
 }
