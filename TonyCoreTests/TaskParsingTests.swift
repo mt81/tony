@@ -67,14 +67,14 @@ func theRulesReadTheCadenceAndLeaveTheName(_ sentenceCase: SentenceCase) {
 // MARK: With the model
 
 private struct FixedService: LanguageService {
-    var draft: TaskDraft?
+    var reading: TaskReading?
     var routine: Routine?
 
     func briefing(instructions: String, plan: String) async throws -> String { throw CocoaError(.featureUnsupported) }
 
-    func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft {
-        guard let draft else { throw CocoaError(.featureUnsupported) }
-        return draft
+    func taskReading(instructions: String, sentence: String) async throws -> TaskReading {
+        guard let reading else { throw CocoaError(.featureUnsupported) }
+        return reading
     }
 
     func routine(instructions: String, description: String) async throws -> Routine {
@@ -83,37 +83,103 @@ private struct FixedService: LanguageService {
     }
 }
 
-private func draft(_ sentence: String, model: TaskDraft?) async -> TaskDraft {
-    await TaskSentenceParser.draft(from: sentence, locale: Locale(identifier: "en"), instructions: "", service: FixedService(draft: model))
+/// Today is Thursday 19 November 2026.
+private func draft(_ sentence: String, model: TaskReading?) async throws -> TaskDraft {
+    await TaskSentenceParser.draft(
+        from: sentence,
+        locale: Locale(identifier: "en"),
+        instructions: "",
+        service: FixedService(reading: model),
+        now: try Fixtures.november(19, hour: 9),
+        calendar: Fixtures.calendar
+    )
 }
 
-@Test func whatTheRulesUnderstandNeedsNoModel() async {
-    let wrong = TaskDraft(name: "Water", cadence: .timesPerWeek(5))
+@Test func theRulesReadTheCadenceAndTheModelTheRest() async throws {
+    let reading = TaskReading(
+        name: "Water the plants",
+        icon: "🪴",
+        cadence: .timesPerWeek(5),
+        requirements: Requirements(location: .home, windows: [.morning], avoidedWeather: [.rain], costsMoney: true)
+    )
 
-    #expect(await draft("Water the plants every 5 days", model: wrong) == TaskDraft(name: "Water the plants", cadence: .every(5, .day)))
+    #expect(try await draft("Water the plants every 5 days", model: reading) == TaskDraft(
+        name: "Water the plants",
+        icon: "🪴",
+        cadence: .every(5, .day),
+        requirements: Requirements(location: .home, windows: [.morning], avoidedWeather: [.rain])
+    ))
 }
 
-@Test func theModelReadsWhatTheRulesDoNot() async {
-    let fromModel = TaskDraft(name: "water the plants", cadence: .every(3, .day))
+@Test func theModelReadsWhatTheRulesDoNot() async throws {
+    let reading = TaskReading(name: "water the plants", cadence: .every(3, .day))
 
-    #expect(await draft("Water the plants every couple of days or so", model: fromModel) == fromModel)
+    #expect(try await draft("Water the plants every couple of days or so", model: reading) == TaskDraft(name: "water the plants", cadence: .every(3, .day)))
+}
+
+@Test func aFixedScheduleStartsOnTheFirstDayThatMatches() async throws {
+    let reading = TaskReading(name: "Pay the rent", cadence: .every(1, .month), scheduleStart: DateComponents(day: 1))
+    let firstOfDecember = try Fixtures.november(31)
+
+    #expect(try await draft("Pay the rent on the 1st, every month", model: reading).cadence == .interval(
+        Cadence.Interval(count: 1, unit: .month),
+        countedFrom: .schedule(from: firstOfDecember)
+    ))
+}
+
+@Test func aFixedScheduleWithoutADayStartsToday() async throws {
+    let reading = TaskReading(name: "Vacuum", cadence: .every(2, .week), scheduleStart: DateComponents())
+
+    #expect(try await draft("Vacuum every 2 weeks on a fixed schedule", model: reading).cadence == .interval(
+        Cadence.Interval(count: 2, unit: .week),
+        countedFrom: .schedule(from: try Fixtures.november(19))
+    ))
+}
+
+@Test func theDeadlineIsTheNextDayWithThatDate() async throws {
+    let thisYear = TaskReading(name: "Renew my passport", deadline: DateComponents(month: 12, day: 15))
+    let nextYear = TaskReading(name: "Renew my passport", deadline: DateComponents(month: 3, day: 3))
+    let nextMarch = try #require(Fixtures.calendar.date(from: DateComponents(year: 2027, month: 3, day: 3)))
+
+    #expect(try await draft("Renew my passport by 15 December", model: thisYear).deadline == (try Fixtures.november(45)))
+    #expect(try await draft("Renew my passport by 3 March", model: nextYear).deadline == nextMarch)
+}
+
+@Test func subtasksAreKeptOnlyForATaskOfSeveralSensibleSteps() async throws {
+    let wash = StepTemplate(name: "Wash", mode: .active, duration: 10 * 60)
+    let fold = StepTemplate(name: "Fold", mode: .active, duration: 15 * 60)
+    let unnamed = StepTemplate(name: " ", mode: .active, duration: 10 * 60)
+    let endless = StepTemplate(name: "Dry", mode: .active, duration: 24 * 3600)
+    func subtasks(_ steps: [StepTemplate]) async throws -> [StepTemplate] {
+        try await draft("Do the laundry", model: TaskReading(name: "Do the laundry", subtasks: steps)).subtasks
+    }
+
+    #expect(try await subtasks([wash, unnamed, endless, fold]) == [wash, fold])
+    #expect(try await subtasks([wash, endless]) == [])
+}
+
+@Test(arguments: ["leaf", "", "🧺 laundry"])
+func theIconIsOneEmoji(icon: String) async throws {
+    let read = try await draft("Do the laundry", model: TaskReading(name: "Do the laundry", icon: icon))
+
+    #expect(read.icon == (icon.hasPrefix("🧺") ? "🧺" : nil))
 }
 
 @Test(arguments: [
-    TaskDraft(name: "Feed the cat", cadence: .every(3, .day)),
-    TaskDraft(name: "", cadence: .every(3, .day)),
-    TaskDraft(name: "Water the plants", cadence: .every(0, .day)),
-    TaskDraft(name: "Water the plants", cadence: .timesPerWeek(9)),
-    TaskDraft(name: "Water the plants", cadence: .weekdays([])),
+    TaskReading(name: "Feed the cat", cadence: .every(3, .day)),
+    TaskReading(name: "", cadence: .every(3, .day)),
+    TaskReading(name: "Water the plants", cadence: .every(0, .day)),
+    TaskReading(name: "Water the plants", cadence: .timesPerWeek(9)),
+    TaskReading(name: "Water the plants", cadence: .weekdays([])),
 ])
-func anAnswerThatInventsANameOrAnImpossibleCadenceIsDropped(fromModel: TaskDraft) async {
+func anAnswerThatInventsANameOrAnImpossibleCadenceIsDropped(fromModel: TaskReading) async throws {
     let sentence = "Water the plants every couple of days or so"
 
-    #expect(await draft(sentence, model: fromModel) == TaskDraft(name: sentence, cadence: nil))
+    #expect(try await draft(sentence, model: fromModel) == TaskDraft(name: sentence, cadence: nil))
 }
 
-@Test func withoutAModelTheRulesAnswerAlone() async {
-    #expect(await draft("Renew my passport", model: nil) == TaskDraft(name: "Renew my passport", cadence: nil))
+@Test func withoutAModelTheRulesAnswerAlone() async throws {
+    #expect(try await draft("Renew my passport", model: nil) == TaskDraft(name: "Renew my passport", cadence: nil))
 }
 
 // MARK: Routine

@@ -6,8 +6,6 @@ import TonyUIModels
 public struct TasksScreenDataModel {
     public var title: String
     public var add: ButtonDataModel
-    /// Where a task is typed in plain words. Return reads it and opens the form, filled in.
-    public var quickAdd: TextFieldDataModel
     public var sections: [TaskSectionDataModel]
     public var addTask: ButtonDataModel
     public var editor: TaskEditorDataModel?
@@ -25,75 +23,115 @@ public struct TaskSectionDataModel: Identifiable {
     public var move: any Executable<Move>
 }
 
+/// The task sheet: the composer for a new task, then the form.
 @MemberwiseInit(.public)
 public struct TaskEditorDataModel: Identifiable, Equatable {
     public var id: UUID
     public var title: String
-    public var name: TextFieldDataModel
-    public var icon: TextFieldDataModel
-    public var kind: PickerDataModel
-    /// Nil for a one-time task.
-    public var cadence: CadenceSectionDataModel?
-    public var whenItFits: WhenItFitsSectionDataModel
-    public var steps: StepsSectionDataModel
-    public var deadline: DeadlineSectionDataModel
-    /// Nil for a task that is not saved yet.
-    public var delete: ButtonDataModel?
+    /// While the task is typed in one sentence; nil once the form shows.
+    public var composer: TaskComposerDataModel? = nil
+    /// Once the sentence is read, or for a task that exists; nil while composing.
+    public var form: TaskFormDataModel? = nil
     public var cancel: ButtonDataModel
     public var save: ButtonDataModel
 }
 
 @MemberwiseInit(.public)
-public struct CadenceSectionDataModel: Equatable {
+public struct TaskComposerDataModel: Equatable {
+    public var prompt: String
+    public var composer: ComposerDataModel
+}
+
+@MemberwiseInit(.public)
+public struct TaskFormDataModel: Equatable {
+    public var icon: TextFieldDataModel
+    public var name: TextFieldDataModel
+    public var scheduleHeader: String
+    public var repeats: RepeatsDataModel
+    /// Nil unless the task repeats at an interval.
+    public var countedFrom: CountedFromDataModel? = nil
+    public var deadline: DeadlineDataModel
+    public var whenItFitsHeader: String
+    public var location: ChoiceDataModel
+    public var timeOfDay: ChecklistDataModel
+    public var weather: ChecklistDataModel
+    public var subtasks: SubtasksSectionDataModel
+    /// Nil for a task that is not saved yet.
+    public var delete: ButtonDataModel? = nil
+}
+
+/// The Repeats row and its page.
+@MemberwiseInit(.public)
+public struct RepeatsDataModel: Equatable {
+    public var row: DetailRowDataModel
+    public var choices: PickerDataModel
+    /// Nil unless the task is a number of times a week.
+    public var timesPerWeek: StepperDataModel? = nil
+    /// Nil unless Custom is picked.
+    public var custom: CustomRepeatDataModel? = nil
+}
+
+@MemberwiseInit(.public)
+public struct CustomRepeatDataModel: Equatable {
     public var header: String
-    public var repeats: PickerDataModel
-    /// The number of days or of times a week; nil on fixed days.
+    public var frequency: PickerDataModel
+    /// Nil once weekdays are picked: they repeat every week.
     public var count: StepperDataModel?
-    /// One toggle per weekday on fixed days; empty otherwise.
+    /// One toggle per weekday for a weekly frequency; empty otherwise.
     public var weekdays: [ToggleDataModel]
 }
 
 @MemberwiseInit(.public)
-public struct WhenItFitsSectionDataModel: Equatable {
-    public var header: String
-    public var location: PickerDataModel
-    public var toggles: [ToggleDataModel]
+public struct CountedFromDataModel: Equatable {
+    public var row: DetailRowDataModel
+    public var choices: PickerDataModel
+    /// Nil unless the task is on a fixed schedule.
+    public var start: DatePickerDataModel? = nil
 }
 
 @MemberwiseInit(.public)
-public struct StepsSectionDataModel {
+public struct DeadlineDataModel: Equatable {
+    public var row: DetailRowDataModel
+    public var toggle: ToggleDataModel
+    public var date: DatePickerDataModel? = nil
+}
+
+/// A row whose page picks one value.
+@MemberwiseInit(.public)
+public struct ChoiceDataModel: Equatable {
+    public var row: DetailRowDataModel
+    public var choices: PickerDataModel
+}
+
+/// A row whose page checks any number of values.
+@MemberwiseInit(.public)
+public struct ChecklistDataModel: Equatable {
+    public var row: DetailRowDataModel
+    public var items: [ToggleDataModel]
+}
+
+@MemberwiseInit(.public)
+public struct SubtasksSectionDataModel {
     public var header: String
-    public var footer: String?
-    public var steps: [StepDataModel]
+    public var subtasks: [SubtaskDataModel]
     public var add: ButtonDataModel
-    /// The last step cannot be deleted.
+    /// The last one cannot be deleted.
     public var canDelete: Bool
     public var move: any Executable<Move>
     public var delete: any Executable<IndexSet>
 }
 
 @MemberwiseInit(.public)
-public struct StepDataModel: Identifiable, Equatable {
+public struct SubtaskDataModel: Identifiable, Equatable {
     public var id: UUID
     public var name: TextFieldDataModel
-    public var mode: PickerDataModel
-    public var duration: StepperDataModel
-    /// Nil for the last step.
-    public var gap: StepperDataModel?
-}
-
-@MemberwiseInit(.public)
-public struct DeadlineSectionDataModel: Equatable {
-    public var header: String
-    public var toggle: ToggleDataModel
-    public var date: DatePickerDataModel?
+    public var duration: PickerDataModel
 }
 
 extension TasksScreenDataModel: Equatable {
     public static func == (lhs: TasksScreenDataModel, rhs: TasksScreenDataModel) -> Bool {
         lhs.title == rhs.title
             && lhs.add == rhs.add
-            && lhs.quickAdd == rhs.quickAdd
             && lhs.sections == rhs.sections
             && lhs.addTask == rhs.addTask
             && lhs.editor == rhs.editor
@@ -113,11 +151,10 @@ extension TaskSectionDataModel: Equatable {
     }
 }
 
-extension StepsSectionDataModel: Equatable {
-    public static func == (lhs: StepsSectionDataModel, rhs: StepsSectionDataModel) -> Bool {
+extension SubtasksSectionDataModel: Equatable {
+    public static func == (lhs: SubtasksSectionDataModel, rhs: SubtasksSectionDataModel) -> Bool {
         lhs.header == rhs.header
-            && lhs.footer == rhs.footer
-            && lhs.steps == rhs.steps
+            && lhs.subtasks == rhs.subtasks
             && lhs.add == rhs.add
             && lhs.canDelete == rhs.canDelete
             && lhs.move.isEqual(to: rhs.move)

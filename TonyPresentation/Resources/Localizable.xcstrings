@@ -267,23 +267,6 @@
         }
       }
     },
-    "A number of times a week" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A number of times a week"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un nombre de fois par semaine"
-          }
-        }
-      }
-    },
     "A steady day" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -301,19 +284,19 @@
         }
       }
     },
-    "Add a step" : {
+    "Add a sub task" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add a step"
+            "value" : "Add a sub task"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter une étape"
+            "value" : "Ajouter une sous-tâche"
           }
         }
       }
@@ -352,6 +335,40 @@
         }
       }
     },
+    "Any time" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any time"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N’importe quand"
+          }
+        }
+      }
+    },
+    "Any weather" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any weather"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par tous les temps"
+          }
+        }
+      }
+    },
     "Anywhere" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -382,23 +399,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À la maison"
-          }
-        }
-      }
-    },
-    "At regular intervals" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At regular intervals"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À intervalles réguliers"
           }
         }
       }
@@ -488,23 +488,6 @@
         }
       }
     },
-    "Cadence" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cadence"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rythme"
-          }
-        }
-      }
-    },
     "Calendar" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -556,19 +539,19 @@
         }
       }
     },
-    "Costs money" : {
+    "Counted from" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Costs money"
+            "value" : "Counted from"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coûte de l’argent"
+            "value" : "Compté depuis"
           }
         }
       }
@@ -586,6 +569,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Routine actuelle :"
+          }
+        }
+      }
+    },
+    "Custom" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnalisé"
+          }
+        }
+      }
+    },
+    "Daily" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les jours"
           }
         }
       }
@@ -675,6 +692,23 @@
         }
       }
     },
+    "Describe your task" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Describe your task"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décrivez votre tâche"
+          }
+        }
+      }
+    },
     "Describe your week" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -756,6 +790,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À faire"
+          }
+        }
+      }
+    },
+    "Duration" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée"
           }
         }
       }
@@ -1173,6 +1224,23 @@
         }
       }
     },
+    "Fixed schedule" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed schedule"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendrier fixe"
+          }
+        }
+      }
+    },
     "Flexible days" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1190,19 +1258,19 @@
         }
       }
     },
-    "Goal" : {
+    "Frequency" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Goal"
+            "value" : "Frequency"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objectif"
+            "value" : "Fréquence"
           }
         }
       }
@@ -1258,23 +1326,6 @@
         }
       }
     },
-    "How" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment"
-          }
-        }
-      }
-    },
     "How things are" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1288,23 +1339,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Où en sont les choses"
-          }
-        }
-      }
-    },
-    "I do it" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I do it"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Je le fais"
           }
         }
       }
@@ -1367,23 +1401,6 @@
         }
       }
     },
-    "It runs on its own" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "It runs on its own"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ça tourne tout seul"
-          }
-        }
-      }
-    },
     "It runs on its own." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1418,36 +1435,19 @@
         }
       }
     },
-    "Kind" : {
+    "Last time done" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kind"
+            "value" : "Last time done"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Type"
-          }
-        }
-      }
-    },
-    "Lasts %lld min" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lasts %lld min"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dure %lld min"
+            "value" : "La dernière fois"
           }
         }
       }
@@ -1520,6 +1520,23 @@
         }
       }
     },
+    "Monthly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les mois"
+          }
+        }
+      }
+    },
     "Morning" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1567,6 +1584,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nom"
+          }
+        }
+      }
+    },
+    "Never" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Never"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jamais"
           }
         }
       }
@@ -1639,6 +1673,40 @@
         }
       }
     },
+    "None" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune"
+          }
+        }
+      }
+    },
+    "Not in rain or snow" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not in rain or snow"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ni sous la pluie ni sous la neige"
+          }
+        }
+      }
+    },
     "Not in the rain" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1652,6 +1720,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas sous la pluie"
+          }
+        }
+      }
+    },
+    "Not in the snow" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not in the snow"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas sous la neige"
           }
         }
       }
@@ -1792,23 +1877,6 @@
         }
       }
     },
-    "On fixed days" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On fixed days"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À jours fixes"
-          }
-        }
-      }
-    },
     "One-time" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1826,23 +1894,6 @@
         }
       }
     },
-    "One-time task" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One-time task"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tâche ponctuelle"
-          }
-        }
-      }
-    },
     "Recurring" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1856,23 +1907,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Récurrentes"
-          }
-        }
-      }
-    },
-    "Recurring task" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recurring task"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tâche récurrente"
           }
         }
       }
@@ -1928,6 +1962,40 @@
         }
       }
     },
+    "Schedule" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planification"
+          }
+        }
+      }
+    },
+    "Send" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer"
+          }
+        }
+      }
+    },
     "Sleep" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1979,53 +2047,36 @@
         }
       }
     },
-    "Step name" : {
+    "Sub task" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Step name"
+            "value" : "Sub task"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom de l’étape"
+            "value" : "Sous-tâche"
           }
         }
       }
     },
-    "Steps" : {
+    "Sub tasks" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Steps"
+            "value" : "Sub tasks"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Étapes"
-          }
-        }
-      }
-    },
-    "Suggested by Tony. Change anything that does not fit." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggested by Tony. Change anything that does not fit."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Proposé par Tony. Change ce qui ne convient pas."
+            "value" : "Sous-tâches"
           }
         }
       }
@@ -2064,23 +2115,6 @@
         }
       }
     },
-    "Tell Tony what to add" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tell Tony what to add"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dis à Tony quoi ajouter"
-          }
-        }
-      }
-    },
     "Tell Tony… “office on Tuesdays and Thursdays, 9 to 5:30”" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2094,23 +2128,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dis à Tony… « bureau le mardi et le jeudi, de 9 h à 17 h 30 »"
-          }
-        }
-      }
-    },
-    "Tell Tony… “water the plants every 5 days”" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tell Tony… “water the plants every 5 days”"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dis à Tony… « arroser les plantes tous les 5 jours »"
           }
         }
       }
@@ -2132,19 +2149,36 @@
         }
       }
     },
-    "Then wait %lld min" : {
+    "Time of day" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Then wait %lld min"
+            "value" : "Time of day"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Puis attendre %lld min"
+            "value" : "Moment de la journée"
+          }
+        }
+      }
+    },
+    "Times a week" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times a week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plusieurs fois par semaine"
           }
         }
       }
@@ -2336,6 +2370,74 @@
         }
       }
     },
+    "Water the plants every 5 days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water the plants every 5 days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arroser les plantes tous les 5 jours"
+          }
+        }
+      }
+    },
+    "Weather" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Météo"
+          }
+        }
+      }
+    },
+    "Weekdays" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekdays"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En semaine"
+          }
+        }
+      }
+    },
+    "Weekly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekly"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les semaines"
+          }
+        }
+      }
+    },
     "When it fits" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2434,6 +2536,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Travail de %1$@ à %2$@"
+          }
+        }
+      }
+    },
+    "Yearly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les ans"
           }
         }
       }

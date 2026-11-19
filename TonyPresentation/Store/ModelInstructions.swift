@@ -7,8 +7,11 @@ enum ModelInstructions {
         prompt("briefing", locale)
     }
 
-    static func task(_ locale: Locale) -> String {
-        prompt("task", locale)
+    /// The task prompt says what today is, so the model can read "by Friday".
+    static func task(_ locale: Locale, now: Date, calendar: Calendar) -> String {
+        var format = Date.FormatStyle(date: .complete, time: .omitted, locale: Locale(identifier: "en_US_POSIX"), calendar: calendar)
+        format.timeZone = calendar.timeZone
+        return prompt("task", locale).replacing("{today}", with: now.formatted(format))
     }
 
     static func routine(_ locale: Locale) -> String {

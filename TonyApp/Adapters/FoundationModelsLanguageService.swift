@@ -11,16 +11,45 @@ struct FoundationModelsLanguageService: LanguageService {
 
     @Generable
     struct TaskOutput {
-        @Guide(description: "The task alone, without how often it repeats")
+        @Guide(description: "The task alone, without how often it repeats, when, where or by when")
         var name: String
-        @Guide(description: "How the task repeats", .anyOf(["everyNDays", "onWeekdays", "timesPerWeek", "once"]))
+        @Guide(description: "One emoji for the task")
+        var icon: String
+        @Guide(description: "How the task repeats", .anyOf(["never", "interval", "weekdays", "timesPerWeek"]))
         var repeats: String
-        @Guide(description: "Days between two times when it repeats everyNDays, otherwise 0", .range(0...365))
-        var days: Int
-        @Guide(description: "Weekdays when it repeats onWeekdays, otherwise empty", .element(.anyOf(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"])))
+        @Guide(description: "How many units between two times when it repeats interval, otherwise 0", .range(0...365))
+        var intervalCount: Int
+        @Guide(description: "The unit of the interval", .anyOf(["day", "week", "month", "year"]))
+        var intervalUnit: String
+        @Guide(description: "What the interval counts from", .anyOf(["lastTimeDone", "fixedSchedule"]))
+        var countedFrom: String
+        @Guide(description: "The month of the first time on a fixed schedule, 0 when it does not say", .range(0...12))
+        var scheduleMonth: Int
+        @Guide(description: "The day of the month of the first time on a fixed schedule, 0 when it does not say", .range(0...31))
+        var scheduleDay: Int
+        @Guide(description: "Weekdays when it repeats weekdays, otherwise empty", .element(.anyOf(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"])))
         var weekdays: [String]
         @Guide(description: "Times per week when it repeats timesPerWeek, otherwise 0", .range(0...7))
         var timesPerWeek: Int
+        @Guide(description: "Where it can be done", .anyOf(["anywhere", "home", "office"]))
+        var place: String
+        @Guide(description: "The times of day it fits, empty for any time", .element(.anyOf(["morning", "workday", "evening"])))
+        var timesOfDay: [String]
+        @Guide(description: "The weather it must avoid, empty for any weather", .element(.anyOf(["rain", "snow"])))
+        var avoidsWeather: [String]
+        @Guide(description: "The steps of a task done in several steps, empty otherwise", .maximumCount(8))
+        var subtasks: [SubtaskOutput]
+        @Guide(description: "The month of the deadline, 0 when there is none", .range(0...12))
+        var deadlineMonth: Int
+        @Guide(description: "The day of the month of the deadline, 0 when there is none", .range(0...31))
+        var deadlineDay: Int
+    }
+
+    @Generable
+    struct SubtaskOutput {
+        var name: String
+        @Guide(description: "How many minutes the step takes", .range(5...480))
+        var minutes: Int
     }
 
     @Generable
@@ -51,16 +80,30 @@ struct FoundationModelsLanguageService: LanguageService {
         try await session(instructions).respond(to: plan, generating: BriefingText.self).content.text
     }
 
-    func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft {
+    func taskReading(instructions: String, sentence: String) async throws -> TaskReading {
         let output = try await session(instructions).respond(to: sentence, generating: TaskOutput.self).content
+        let unit = Cadence.Interval.Unit(rawValue: output.intervalUnit) ?? .day
         let cadence: Cadence? =
             switch output.repeats {
-            case "everyNDays": .every(output.days, .day)
-            case "onWeekdays": .weekdays(Self.weekdays(output.weekdays))
+            case "interval": .every(output.intervalCount, unit)
+            case "weekdays": .weekdays(Self.weekdays(output.weekdays))
             case "timesPerWeek": .timesPerWeek(output.timesPerWeek)
             default: nil
             }
-        return TaskDraft(name: output.name, cadence: cadence)
+        let requirements = Requirements(
+            location: Location(rawValue: output.place),
+            windows: Set(output.timesOfDay.compactMap(Window.init(rawValue:))),
+            avoidedWeather: Set(output.avoidsWeather.compactMap(WeatherCondition.init(rawValue:)))
+        )
+        return TaskReading(
+            name: output.name,
+            icon: output.icon,
+            cadence: cadence,
+            scheduleStart: output.countedFrom == "fixedSchedule" ? Self.day(month: output.scheduleMonth, day: output.scheduleDay) ?? DateComponents() : nil,
+            requirements: requirements,
+            subtasks: output.subtasks.map { StepTemplate(name: $0.name, mode: .active, duration: TimeInterval($0.minutes * 60)) },
+            deadline: Self.day(month: output.deadlineMonth, day: output.deadlineDay)
+        )
     }
 
     func routine(instructions: String, description: String) async throws -> Routine {
@@ -86,6 +129,12 @@ struct FoundationModelsLanguageService: LanguageService {
             "friday": .friday, "saturday": .saturday, "sunday": .sunday,
         ]
         return Set(names.compactMap { weekdays[$0.lowercased()] })
+    }
+
+    /// A day of the month, in a month when there is one; nil when the model gave no day.
+    private static func day(month: Int, day: Int) -> DateComponents? {
+        guard day > 0 else { return nil }
+        return DateComponents(month: month > 0 ? month : nil, day: day)
     }
 
     private static func time(_ output: TimeOutput) -> DateComponents {

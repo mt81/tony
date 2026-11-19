@@ -9,8 +9,6 @@ public enum TasksFeature: Feature {
         public var tasks: [TonyTask] = []
         public var completions: [Completion] = []
         public var editor: TaskEditor.State?
-        /// The sentence being typed in the quick-add field.
-        public var quickAdd = ""
         public var hasFailed = false
 
         public init() {}
@@ -22,9 +20,6 @@ public enum TasksFeature: Feature {
         case failed
         case alertDismissed
         case addTapped(id: UUID, stepID: UUID, now: Date)
-        case quickAddChanged(String)
-        case quickAddSubmitted(id: UUID, stepID: UUID, now: Date)
-        case sentenceRead(TaskDraft, id: UUID, stepID: UUID, now: Date)
         case rowTapped(id: UUID, now: Date)
         case moved(kind: TonyTask.Kind, from: IndexSet, to: Int)
         case deleteTapped(id: UUID)
@@ -40,17 +35,17 @@ public enum TasksFeature: Feature {
         case delete(id: UUID)
         case reorder([UUID])
         case editor(TaskEditor.Effect)
-        case read(sentence: String, id: UUID, stepID: UUID, now: Date)
     }
 
     @MemberwiseInit(.public)
     public struct Environment: Sendable {
         public var repository: any Repository
         public var catalog: (any TaskCatalog)?
-        /// Reads the sentences the rules do not understand; nil when there is no model.
+        /// Reads the sentence a new task is typed in, with the rules; nil when there is no model.
         public var languageService: (any LanguageService)? = nil
-        /// The language the catalogue answers in.
+        /// The language the catalogue answers in and sentences are read in.
         public var locale: Locale
+        public var calendar: Calendar
         /// How long typing must pause before the catalogue is asked.
         public var suggestionDelay: Duration = .milliseconds(400)
     }
@@ -72,18 +67,6 @@ public enum TasksFeature: Feature {
             state.hasFailed = false
         case .addTapped(let id, let stepID, let now):
             state.editor = .newTask(id: id, stepID: stepID, now: now)
-        case .quickAddChanged(let sentence):
-            state.quickAdd = sentence
-        case .quickAddSubmitted(let id, let stepID, let now):
-            let sentence = state.quickAdd.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !sentence.isEmpty else { break }
-            return [.read(sentence: sentence, id: id, stepID: stepID, now: now)]
-        case .sentenceRead(let draft, let id, let stepID, let now):
-            var editor = TaskEditor.State.newTask(id: id, stepID: stepID, now: now)
-            let effects = TaskEditor.fill(&editor, with: draft)
-            state.editor = editor
-            state.quickAdd = ""
-            return effects.map(Effect.editor)
         case .rowTapped(let id, let now):
             if let task = state.tasks.first(where: { $0.id == id }) {
                 state.editor = TaskEditor.State(task: task, isNew: false, today: now)
@@ -146,15 +129,15 @@ public enum TasksFeature: Feature {
                 after: environment.suggestionDelay
             )
             return action.map { .editor($0) }
-        case .read(let sentence, let id, let stepID, let now):
-            let locale = environment.locale
-            let draft = await TaskSentenceParser.draft(
-                from: sentence,
-                locale: locale,
-                instructions: ModelInstructions.task(locale),
+        case .editor(.read(let sentence, let now)):
+            let action = await TaskEditor.read(
+                sentence: sentence,
+                now: now,
+                calendar: environment.calendar,
+                locale: environment.locale,
                 service: environment.languageService
             )
-            return .sentenceRead(draft, id: id, stepID: stepID, now: now)
+            return .editor(action)
         }
     }
 

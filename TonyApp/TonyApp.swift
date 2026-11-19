@@ -59,13 +59,14 @@ struct AppStores {
                 briefingWriter: BriefingWriter(service: languageService),
                 repository: repository,
                 catalog: catalog,
+                languageService: languageService,
                 calendar: .current,
                 locale: .current
             )
         )
         tasks = Store(
             state: TasksFeature.State(),
-            environment: TasksFeature.Environment(repository: repository, catalog: catalog, languageService: languageService, locale: .current)
+            environment: TasksFeature.Environment(repository: repository, catalog: catalog, languageService: languageService, locale: .current, calendar: .current)
         )
         you = YouStore(
             repository: repository,

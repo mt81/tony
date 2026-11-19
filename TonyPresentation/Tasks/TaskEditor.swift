@@ -1,49 +1,73 @@
 import Foundation
 import TonyCore
 
-/// The task form. The feature that shows it (Tasks, Today) saves the task and looks up its steps.
+/// The task form. A new task starts from a sentence the user types; the form then shows what Tony read, to review.
+/// The feature that shows it (Tasks, Today) saves the task, reads the sentence and looks up the steps.
 public enum TaskEditor {
-    public enum CadenceKind: String, Sendable, CaseIterable {
-        case interval
+    public enum Stage: Sendable, Equatable {
+        /// The user types the task in one sentence.
+        case composing
+        /// The sentence is being read.
+        case reading
+        /// The form shows the task, to review and change.
+        case reviewing
+    }
+
+    /// The choices of the Repeats list. `custom` is any other cadence.
+    public enum Repeats: String, Sendable, CaseIterable {
+        case never
+        case everyDay
         case weekdays
-        case timesPerWeek
+        case everyWeek
+        case everyTwoWeeks
+        case everyMonth
+        case everyYear
+        case timesAWeek
+        case custom
     }
 
     public struct State: Sendable, Equatable {
         public var task: TonyTask
         public var isNew: Bool
-        public var cadenceKind: CadenceKind
-        public var interval: Cadence.Interval
+        public var stage: Stage
+        /// The sentence typed in the composer.
+        public var sentence: String
+        public var today: Date
+        /// What an interval counts from, kept while the user tries other choices.
         public var countedFrom: Cadence.Anchor
-        public var weekdays: Set<Locale.Weekday>
+        /// The weekly goal, kept while the user tries other choices.
         public var timesPerWeek: Int
+        /// Custom was picked, so its choices show even when they match a preset.
+        public var isCustom: Bool
         public var hasDeadline: Bool
         public var deadline: Date
         /// The steps the task started with, which the catalogue may replace while they are untouched.
         public var initialSteps: [Step]
         public var suggestedSteps: [Step]?
 
+        /// An existing task opens on the form.
         public init(task: TonyTask, isNew: Bool, today: Date) {
             self.task = task
             self.isNew = isNew
+            self.today = today
+            stage = isNew ? .composing : .reviewing
+            sentence = ""
             hasDeadline = task.mustHappenBy != nil
             deadline = task.mustHappenBy ?? today
             initialSteps = task.steps
             suggestedSteps = nil
-            cadenceKind = .interval
-            interval = Cadence.Interval(count: 1, unit: .week)
             countedFrom = .lastCompletion
-            weekdays = []
             timesPerWeek = 3
+            isCustom = false
             switch task.cadence {
-            case .interval(let taskInterval, let anchor): (interval, countedFrom) = (taskInterval, anchor)
-            case .weekdays(let days): (cadenceKind, weekdays) = (.weekdays, days)
-            case .timesPerWeek(let times): (cadenceKind, timesPerWeek) = (.timesPerWeek, times)
-            case nil: break
+            case .interval(_, let anchor): countedFrom = anchor
+            case .timesPerWeek(let times): timesPerWeek = times
+            case .weekdays, nil: break
             }
+            isCustom = preset == .custom
         }
 
-        /// A blank recurring task with the one step every task has.
+        /// A blank task with the one step every task has, opening on the composer.
         public static func newTask(id: UUID, stepID: UUID, now: Date) -> State {
             let task = TonyTask(
                 id: id,
@@ -62,103 +86,172 @@ public enum TaskEditor {
             task.name.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
+        public var trimmedSentence: String {
+            sentence.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
         public var isValid: Bool {
-            let needsWeekdays = task.kind != .oneTime && cadenceKind == .weekdays
-            return !trimmedName.isEmpty && !(needsWeekdays && weekdays.isEmpty)
+            guard stage == .reviewing, !trimmedName.isEmpty else { return false }
+            if case .weekdays(let weekdays) = task.cadence {
+                return !weekdays.isEmpty
+            }
+            return true
         }
 
         public var stepsAreUntouched: Bool {
             task.steps == initialSteps || task.steps == suggestedSteps
         }
 
-        public var showsSuggestion: Bool {
-            suggestedSteps != nil && task.steps == suggestedSteps
+        public var repeats: Repeats {
+            isCustom ? .custom : preset
         }
 
-        /// The task as the form describes it: cadence and deadline folded in, unnamed steps named after the task.
+        /// The choice the cadence matches; custom when it matches none.
+        var preset: Repeats {
+            switch task.cadence {
+            case nil: .never
+            case .timesPerWeek: .timesAWeek
+            case .weekdays(let weekdays): weekdays == TaskEditor.workweek ? .weekdays : .custom
+            case .interval(let interval, _):
+                switch (interval.count, interval.unit) {
+                case (1, .day): .everyDay
+                case (1, .week): .everyWeek
+                case (2, .week): .everyTwoWeeks
+                case (1, .month): .everyMonth
+                case (1, .year): .everyYear
+                default: .custom
+                }
+            }
+        }
+
+        /// The task as the form describes it: kind and deadline folded in, unnamed steps named after the task.
         public var editedTask: TonyTask {
             var edited = task
             edited.name = trimmedName
+            edited.kind = TonyTask.Kind(cadence: task.cadence)
             edited.mustHappenBy = hasDeadline ? deadline : nil
-            edited.cadence =
-                if task.kind == .oneTime {
-                    nil
-                } else {
-                    switch cadenceKind {
-                    case .interval: .interval(interval, countedFrom: countedFrom)
-                    case .weekdays: .weekdays(weekdays)
-                    case .timesPerWeek: .timesPerWeek(timesPerWeek)
-                    }
-                }
             for index in edited.steps.indices where edited.steps[index].name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 edited.steps[index].name = trimmedName
             }
             return edited
         }
+
+        fileprivate mutating func setInterval(_ interval: Cadence.Interval) {
+            task.cadence = .interval(interval, countedFrom: countedFrom)
+        }
     }
 
     public enum Action: Sendable, Equatable {
+        case sentenceChanged(String)
+        case sentenceSent
+        /// What Tony read in the sentence.
+        case sentenceRead(TaskDraft, stepIDs: [UUID])
         case nameChanged(String)
         case iconChanged(String)
-        case kindChanged(TonyTask.Kind)
-        case cadenceKindChanged(CadenceKind)
+        case repeatsChanged(Repeats)
+        case timesPerWeekChanged(Int)
+        case customUnitChanged(Cadence.Interval.Unit)
         case intervalCountChanged(Int)
         case weekdayToggled(Locale.Weekday, isOn: Bool)
-        case timesPerWeekChanged(Int)
+        case countedFromChanged(isFixed: Bool)
+        case scheduleStartChanged(Date)
+        case deadlineToggled(Bool)
+        case deadlineChanged(Date)
         case locationChanged(Location?)
-        case windowToggled(Window, isOn: Bool)
-        case avoidsRainToggled(Bool)
-        case costsMoneyToggled(Bool)
+        /// A time of day turned on or off; nil is "Any time", which clears them.
+        case windowToggled(Window?, isOn: Bool)
+        /// Weather to avoid turned on or off; nil is "Any weather", which clears it.
+        case weatherToggled(WeatherCondition?, isOn: Bool)
         case stepNameChanged(id: UUID, name: String)
-        case stepModeChanged(id: UUID, mode: Step.Mode)
         case stepMinutesChanged(id: UUID, minutes: Int)
-        case stepGapChanged(id: UUID, minutes: Int)
         case stepAdded(id: UUID)
         case stepsMoved(from: IndexSet, to: Int)
         case stepsDeleted(IndexSet)
-        case deadlineToggled(Bool)
-        case deadlineChanged(Date)
         /// The catalogue's answer for a name; nil when it does not know it.
         case stepsSuggested(forName: String, steps: [Step]?)
     }
 
     public enum Effect: Sendable, Equatable {
+        case read(sentence: String, now: Date)
         case suggestSteps(forName: String)
     }
 
+    static let workweek: Set<Locale.Weekday> = [.monday, .tuesday, .wednesday, .thursday, .friday]
+
     public static func reduce(_ state: inout State, _ action: Action) -> [Effect] {
         switch action {
+        case .sentenceChanged(let sentence):
+            // The composer grows over several lines, so return types a line break: it sends instead.
+            guard sentence.contains(where: \.isNewline) else {
+                state.sentence = sentence
+                break
+            }
+            state.sentence = String(sentence.filter { !$0.isNewline })
+            return reduce(&state, .sentenceSent)
+        case .sentenceSent:
+            guard state.stage == .composing, !state.trimmedSentence.isEmpty else { break }
+            state.stage = .reading
+            return [.read(sentence: state.trimmedSentence, now: state.today)]
+        case .sentenceRead(let draft, let stepIDs):
+            guard state.stage == .reading else { break }
+            return fill(&state, with: draft, stepIDs: stepIDs)
         case .nameChanged(let name):
-            state.task.name = name
+            // The name field grows over several lines; a name stays on one.
+            state.task.name = String(name.filter { !$0.isNewline })
             return state.isNew && state.stepsAreUntouched ? [.suggestSteps(forName: state.trimmedName)] : []
         case .iconChanged(let icon):
             state.task.icon = icon
-        case .kindChanged(let kind):
-            state.task.kind = kind
-        case .cadenceKindChanged(let kind):
-            state.cadenceKind = kind
-        case .intervalCountChanged(let count):
-            state.interval.count = count
-        case .weekdayToggled(let weekday, let isOn):
-            state.weekdays.set(weekday, isOn)
+        case .repeatsChanged(let repeats):
+            apply(repeats, to: &state)
         case .timesPerWeekChanged(let times):
             state.timesPerWeek = times
+            state.task.cadence = .timesPerWeek(times)
+        case .customUnitChanged(let unit):
+            let count = state.task.cadence?.interval?.count ?? 1
+            state.setInterval(Cadence.Interval(count: min(count, unit.maximumCount), unit: unit))
+        case .intervalCountChanged(let count):
+            guard let interval = state.task.cadence?.interval else { break }
+            state.setInterval(Cadence.Interval(count: count, unit: interval.unit))
+        case .weekdayToggled(let weekday, let isOn):
+            var weekdays: Set<Locale.Weekday> = if case .weekdays(let days) = state.task.cadence { days } else { [] }
+            weekdays.set(weekday, isOn)
+            if weekdays.isEmpty {
+                state.setInterval(Cadence.Interval(count: 1, unit: .week))
+            } else {
+                state.task.cadence = .weekdays(weekdays)
+            }
+        case .countedFromChanged(let isFixed):
+            state.countedFrom = isFixed ? .schedule(from: state.today) : .lastCompletion
+            if let interval = state.task.cadence?.interval {
+                state.setInterval(interval)
+            }
+        case .scheduleStartChanged(let date):
+            state.countedFrom = .schedule(from: date)
+            if let interval = state.task.cadence?.interval {
+                state.setInterval(interval)
+            }
+        case .deadlineToggled(let isOn):
+            state.hasDeadline = isOn
+        case .deadlineChanged(let date):
+            state.deadline = date
         case .locationChanged(let location):
             state.task.requirements.location = location
         case .windowToggled(let window, let isOn):
-            state.task.requirements.windows.set(window, isOn)
-        case .avoidsRainToggled(let isOn):
-            state.task.requirements.avoidedWeather.set(.rain, isOn)
-        case .costsMoneyToggled(let isOn):
-            state.task.requirements.costsMoney = isOn
+            if let window {
+                state.task.requirements.windows.set(window, isOn)
+            } else if isOn {
+                state.task.requirements.windows = []
+            }
+        case .weatherToggled(let condition, let isOn):
+            if let condition {
+                state.task.requirements.avoidedWeather.set(condition, isOn)
+            } else if isOn {
+                state.task.requirements.avoidedWeather = []
+            }
         case .stepNameChanged(let id, let name):
             state.updateStep(id) { $0.name = name }
-        case .stepModeChanged(let id, let mode):
-            state.updateStep(id) { $0.mode = mode }
         case .stepMinutesChanged(let id, let minutes):
             state.updateStep(id) { $0.duration = TimeInterval(minutes * 60) }
-        case .stepGapChanged(let id, let minutes):
-            state.updateStep(id) { $0.minimumGapToNextStep = TimeInterval(minutes * 60) }
         case .stepAdded(let id):
             state.task.steps.append(Step(id: id, name: "", mode: .active, duration: 30 * 60))
         case .stepsMoved(let source, let destination):
@@ -167,10 +260,6 @@ public enum TaskEditor {
             if state.task.steps.count > offsets.count {
                 state.task.steps.remove(atOffsets: offsets)
             }
-        case .deadlineToggled(let isOn):
-            state.hasDeadline = isOn
-        case .deadlineChanged(let date):
-            state.deadline = date
         case .stepsSuggested(let name, let steps):
             guard state.isNew, name == state.trimmedName, state.stepsAreUntouched else { break }
             if let steps, !steps.isEmpty {
@@ -183,19 +272,78 @@ public enum TaskEditor {
         }
         return []
     }
+
+    private static func apply(_ repeats: Repeats, to state: inout State) {
+        state.isCustom = repeats == .custom
+        switch repeats {
+        case .never: state.task.cadence = nil
+        case .everyDay: state.setInterval(Cadence.Interval(count: 1, unit: .day))
+        case .weekdays: state.task.cadence = .weekdays(workweek)
+        case .everyWeek: state.setInterval(Cadence.Interval(count: 1, unit: .week))
+        case .everyTwoWeeks: state.setInterval(Cadence.Interval(count: 2, unit: .week))
+        case .everyMonth: state.setInterval(Cadence.Interval(count: 1, unit: .month))
+        case .everyYear: state.setInterval(Cadence.Interval(count: 1, unit: .year))
+        case .timesAWeek: state.task.cadence = .timesPerWeek(state.timesPerWeek)
+        case .custom:
+            // Custom starts from what is there; from never or a weekly goal, it starts every 2 days.
+            if state.task.cadence == nil || state.preset == .timesAWeek {
+                state.setInterval(Cadence.Interval(count: 2, unit: .day))
+            }
+        }
+    }
+
+    /// Fills a new task's form with what was read in the sentence, and shows the form.
+    /// Sub tasks the sentence gave stand, with these ids; otherwise the catalogue is asked for the steps.
+    static func fill(_ state: inout State, with draft: TaskDraft, stepIDs: [UUID]) -> [Effect] {
+        state.stage = .reviewing
+        state.task.cadence = draft.cadence
+        state.isCustom = state.preset == .custom
+        if case .interval(_, let anchor) = draft.cadence {
+            state.countedFrom = anchor
+        }
+        if case .timesPerWeek(let times) = draft.cadence {
+            state.timesPerWeek = times
+        }
+        state.task.icon = draft.icon ?? state.task.icon
+        state.task.requirements = draft.requirements
+        if let deadline = draft.deadline {
+            state.hasDeadline = true
+            state.deadline = deadline
+        }
+        if !draft.subtasks.isEmpty, draft.subtasks.count == stepIDs.count {
+            state.task.name = draft.name
+            state.task.steps = zip(draft.subtasks, stepIDs).map { $0.step(id: $1) }
+            state.initialSteps = state.task.steps
+            return []
+        }
+        return reduce(&state, .nameChanged(draft.name))
+    }
 }
 
 extension TaskEditor {
-    /// Fills a new task's form from a sentence the user typed: name, kind and cadence. The user still confirms it.
-    static func fill(_ state: inout State, with draft: TaskDraft) -> [Effect] {
-        state.task.kind = draft.kind
-        switch draft.cadence {
-        case .interval(let interval, let anchor): (state.cadenceKind, state.interval, state.countedFrom) = (.interval, interval, anchor)
-        case .weekdays(let weekdays): (state.cadenceKind, state.weekdays) = (.weekdays, weekdays)
-        case .timesPerWeek(let times): (state.cadenceKind, state.timesPerWeek) = (.timesPerWeek, times)
-        case nil: break
-        }
-        return reduce(&state, .nameChanged(draft.name))
+    /// Reads the sentence the user typed: the rules, then the model when there is one.
+    static func read(
+        sentence: String,
+        now: Date,
+        calendar: Calendar,
+        locale: Locale,
+        service: (any LanguageService)?
+    ) async -> Action {
+        let draft = await TaskSentenceParser.draft(
+            from: sentence,
+            locale: locale,
+            instructions: ModelInstructions.task(locale, now: now, calendar: calendar),
+            service: service,
+            now: now,
+            calendar: calendar
+        )
+        return .sentenceRead(draft, stepIDs: draft.subtasks.map { _ in UUID() })
+    }
+}
+
+extension Cadence {
+    var interval: Interval? {
+        if case .interval(let interval, _) = self { interval } else { nil }
     }
 }
 

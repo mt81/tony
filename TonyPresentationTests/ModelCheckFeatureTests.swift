@@ -26,9 +26,9 @@ private struct ObedientService: LanguageService {
         return request.items.isEmpty ? "Nothing needs you today." : request.items.map(\.title).joined(separator: ", ")
     }
 
-    func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft {
-        guard case .task(_, _, let cadence) = try evaluationCase(input: sentence).kind else { return TaskDraft(name: "", cadence: nil) }
-        return TaskDraft(name: sentence, cadence: cadence)
+    func taskReading(instructions: String, sentence: String) async throws -> TaskReading {
+        guard case .task(_, _, let cadence) = try evaluationCase(input: sentence).kind else { return TaskReading(name: "") }
+        return TaskReading(name: sentence, cadence: cadence)
     }
 
     func routine(instructions: String, description: String) async throws -> Routine {
@@ -89,7 +89,7 @@ private func store(failing: Set<String> = []) -> Store<ModelCheckFeature> {
 @Test func aBriefingIsCheckedLikeInTheApp() async throws {
     struct Inventing: LanguageService {
         func briefing(instructions: String, plan: String) async throws -> String { "Water the plants at 9:15, then vacuum." }
-        func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft { TaskDraft(name: "Feed the cat", cadence: .timesPerWeek(2)) }
+        func taskReading(instructions: String, sentence: String) async throws -> TaskReading { TaskReading(name: "Feed the cat", cadence: .timesPerWeek(2)) }
         func routine(instructions: String, description: String) async throws -> Routine {
             var routine = Routine.standard
             routine.workEnd = DateComponents(hour: 6, minute: 0)

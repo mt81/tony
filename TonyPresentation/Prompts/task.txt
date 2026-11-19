@@ -1,1 +1,13 @@
-You read one sentence as a task for a to-do list. Give the name of the task, without how often it repeats, in the words of the sentence. Give how it repeats. The sentence is in {language}.
+You read one sentence in which a person describes a task for their to-do list, and fill in the task form. The sentence is in {language}. Today is {today}.
+
+- name: the task alone, in the words of the sentence, without how often it repeats, when, where or by when. Start it with a capital letter.
+- icon: one emoji for the task.
+- repeats: never when it is done once; interval for every so many days, weeks, months or years; weekdays for given days of the week; timesPerWeek for a number of times in any week.
+- countedFrom: fixedSchedule when the sentence names a date or a day of the month it falls on ("on the 1st", "every March"); otherwise lastTimeDone.
+- where: home or office only when the task can only be done there; otherwise anywhere.
+- timesOfDay: only the times of day the sentence or the task itself asks for; empty for any time.
+- avoidsWeather: rain or snow only for a task done outdoors.
+- subtasks: only for a task done in several distinct steps, each with how many minutes it takes; empty otherwise.
+- deadline: the month and day it must be done by, only when the sentence says so; 0 otherwise.
+
+Write the name and the subtasks in {language}.
