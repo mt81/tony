@@ -20,8 +20,16 @@ struct TaskSummary: Equatable {
     private static func cadenceText(for task: TonyTask, context: PresentationContext) -> String {
         let locale = context.locale
         switch task.cadence {
-        case .afterCompletion(let days):
-            return localized("Every \(days) days after last time", locale)
+        case .interval(let interval, .lastCompletion):
+            let count = interval.count
+            return switch interval.unit {
+            case .day: localized("Every \(count) days after last time", locale)
+            case .week: localized("Every \(count) weeks after last time", locale)
+            case .month: localized("Every \(count) months after last time", locale)
+            case .year: localized("Every \(count) years after last time", locale)
+            }
+        case .interval(let interval, .schedule):
+            return interval.text(locale: locale)
         case .weekdays(let weekdays):
             let names = context.calendar.orderedWeekdays(locale: locale)
                 .filter { weekdays.contains($0.weekday) }
@@ -68,6 +76,18 @@ struct TaskSummary: Equatable {
             return localized("Done", locale)
         }
         return localized("In \(days) days", locale)
+    }
+}
+
+extension Cadence.Interval {
+    /// "Every 2 weeks", "Every month".
+    func text(locale: Locale) -> String {
+        switch unit {
+        case .day: localized("Every \(count) days", locale)
+        case .week: localized("Every \(count) weeks", locale)
+        case .month: localized("Every \(count) months", locale)
+        case .year: localized("Every \(count) years", locale)
+        }
     }
 }
 

@@ -112,6 +112,29 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 }
 
 @MainActor
+@Test func rowsNameTheIntervalAndWhatItCountsFrom() throws {
+    var state = TasksFeature.State()
+    let fixedMonthly = Cadence.interval(Cadence.Interval(count: 1, unit: .month), countedFrom: .schedule(from: try Sample.november(1)))
+    let tasks = [
+        try Sample.task(1, "Sheets", cadence: .every(2, .week)),
+        try Sample.task(2, "Kettle", cadence: .every(3, .month)),
+        try Sample.task(3, "Boiler", cadence: .every(1, .year)),
+        try Sample.task(4, "Rent", cadence: fixedMonthly),
+    ]
+    _ = TasksFeature.reduce(&state, .loaded(tasks: tasks, completions: []))
+
+    let (english, _) = try dataModel(state)
+    let (french, _) = try dataModel(state, language: "fr")
+
+    #expect(english.sections[0].rows.map(\.subtitle) == [
+        "Every 2 weeks after last time", "Every 3 months after last time", "Every year after last time", "Every month",
+    ])
+    #expect(french.sections[0].rows.map(\.subtitle) == [
+        "Toutes les 2 semaines après la dernière fois", "Tous les 3 mois après la dernière fois", "Chaque année après la dernière fois", "Tous les mois",
+    ])
+}
+
+@MainActor
 @Test func aNeglectedTaskShowsDueInTheWarningStyle() throws {
     var state = TasksFeature.State()
     let plants = try Sample.task(1, "Plants")
@@ -149,7 +172,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     #expect(blankEditor.title == "New task")
     #expect(blankEditor.delete == nil)
     #expect(!blankEditor.save.isEnabled)
-    #expect(blankEditor.cadence?.count?.title == "Every 7 days")
+    #expect(blankEditor.cadence?.count?.title == "Every week")
 
     _ = TasksFeature.reduce(&state, .editor(.nameChanged("Plants")))
     _ = TasksFeature.reduce(&state, .editor(.cadenceKindChanged(.weekdays)))
@@ -267,7 +290,7 @@ private func quickAdd(_ sentence: String, language: String = "en", languageServi
     #expect(editor.title == "New task")
     #expect(editor.name.text == "Water the plants")
     #expect(editor.kind.selectedID == TonyTask.Kind.recurring.rawValue)
-    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.afterCompletion.rawValue)
+    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.interval.rawValue)
     #expect(editor.cadence?.count?.title == "Every 5 days")
     #expect(editor.save.isEnabled)
     #expect(store.state.quickAdd.isEmpty)
@@ -279,7 +302,7 @@ private func quickAdd(_ sentence: String, language: String = "en", languageServi
     let (_, editor) = try await quickAdd("Arroser les plantes tous les 5 jours", language: "fr")
 
     #expect(editor.name.text == "Arroser les plantes")
-    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.afterCompletion.rawValue)
+    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.interval.rawValue)
     #expect(editor.cadence?.count?.title == "Tous les 5 jours")
 }
 
@@ -300,7 +323,7 @@ private func quickAdd(_ sentence: String, language: String = "en", languageServi
 
 @MainActor
 @Test func theModelIsAskedOnlyForWhatTheRulesDoNotRead() async throws {
-    let service = FakeLanguageService(draft: TaskDraft(name: "Water the plants", cadence: .afterCompletion(days: 3)))
+    let service = FakeLanguageService(draft: TaskDraft(name: "Water the plants", cadence: .every(3, .day)))
 
     let (_, byRules) = try await quickAdd("Water the plants every 5 days", languageService: service)
     let (_, byModel) = try await quickAdd("Water the plants every couple of days", languageService: service)

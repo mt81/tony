@@ -55,7 +55,7 @@ struct FoundationModelsLanguageService: LanguageService {
         let output = try await session(instructions).respond(to: sentence, generating: TaskOutput.self).content
         let cadence: Cadence? =
             switch output.repeats {
-            case "everyNDays": .afterCompletion(days: output.days)
+            case "everyNDays": .every(output.days, .day)
             case "onWeekdays": .weekdays(Self.weekdays(output.weekdays))
             case "timesPerWeek": .timesPerWeek(output.timesPerWeek)
             default: nil

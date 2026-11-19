@@ -29,7 +29,7 @@ enum Sample {
         _ number: Int,
         _ name: String,
         kind: TonyTask.Kind = .recurring,
-        cadence: Cadence? = .afterCompletion(days: 5),
+        cadence: Cadence? = .every(5, .day),
         mustHappenBy: Date? = nil
     ) throws -> TonyTask {
         TonyTask(

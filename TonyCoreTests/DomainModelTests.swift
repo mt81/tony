@@ -25,12 +25,16 @@ private func expectRoundTrip<Value: Codable & Sendable & Equatable>(_ value: Val
 }
 
 @Test(arguments: [
-    Cadence.afterCompletion(days: 5),
+    Cadence.every(5, .day),
     Cadence.weekdays([.monday, .thursday]),
     Cadence.timesPerWeek(3),
 ])
 func cadenceRoundTrips(cadence: Cadence) throws {
     try expectRoundTrip(cadence)
+}
+
+@Test func fixedScheduleRoundTrips() throws {
+    try expectRoundTrip(Cadence.interval(Cadence.Interval(count: 1, unit: .month), countedFrom: .schedule(from: try Fixtures.november(15))))
 }
 
 @Test(arguments: Completion.Outcome.allCases)

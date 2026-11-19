@@ -106,8 +106,8 @@ private let suggested = [
 }
 
 @Test(arguments: [
-    (name: "", cadence: TaskEditor.CadenceKind.afterCompletion, weekday: false, isValid: false),
-    (name: "Plants", cadence: .afterCompletion, weekday: false, isValid: true),
+    (name: "", cadence: TaskEditor.CadenceKind.interval, weekday: false, isValid: false),
+    (name: "Plants", cadence: .interval, weekday: false, isValid: true),
     (name: "Plants", cadence: .weekdays, weekday: false, isValid: false),
     (name: "Plants", cadence: .weekdays, weekday: true, isValid: true),
 ])

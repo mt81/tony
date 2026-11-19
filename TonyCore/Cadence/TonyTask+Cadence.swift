@@ -50,8 +50,8 @@ extension TonyTask {
 
     private var periodInDays: Double? {
         switch cadence {
-        case .afterCompletion(let days) where days > 0:
-            Double(days)
+        case .interval(let interval, _) where interval.count > 0:
+            Double(interval.count) * interval.unit.approximateDays
         case .weekdays(let weekdays) where !weekdays.isEmpty:
             7 / Double(weekdays.count)
         case .timesPerWeek(let target) where target > 0:
@@ -71,9 +71,12 @@ extension TonyTask {
         switch cadence {
         case nil:
             return lastDoneDay == nil ? createdDay : nil
-        case .afterCompletion(let days) where days > 0:
+        case .interval(let interval, .lastCompletion) where interval.count > 0:
             guard let lastDoneDay else { return createdDay }
-            return calendar.date(byAdding: .day, value: days, to: lastDoneDay)
+            return calendar.date(byAdding: interval.unit.component, value: interval.count, to: lastDoneDay)
+        case .interval(let interval, .schedule(let start)) where interval.count > 0:
+            let firstCandidate = lastDoneDay.flatMap { calendar.date(byAdding: .day, value: 1, to: $0) } ?? createdDay
+            return firstOccurrence(of: interval, from: calendar.startOfDay(for: start), onOrAfter: firstCandidate, calendar: calendar)
         case .weekdays(let weekdays) where !weekdays.isEmpty:
             let firstCandidate = lastDoneDay.flatMap { calendar.date(byAdding: .day, value: 1, to: $0) } ?? createdDay
             return (0..<7)
@@ -84,6 +87,20 @@ extension TonyTask {
         default:
             return nil
         }
+    }
+
+    /// Each occurrence is counted from the start, so the 31st of every month falls on the last day of shorter months.
+    private func firstOccurrence(of interval: Cadence.Interval, from start: Date, onOrAfter day: Date, calendar: Calendar) -> Date? {
+        func occurrence(_ index: Int) -> Date? {
+            calendar.date(byAdding: interval.unit.component, value: index * interval.count, to: start)
+        }
+        guard day > start else { return start }
+        let unitsSinceStart = calendar.dateComponents([interval.unit.component], from: start, to: day).value(for: interval.unit.component) ?? 0
+        var index = max(0, unitsSinceStart / interval.count)
+        while let date = occurrence(index), date < day {
+            index += 1
+        }
+        return occurrence(index)
     }
 
     private func doneDates(completions: [Completion], upTo day: Date, calendar: Calendar) -> [Date] {

@@ -11,7 +11,7 @@ public struct TaskDraft: Sendable, Hashable {
     public var kind: TonyTask.Kind {
         switch cadence {
         case .timesPerWeek: .goal
-        case .afterCompletion, .weekdays: .recurring
+        case .interval, .weekdays: .recurring
         case nil: .oneTime
         }
     }

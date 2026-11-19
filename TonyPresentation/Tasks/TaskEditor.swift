@@ -4,7 +4,7 @@ import TonyCore
 /// The task form. The feature that shows it (Tasks, Today) saves the task and looks up its steps.
 public enum TaskEditor {
     public enum CadenceKind: String, Sendable, CaseIterable {
-        case afterCompletion
+        case interval
         case weekdays
         case timesPerWeek
     }
@@ -13,7 +13,8 @@ public enum TaskEditor {
         public var task: TonyTask
         public var isNew: Bool
         public var cadenceKind: CadenceKind
-        public var everyDays: Int
+        public var interval: Cadence.Interval
+        public var countedFrom: Cadence.Anchor
         public var weekdays: Set<Locale.Weekday>
         public var timesPerWeek: Int
         public var hasDeadline: Bool
@@ -29,12 +30,13 @@ public enum TaskEditor {
             deadline = task.mustHappenBy ?? today
             initialSteps = task.steps
             suggestedSteps = nil
-            cadenceKind = .afterCompletion
-            everyDays = 7
+            cadenceKind = .interval
+            interval = Cadence.Interval(count: 1, unit: .week)
+            countedFrom = .lastCompletion
             weekdays = []
             timesPerWeek = 3
             switch task.cadence {
-            case .afterCompletion(let days): everyDays = days
+            case .interval(let taskInterval, let anchor): (interval, countedFrom) = (taskInterval, anchor)
             case .weekdays(let days): (cadenceKind, weekdays) = (.weekdays, days)
             case .timesPerWeek(let times): (cadenceKind, timesPerWeek) = (.timesPerWeek, times)
             case nil: break
@@ -49,7 +51,7 @@ public enum TaskEditor {
                 icon: "✅",
                 kind: .recurring,
                 rank: 0,
-                cadence: .afterCompletion(days: 7),
+                cadence: .every(1, .week),
                 steps: [Step(id: stepID, name: "", mode: .active, duration: 30 * 60)],
                 createdAt: now
             )
@@ -83,7 +85,7 @@ public enum TaskEditor {
                     nil
                 } else {
                     switch cadenceKind {
-                    case .afterCompletion: .afterCompletion(days: everyDays)
+                    case .interval: .interval(interval, countedFrom: countedFrom)
                     case .weekdays: .weekdays(weekdays)
                     case .timesPerWeek: .timesPerWeek(timesPerWeek)
                     }
@@ -100,7 +102,7 @@ public enum TaskEditor {
         case iconChanged(String)
         case kindChanged(TonyTask.Kind)
         case cadenceKindChanged(CadenceKind)
-        case everyDaysChanged(Int)
+        case intervalCountChanged(Int)
         case weekdayToggled(Locale.Weekday, isOn: Bool)
         case timesPerWeekChanged(Int)
         case locationChanged(Location?)
@@ -135,8 +137,8 @@ public enum TaskEditor {
             state.task.kind = kind
         case .cadenceKindChanged(let kind):
             state.cadenceKind = kind
-        case .everyDaysChanged(let days):
-            state.everyDays = days
+        case .intervalCountChanged(let count):
+            state.interval.count = count
         case .weekdayToggled(let weekday, let isOn):
             state.weekdays.set(weekday, isOn)
         case .timesPerWeekChanged(let times):
@@ -188,7 +190,7 @@ extension TaskEditor {
     static func fill(_ state: inout State, with draft: TaskDraft) -> [Effect] {
         state.task.kind = draft.kind
         switch draft.cadence {
-        case .afterCompletion(let days): (state.cadenceKind, state.everyDays) = (.afterCompletion, days)
+        case .interval(let interval, let anchor): (state.cadenceKind, state.interval, state.countedFrom) = (.interval, interval, anchor)
         case .weekdays(let weekdays): (state.cadenceKind, state.weekdays) = (.weekdays, weekdays)
         case .timesPerWeek(let times): (state.cadenceKind, state.timesPerWeek) = (.timesPerWeek, times)
         case nil: break

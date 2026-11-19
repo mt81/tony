@@ -104,7 +104,7 @@ private func store(failing: Set<String> = []) -> Store<ModelCheckFeature> {
     #expect(await task.run(with: Inventing()).problems == [
         "the app would drop this answer",
         "name has no \"plants\"",
-        "cadence is not afterCompletion(days: 5)",
+        "cadence is not \(Cadence.every(5, .day))",
     ])
     #expect(await routine.run(with: Inventing()).problems == ["the app would drop this answer", "work start is wrong", "work end is wrong"])
 }

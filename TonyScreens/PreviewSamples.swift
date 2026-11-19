@@ -157,8 +157,8 @@ enum PreviewSamples {
                 header: "Cadence",
                 repeats: PickerDataModel(
                     title: "Repeats",
-                    options: [.init(id: "afterCompletion", title: "After it was last done"), .init(id: "weekdays", title: "On fixed days")],
-                    selectedID: "afterCompletion",
+                    options: [.init(id: "interval", title: "At regular intervals"), .init(id: "weekdays", title: "On fixed days")],
+                    selectedID: "interval",
                     onSelect: Action(id: "preview") { _ in }
                 ),
                 count: StepperDataModel(title: "Every 7 days", value: 7, range: 1...365, onChange: Action(id: "preview") { _ in }),

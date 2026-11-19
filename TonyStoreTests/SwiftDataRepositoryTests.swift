@@ -55,14 +55,14 @@ private func repository(with names: [String]) async throws -> (SwiftDataReposito
     let (repository, tasks) = try await repository(with: ["Laundry", "Plants"])
     var plants = tasks[1]
     plants.name = "Water the plants"
-    plants.cadence = .afterCompletion(days: 5)
+    plants.cadence = .every(5, .day)
     plants.rank = 42
 
     try await repository.save(plants)
 
     let stored = try await repository.tasks()
     #expect(stored.map(\.name) == ["Laundry", "Water the plants"])
-    #expect(stored[1].cadence == .afterCompletion(days: 5))
+    #expect(stored[1].cadence == .every(5, .day))
     #expect(stored.map(\.rank) == [0, 1])
 }
 

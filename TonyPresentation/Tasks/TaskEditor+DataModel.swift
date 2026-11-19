@@ -78,12 +78,12 @@ extension TaskEditor {
         let locale = context.locale
         let count: StepperDataModel? =
             switch state.cadenceKind {
-            case .afterCompletion:
+            case .interval:
                 StepperDataModel(
-                    title: localized("Every \(state.everyDays) days", locale),
-                    value: state.everyDays,
-                    range: 1...365,
-                    onChange: TonyUIModels.Action(id: "everyDaysChanged") { edit(.everyDaysChanged($0)) }
+                    title: state.interval.text(locale: locale),
+                    value: state.interval.count,
+                    range: 1...state.interval.unit.maximumCount,
+                    onChange: TonyUIModels.Action(id: "intervalCountChanged") { edit(.intervalCountChanged($0)) }
                 )
             case .timesPerWeek:
                 StepperDataModel(
@@ -112,7 +112,7 @@ extension TaskEditor {
             repeats: PickerDataModel(
                 title: localized("Repeats", locale),
                 options: [
-                    .init(id: CadenceKind.afterCompletion.rawValue, title: localized("After it was last done", locale)),
+                    .init(id: CadenceKind.interval.rawValue, title: localized("At regular intervals", locale)),
                     .init(id: CadenceKind.weekdays.rawValue, title: localized("On fixed days", locale)),
                     .init(id: CadenceKind.timesPerWeek.rawValue, title: localized("A number of times a week", locale)),
                 ],
