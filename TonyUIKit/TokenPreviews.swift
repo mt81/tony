@@ -10,6 +10,7 @@ import SwiftUI
         ("ink", TonyColor.ink), ("muted", TonyColor.muted), ("accent", TonyColor.accent),
         ("accentBand", TonyColor.accentBand), ("warning", TonyColor.warning), ("warningSoft", TonyColor.warningSoft),
         ("onAccent", TonyColor.onAccent), ("glass", TonyColor.glass), ("glassEdge", TonyColor.glassEdge),
+        ("glassBar", TonyColor.glassBar),
     ]
     return ScrollView {
         VStack(alignment: .leading, spacing: TonySpacing.medium) {

@@ -348,3 +348,13 @@ func aTaskNeedsAName(name: String, weekday: Locale.Weekday?, isValid: Bool) thro
 
     #expect(state.task.name == "Waterthe plants")
 }
+
+@Test func thePickedEmojiReplacesTheIcon() throws {
+    var state = try reviewing()
+
+    _ = TaskEditor.reduce(&state, .iconChanged("✅🪴"))
+    #expect(state.task.icon == "🪴")
+
+    _ = TaskEditor.reduce(&state, .iconChanged(""))
+    #expect(state.task.icon == "🪴")
+}

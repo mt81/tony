@@ -81,17 +81,17 @@ struct TaskFormView: View {
     var body: some View {
         List {
             Section {
-                HStack(alignment: .firstTextBaseline, spacing: TonySpacing.medium) {
-                    TextFieldView(model.icon)
-                        .tonyText(.title)
-                        .multilineTextAlignment(.center)
-                        .frame(width: TonySize.touchTarget)
-                    TextFieldView(model.name, axis: .vertical)
-                        .tonyText(.title)
-                        .foregroundStyle(TonyColor.ink)
-                        .lineLimit(1...4)
-                }
-                .frame(minHeight: TonySize.touchTarget)
+                IconField(model.icon)
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+            }
+            .listSectionSpacing(TonySpacing.inset)
+            Section {
+                TextFieldView(model.name, axis: .vertical)
+                    .tonyText(.title)
+                    .foregroundStyle(TonyColor.ink)
+                    .lineLimit(1...4)
+                    .frame(minHeight: TonySize.touchTarget)
             }
             .glassRow()
             Section {
@@ -121,7 +121,7 @@ struct TaskFormView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background { NightSky() }
+        .background(TonyColor.surfaceRaised)
     }
 
     private var repeatsRow: some View {
@@ -265,7 +265,7 @@ private struct FormPage<Content: View>: View {
             content
         }
         .scrollContentBackground(.hidden)
-        .background { NightSky() }
+        .background(TonyColor.surfaceRaised)
         .navigationTitle(title)
         .toolbarTitleDisplayMode(.inline)
     }

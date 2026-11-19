@@ -69,6 +69,7 @@ extension TaskEditor {
             icon: TextFieldDataModel(
                 title: localized("Icon", locale),
                 text: task.icon,
+                accessibilityIdentifier: "taskIcon",
                 onChange: TonyUIModels.Action(id: "iconChanged") { edit(.iconChanged($0)) }
             ),
             name: TextFieldDataModel(

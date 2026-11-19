@@ -82,6 +82,11 @@ struct TasksScreen {
         XCTAssertEqual(app.textFields["taskName"].value as? String, "UITest plants")
         XCTAssertTrue(app.staticTexts["Every 5 days"].waitForExistence(timeout: 5))
 
+        let icon = app.textFields["taskIcon"]
+        icon.tap()
+        icon.typeText("🪴")
+        XCTAssertEqual(icon.value as? String, "🪴")
+
         app.buttons["repeats"].tap()
         app.buttons["Every week"].tap()
         app.navigationBars.buttons.element(boundBy: 0).tap()

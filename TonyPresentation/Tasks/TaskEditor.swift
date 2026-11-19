@@ -199,8 +199,11 @@ public enum TaskEditor {
             // The name field grows over several lines; a name stays on one.
             state.task.name = String(name.filter { !$0.isNewline })
             return state.isNew && state.stepsAreUntouched ? [.suggestSteps(forName: state.trimmedName)] : []
-        case .iconChanged(let icon):
-            state.task.icon = icon
+        case .iconChanged(let text):
+            // The field shows one emoji: what is typed after it replaces it, and clearing it keeps it.
+            if let picked = text.last {
+                state.task.icon = String(picked)
+            }
         case .repeatsChanged(let repeats):
             apply(repeats, to: &state)
         case .timesPerWeekChanged(let times):

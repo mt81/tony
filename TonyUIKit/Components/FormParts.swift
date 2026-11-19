@@ -1,5 +1,6 @@
 import SwiftUI
 import TonyUIModels
+import UIKit
 
 /// A box to type a sentence in, docked above the keyboard, with a button that sends it.
 public struct Composer: View {
@@ -151,21 +152,98 @@ extension View {
     }
 }
 
-/// The background of the task form: stars over the raised surface.
-public struct NightSky: View {
-    public init() {}
+/// A task's emoji on a dark round, with a pen that says it can be changed.
+/// Tapping it opens the emoji keyboard; the emoji picked replaces the one shown.
+public struct IconField: View {
+    private let model: TextFieldDataModel
+    @ScaledMetric(relativeTo: .largeTitle) private var size = TonySize.taskIcon
+    @ScaledMetric(relativeTo: .largeTitle) private var badge = TonySize.editBadge
+
+    public init(_ model: TextFieldDataModel) {
+        self.model = model
+    }
 
     public var body: some View {
-        TonyColor.surfaceRaised
-            .overlay(alignment: .top) {
-                Image("NightSky", bundle: .design)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .clipped()
+        EmojiTextField(model: model, fontSize: size * 0.6)
+            .frame(width: size, height: size)
+            .background(TonyColor.glassBar, in: .circle)
+            .overlay(alignment: .bottomTrailing) {
+                Image(systemName: "pencil")
+                    .font(.system(size: badge * 0.55, weight: .semibold))
+                    .foregroundStyle(TonyColor.ink)
+                    .frame(width: badge, height: badge)
+                    .background(TonyColor.surface, in: .circle)
+                    .overlay { Circle().strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge) }
+                    .offset(x: badge * 0.25, y: badge * 0.15)
                     .accessibilityHidden(true)
             }
-            .ignoresSafeArea()
+            .frame(minWidth: TonySize.touchTarget, minHeight: TonySize.touchTarget)
+    }
+}
+
+/// A text field that opens on the emoji keyboard, shows one emoji, and closes once one is picked.
+private struct EmojiTextField: UIViewRepresentable {
+    let model: TextFieldDataModel
+    let fontSize: CGFloat
+
+    func makeUIView(context: Context) -> EmojiKeyboardField {
+        let field = EmojiKeyboardField()
+        field.textAlignment = .center
+        field.tintColor = .clear
+        field.borderStyle = .none
+        field.adjustsFontSizeToFitWidth = true
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        field.addTarget(context.coordinator, action: #selector(Coordinator.began(_:)), for: .editingDidBegin)
+        field.addTarget(context.coordinator, action: #selector(Coordinator.changed(_:)), for: .editingChanged)
+        field.addTarget(context.coordinator, action: #selector(Coordinator.ended(_:)), for: .editingDidEnd)
+        return field
+    }
+
+    func updateUIView(_ field: EmojiKeyboardField, context: Context) {
+        context.coordinator.model = model
+        field.text = model.text
+        field.font = .systemFont(ofSize: fontSize)
+        field.accessibilityLabel = model.title
+        field.accessibilityIdentifier = model.accessibilityIdentifier
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(model: model)
+    }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var model: TextFieldDataModel
+
+        init(model: TextFieldDataModel) {
+            self.model = model
+        }
+
+        /// The field empties while the keyboard is up, so the emoji picked is all it holds.
+        @objc func began(_ field: UITextField) {
+            field.text = ""
+        }
+
+        @objc func changed(_ field: UITextField) {
+            guard let text = field.text, !text.isEmpty else { return }
+            model.onChange.execute(text)
+            field.resignFirstResponder()
+        }
+
+        /// Closing the keyboard without picking one shows the icon again.
+        @objc func ended(_ field: UITextField) {
+            if field.text?.isEmpty ?? true {
+                field.text = model.text
+            }
+        }
+    }
+}
+
+/// Asks for the emoji keyboard when the user has it; the usual keyboard otherwise.
+private final class EmojiKeyboardField: UITextField {
+    override var textInputMode: UITextInputMode? {
+        UITextInputMode.activeInputModes.first { $0.primaryLanguage == "emoji" } ?? super.textInputMode
     }
 }
 
@@ -218,13 +296,13 @@ public struct NightSky: View {
             .glassRow()
         }
         .scrollContentBackground(.hidden)
-        .background { NightSky() }
+        .background(TonyColor.surfaceRaised)
     }
     .tonyPreview(padding: 0)
 }
 
-#Preview("Night sky") {
-    NightSky()
-        .preferredColorScheme(.dark)
+#Preview("Icon field") {
+    IconField(TextFieldDataModel(title: "Icon", text: "🪴", onChange: Action(id: "preview") { _ in }))
+        .tonyPreview()
 }
 #endif

@@ -23,6 +23,8 @@ public enum TonyColor {
     public static let glass = Color("Glass", bundle: .design)
     /// The edge of a glass card, and the lines between its rows.
     public static let glassEdge = Color("GlassEdge", bundle: .design)
+    /// The dark round behind a task's icon.
+    public static let glassBar = Color("GlassBar", bundle: .design)
 }
 
 /// The spacings used in the Figma file, in points.
@@ -60,6 +62,10 @@ public enum TonySize {
     public static let border: CGFloat = 1.5
     /// The edge of a glass card.
     public static let glassEdge: CGFloat = 1
+    /// The round behind a task's icon at the top of its form.
+    public static let taskIcon: CGFloat = 72
+    /// The pen on a task's icon that says it can be changed.
+    public static let editBadge: CGFloat = 24
     public static let rail: CGFloat = 2
     public static let nowDot: CGFloat = 14
     public static let meetingsDot: CGFloat = 10
