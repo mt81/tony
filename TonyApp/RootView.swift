@@ -45,7 +45,7 @@ struct RootView: View {
             }
             #endif
             // The + is a tab only to sit in the tab bar: selecting it adds a task and goes back.
-            Tab(value: RootTab.add, role: .search) {
+            Tab(value: RootTab.add, role: .prominent) {
                 EmptyView()
             } label: {
                 Label("Add a task", systemImage: "plus")
