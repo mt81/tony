@@ -1,10 +1,12 @@
 import SwiftUI
 import TonyUIModels
 
-/// One entry of the Today timeline. The five Figma kinds are: now, task with actions, meetings, task, and last task.
+/// One entry of the Today timeline: what is done, now, a task, or meetings. A rail on the left joins the entries.
+/// A task's ring marks it done; its other actions are in its context menu.
 public struct TimelineItem: View {
     private let model: TimelineItemDataModel
     @ScaledMetric(relativeTo: .body) private var railWidth = TonySize.iconCircle
+    @ScaledMetric(relativeTo: .caption) private var markerOffset = TonySize.markerOffset
 
     public init(_ model: TimelineItemDataModel) {
         self.model = model
@@ -21,109 +23,127 @@ public struct TimelineItem: View {
 
     private var rail: some View {
         VStack(spacing: 0) {
+            if hasLineAbove {
+                line(TonyColor.ring)
+                    .frame(height: markerOffset)
+            }
             marker
             if !isLast {
-                Rectangle()
-                    .fill(isNow ? TonyColor.accent : TonyColor.line)
-                    .frame(width: TonySize.rail)
+                line(isDone ? TonyColor.ink : TonyColor.ring)
                     .frame(maxHeight: .infinity)
             }
         }
         .frame(width: railWidth)
-        .accessibilityHidden(true)
+    }
+
+    private func line(_ colour: Color) -> some View {
+        Rectangle()
+            .fill(colour)
+            .frame(width: TonySize.rail)
+            .accessibilityHidden(true)
     }
 
     @ViewBuilder private var marker: some View {
         switch model {
+        case .done:
+            Circle()
+                .fill(TonyColor.ink)
+                .frame(width: TonySize.marker, height: TonySize.marker)
+                .overlay {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: TonySize.markerCheck, weight: .bold))
+                        .foregroundStyle(TonyColor.canvas)
+                }
+                .padding(.top, markerOffset)
+                .accessibilityHidden(true)
         case .now:
-            dot(diameter: TonySize.nowDot, height: TonySize.nowMarkerHeight, colour: TonyColor.accent)
+            ring(TonyColor.accent)
+                .frame(height: TonySize.nowMarkerHeight)
+                .accessibilityHidden(true)
         case .task(let item, _):
-            IconCircle(icon: item.icon, isNeglected: item.isNeglected)
+            checkButton(item)
+                .frame(height: item.now == nil ? nil : TonySize.nowMarkerHeight)
         case .meetings:
-            dot(diameter: TonySize.meetingsDot, height: TonySize.meetingsMarkerHeight, colour: TonyColor.muted)
+            Circle()
+                .fill(TonyColor.muted)
+                .frame(width: TonySize.meetingsDot, height: TonySize.meetingsDot)
+                .frame(height: TonySize.meetingsMarkerHeight)
+                .accessibilityHidden(true)
         }
     }
 
-    private func dot(diameter: CGFloat, height: CGFloat, colour: Color) -> some View {
+    private func ring(_ colour: Color) -> some View {
         Circle()
-            .fill(colour)
-            .frame(width: diameter, height: diameter)
-            .frame(height: height)
+            .strokeBorder(colour, lineWidth: TonySize.border)
+            .frame(width: TonySize.marker, height: TonySize.marker)
+    }
+
+    private func checkButton(_ item: TimelineItemDataModel.TaskItem) -> some View {
+        Button {
+            item.check.action.execute()
+        } label: {
+            ring(item.now != nil ? TonyColor.accent : item.isNeglected ? TonyColor.warning : TonyColor.ring)
+                .contentShape(.rect.inset(by: (TonySize.marker - TonySize.touchTarget) / 2))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(item.check.title)
+        .accessibilityIdentifier(ifPresent: item.check.accessibilityIdentifier)
     }
 
     @ViewBuilder private var content: some View {
         switch model {
+        case .done(let text):
+            Text(text)
+                .tonyText(.bodySmall)
+                .foregroundStyle(TonyColor.ink)
+                .padding(.top, markerOffset)
         case .now(let text):
             Text(text)
                 .tonyText(.label)
                 .foregroundStyle(TonyColor.accent)
                 .padding(.top, TonySpacing.tight)
         case .task(let item, _):
-            VStack(alignment: .leading, spacing: TonySpacing.snug) {
-                HStack(spacing: TonySpacing.medium) {
-                    VStack(alignment: .leading, spacing: TonySpacing.textGap) {
-                        Text(item.time).tonyText(.labelSmall).foregroundStyle(TonyColor.muted)
-                        Text(item.title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
-                        Text(item.reason).tonyText(.bodySmall).foregroundStyle(item.isNeglected ? TonyColor.warning : TonyColor.muted)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityIdentifier(ifPresent: item.accessibilityIdentifier)
-                    checkbox(item.check)
+            VStack(alignment: .leading, spacing: TonySpacing.textGap) {
+                if let now = item.now {
+                    Text(now).tonyText(.label).foregroundStyle(TonyColor.accent)
+                } else {
+                    Text(item.time).tonyText(.labelSmall).foregroundStyle(TonyColor.ink)
                 }
-                if !item.actions.isEmpty {
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: TonySpacing.small) { actionButtons(item.actions) }
-                        VStack(alignment: .leading, spacing: TonySpacing.small) { actionButtons(item.actions) }
-                    }
+                Text(verbatim: "\(item.icon) \(item.title)").tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
+                Text(item.reason).tonyText(.bodySmall).foregroundStyle(item.isNeglected ? TonyColor.warning : TonyColor.ink)
+            }
+            .padding(.top, item.now == nil ? 0 : TonySpacing.tight)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(.rect)
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier(ifPresent: item.accessibilityIdentifier)
+            .contextMenu {
+                ForEach(item.actions.indices, id: \.self) { index in
+                    let action = item.actions[index]
+                    Button(action.title) { action.action.execute() }
+                        .disabled(!action.isEnabled)
+                        .accessibilityIdentifier(ifPresent: action.accessibilityIdentifier)
                 }
             }
         case .meetings(let time, let title, let detail):
             VStack(alignment: .leading, spacing: TonySpacing.hairline) {
-                Text(time).tonyText(.labelSmall).foregroundStyle(TonyColor.muted)
-                Text(title).tonyText(.label).foregroundStyle(TonyColor.ink)
-                Text(detail).tonyText(.caption).foregroundStyle(TonyColor.muted)
+                Text(time).tonyText(.labelSmall)
+                Text(title).tonyText(.label)
+                Text(detail).tonyText(.caption)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, TonySpacing.inset)
-            .padding(.vertical, TonySpacing.cardVertical)
-            .background(TonyColor.surface, in: .rect(cornerRadius: TonyRadius.card))
+            .foregroundStyle(TonyColor.ink)
+            .opacity(TonyOpacity.meetings)
             .accessibilityElement(children: .combine)
         }
     }
 
-    private func actionButtons(_ actions: [ButtonDataModel]) -> some View {
-        ForEach(actions.indices, id: \.self) { index in
-            let action = actions[index]
-            Button {
-                action.action.execute()
-            } label: {
-                Chip(ChipDataModel(title: action.title))
-                    .frame(minHeight: TonySize.touchTarget)
-            }
-            .buttonStyle(.plain)
-            .disabled(!action.isEnabled)
-            .accessibilityIdentifier(ifPresent: action.accessibilityIdentifier)
-        }
+    private var isDone: Bool {
+        if case .done = model { true } else { false }
     }
 
-    private func checkbox(_ check: ButtonDataModel) -> some View {
-        Button {
-            check.action.execute()
-        } label: {
-            Circle()
-                .strokeBorder(TonyColor.muted, lineWidth: TonySize.border)
-                .frame(width: TonySize.checkbox, height: TonySize.checkbox)
-                .frame(width: TonySize.touchTarget, height: TonySize.touchTarget)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(check.title)
-        .accessibilityIdentifier(ifPresent: check.accessibilityIdentifier)
-    }
-
-    private var isNow: Bool {
-        if case .now = model { true } else { false }
+    /// Tasks start with a stretch of rail, so their ring lines up with their name; the task to do now does not.
+    private var hasLineAbove: Bool {
+        if case .task(let item, _) = model { item.now == nil } else { false }
     }
 
     private var isLast: Bool {
@@ -135,7 +155,7 @@ public struct TimelineItem: View {
 #Preview("Timeline items") {
     let check = ButtonDataModel(title: "Mark as done", action: Action(id: "preview") { _ in })
     let items: [TimelineItemDataModel] = [
-        .now(text: "Now · a good moment to start the laundry"),
+        .done(text: "Good job, today you already did Supplements and Grocery."),
         .task(
             .init(
                 icon: "🧺",
@@ -143,12 +163,13 @@ public struct TimelineItem: View {
                 title: "Start a load of laundry",
                 reason: "Before your 10:00 meetings. It runs on its own.",
                 actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
-                check: check
+                check: check,
+                now: "8:30 · a good moment to start"
             ),
             isLast: false
         ),
         .meetings(time: "10:00", title: "3 meetings, back to back", detail: "Daily scrum · Weekly sync · 1 more · until 11:00"),
-        .task(.init(icon: "🥀", time: "11:15", title: "Water the plants", reason: "8 days since last time", check: check, isNeglected: true), isLast: false),
+        .task(.init(icon: "🪴", time: "3:30", title: "Water the plants", reason: "5 days since last time", check: check, isNeglected: true), isLast: false),
         .task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true),
     ]
     return ScrollView {
@@ -157,6 +178,15 @@ public struct TimelineItem: View {
                 TimelineItem(items[index])
             }
         }
+    }
+    .tonyPreview()
+}
+
+#Preview("Timeline, nothing soon") {
+    let check = ButtonDataModel(title: "Mark as done", action: Action(id: "preview") { _ in })
+    VStack(spacing: 0) {
+        TimelineItem(.now(text: "Now"))
+        TimelineItem(.task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true))
     }
     .tonyPreview()
 }

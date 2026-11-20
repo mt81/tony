@@ -42,11 +42,15 @@ public enum TimelineItemDataModel: Equatable {
         public var actions: [ButtonDataModel] = []
         /// Marks the item as done; its title is the VoiceOver label.
         public var check: ButtonDataModel
-        /// Draws the icon and the reason in the neglected mood.
+        /// Draws the marker and the reason in the neglected mood.
         public var isNeglected: Bool = false
+        /// Set on the task to do now: shown in the accent colour in place of the time, with an accent marker.
+        public var now: String? = nil
         public var accessibilityIdentifier: String? = nil
     }
 
+    /// What is already done today, above the rest of the day.
+    case done(text: String)
     case now(text: String)
     case task(TaskItem, isLast: Bool)
     case meetings(time: String, title: String, detail: String)
@@ -54,9 +58,15 @@ public enum TimelineItemDataModel: Equatable {
 
 @MemberwiseInit(.public)
 public struct TileDataModel: Hashable, Sendable {
+    /// The Figma area colours a tile can take.
+    public enum Colour: Hashable, Sendable, CaseIterable {
+        case yellow, green, blue, orange, teal, indigo
+    }
+
     public var icon: String
     public var title: String
     public var detail: String
+    public var colour: Colour
     public var isNeglected: Bool = false
 }
 

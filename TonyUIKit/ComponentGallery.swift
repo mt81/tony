@@ -44,7 +44,7 @@ public struct ComponentGallery: View {
                 )
 
                 HStack(alignment: .top, spacing: TonySpacing.medium) {
-                    Tile(TileDataModel(icon: "🛏️🪰", title: "Bed sheets", detail: "16 days. The flies moved in.", isNeglected: true))
+                    Tile(TileDataModel(icon: "🛏️", title: "Bed sheets", detail: "16 days since last time", colour: .yellow, isNeglected: true))
                     Stat(StatDataModel(value: "12", label: "tasks done"))
                 }
 
@@ -71,15 +71,16 @@ public struct ComponentGallery: View {
     private var timeline: [TimelineItemDataModel] {
         let check = ButtonDataModel(title: "Mark as done", action: Action(id: "preview") { _ in })
         return [
-            .now(text: "Now · a good moment to start the laundry"),
+            .done(text: "Good job, today you already did Supplements and Grocery."),
             .task(
                 .init(
                     icon: "🧺",
                     time: "8:30",
                     title: "Start a load of laundry",
                     reason: "Before your 10:00 meetings. It runs on its own.",
-                    actions: ["Move to noon", "Swap", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
-                    check: check
+                    actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
+                    check: check,
+                    now: "8:30 · a good moment to start"
                 ),
                 isLast: false
             ),

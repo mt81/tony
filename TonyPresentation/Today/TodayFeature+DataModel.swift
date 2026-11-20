@@ -15,19 +15,9 @@ extension TodayFeature {
         return TodayScreenDataModel(
             date: context.now.formatted(context.dayStyle),
             headline: wording.headline,
-            briefing: BriefingDataModel(
-                author: localized("Tony", locale),
-                time: state.planned.map { "· \($0.plannedAt.formatted(context.timeStyle))" } ?? "",
-                text: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing
-            ),
+            briefing: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing,
             timelineTitle: localized("Your day", locale),
-            timelineHint: localized("Suggestions, not orders", locale),
             timeline: timeline(state: state, wording: wording, send: send),
-            addTask: ButtonDataModel(
-                title: localized("+ Add a task", locale),
-                accessibilityIdentifier: "todayAddTask",
-                action: TonyUIModels.Action(id: "addTapped", parameters: context.now) { now, _ in send(.addTapped(id: UUID(), stepID: UUID(), now: now)) }
-            ),
             tilesTitle: localized("How things are", locale),
             tiles: tiles(state: state, wording: wording),
             editor: state.editor.map { editor in
@@ -62,6 +52,7 @@ extension TodayFeature {
         let locale = wording.context.locale
         let items = state.planned?.plan.items ?? []
         let firstItemID = items.first?.id
+        let nowItemID = wording.nowItem?.id
 
         var entries: [(start: Date, entry: TodayScreenDataModel.TimelineEntry)] = []
         for item in items {
@@ -86,9 +77,10 @@ extension TodayFeature {
                     )
                 }
             }
+            let time = item.interval.start.formatted(wording.context.timeStyle)
             let taskItem = TimelineItemDataModel.TaskItem(
                 icon: task.icon,
-                time: item.interval.start.formatted(wording.context.timeStyle),
+                time: time,
                 title: title,
                 reason: wording.reason(for: item, step: step, task: task),
                 actions: actions,
@@ -98,6 +90,7 @@ extension TodayFeature {
                     action: TonyUIModels.Action(id: "checkTapped", parameters: Action.checkTapped(item)) { action, _ in send(action) }
                 ),
                 isNeglected: wording.isNeglected(task),
+                now: item.id == nowItemID ? localized("\(time) · a good moment to start", locale) : nil,
                 accessibilityIdentifier: "today-item-\(title)"
             )
             entries.append((item.interval.start, .init(id: item.stepID.uuidString, item: .task(taskItem, isLast: false))))
@@ -112,7 +105,13 @@ extension TodayFeature {
             entries.append((start, .init(id: "meetings-\(start.timeIntervalSinceReferenceDate)", item: item)))
         }
 
-        var timeline = [TodayScreenDataModel.TimelineEntry(id: "now", item: .now(text: wording.now))]
+        var timeline: [TodayScreenDataModel.TimelineEntry] = []
+        if let done = wording.done {
+            timeline.append(.init(id: "done", item: .done(text: done)))
+        }
+        if nowItemID == nil {
+            timeline.append(.init(id: "now", item: .now(text: localized("Now", locale))))
+        }
         timeline += entries.sorted { $0.start < $1.start }.map(\.entry)
         if let last = timeline.indices.last, case .task(let item, _) = timeline[last].item {
             timeline[last].item = .task(item, isLast: true)
@@ -121,14 +120,17 @@ extension TodayFeature {
     }
 
     private static func tiles(state: State, wording: TodayWording) -> [TodayScreenDataModel.IdentifiedTile] {
-        (state.planned?.tasks ?? [])
-            .map { (task: $0, isNeglected: wording.isNeglected($0)) }
+        let colours = TileDataModel.Colour.allCases
+        return (state.planned?.tasks ?? [])
+            .sorted { $0.rank < $1.rank }
+            .enumerated()
+            .map { index, task in (task: task, colour: colours[index % colours.count], isNeglected: wording.isNeglected(task)) }
             .sorted { ($0.isNeglected ? 0 : 1, $0.task.rank) < ($1.isNeglected ? 0 : 1, $1.task.rank) }
             .prefix(6)
-            .map { task, isNeglected in
+            .map { task, colour, isNeglected in
                 .init(
                     id: task.id,
-                    tile: TileDataModel(icon: task.icon, title: task.name, detail: wording.tileDetail(for: task), isNeglected: isNeglected)
+                    tile: TileDataModel(icon: task.icon, title: task.name, detail: wording.tileDetail(for: task), colour: colour, isNeglected: isNeglected)
                 )
             }
     }
@@ -219,17 +221,30 @@ struct TodayWording {
         )
     }
 
-    var now: String {
-        let locale = context.locale
-        guard
-            let item = state.planned?.plan.items.first,
-            item.interval.start <= context.now.addingTimeInterval(15 * 60),
-            let task = task(of: item),
-            let step = task.steps.first(where: { $0.id == item.stepID })
-        else {
-            return localized("Now", locale)
+    /// The first item of the plan when it starts within a quarter of an hour: the moment to do it is now.
+    var nowItem: DayPlan.Item? {
+        guard let item = state.planned?.plan.items.first, item.interval.start <= context.now.addingTimeInterval(15 * 60) else {
+            return nil
         }
-        return localized("Now · a good moment for \(title(of: step, in: task))", locale)
+        return item
+    }
+
+    /// The tasks already done today, in the order they were done.
+    var done: String? {
+        let calendar = context.calendar
+        let tasks = state.planned?.tasks ?? []
+        var seen: Set<UUID> = []
+        let names = (state.planned?.completions ?? [])
+            .filter { $0.stepID == nil && $0.outcome == .done && calendar.isDate($0.date, inSameDayAs: context.now) }
+            .sorted { $0.date < $1.date }
+            .compactMap { completion in
+                seen.insert(completion.taskID).inserted ? tasks.first { $0.id == completion.taskID }?.name : nil
+            }
+        guard !names.isEmpty else {
+            return nil
+        }
+        let list = names.formatted(.list(type: .and).locale(context.locale))
+        return localized("Good job, today you already did \(list).", context.locale)
     }
 
     func task(of item: DayPlan.Item) -> TonyTask? {

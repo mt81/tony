@@ -5,9 +5,7 @@ import TonyUIModels
 @MemberwiseInit(.public)
 public struct TasksScreenDataModel {
     public var title: String
-    public var add: ButtonDataModel
     public var sections: [TaskSectionDataModel]
-    public var addTask: ButtonDataModel
     public var editor: TaskEditorDataModel?
     public var dismissEditor: any Executable<Void>
     public var alert: AlertDataModel?
@@ -131,9 +129,7 @@ public struct SubtaskDataModel: Identifiable, Equatable {
 extension TasksScreenDataModel: Equatable {
     public static func == (lhs: TasksScreenDataModel, rhs: TasksScreenDataModel) -> Bool {
         lhs.title == rhs.title
-            && lhs.add == rhs.add
             && lhs.sections == rhs.sections
-            && lhs.addTask == rhs.addTask
             && lhs.editor == rhs.editor
             && lhs.alert == rhs.alert
             && lhs.dismissEditor.isEqual(to: rhs.dismissEditor)

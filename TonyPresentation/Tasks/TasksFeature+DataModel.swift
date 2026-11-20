@@ -10,15 +10,11 @@ extension TasksFeature {
         send: @escaping @MainActor (Action) -> Void
     ) -> TasksScreenDataModel {
         let locale = context.locale
-        let addTask: any Executable<Void> = TonyUIModels.Action(id: "add_task") { _ in send(.addTapped(id: UUID(), stepID: UUID(), now: Date())) }
-
         return TasksScreenDataModel(
             title: localized("Tasks", locale),
-            add: ButtonDataModel(title: localized("Add a task", locale), systemImage: "plus", accessibilityIdentifier: "addTask", action: addTask),
             sections: kinds.compactMap { kind in
                 section(kind, state: state, context: context, send: send)
             },
-            addTask: ButtonDataModel(title: localized("+ Add a task", locale), action: addTask),
             editor: state.editor.map { editor in
                 TaskEditor.dataModel(
                     for: editor,

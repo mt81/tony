@@ -23,7 +23,6 @@ public struct TodayScreen: View {
                 }
             }
             .padding(.horizontal, TonySpacing.page)
-            .padding(.top, TonySpacing.small)
             .padding(.bottom, TonySpacing.section)
         }
         .background { PageBackground() }
@@ -41,61 +40,35 @@ public struct TodayScreen: View {
             VStack(spacing: TonySpacing.tight) {
                 Text(model.date)
                     .tonyText(.bodySmall)
-                    .foregroundStyle(TonyColor.muted)
                 Text(model.headline)
                     .tonyText(.display)
-                    .foregroundStyle(TonyColor.ink)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("todayHeadline")
             }
+            .foregroundStyle(TonyColor.ink)
             .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, TonySpacing.small)
     }
 
     private var briefing: some View {
-        VStack(alignment: .leading, spacing: TonySpacing.inset) {
-            HStack(spacing: TonySpacing.small) {
-                TonyImage()
-                    .frame(width: TonySize.tonyByline, height: TonySize.tonyByline)
-                Text(model.briefing.author).tonyText(.labelStrong).foregroundStyle(TonyColor.ink)
-                Text(model.briefing.time).tonyText(.caption).foregroundStyle(TonyColor.muted)
-            }
-            .accessibilityElement(children: .combine)
-            Text(model.briefing.text)
-                .tonyText(.bodyLarge)
-                .foregroundStyle(TonyColor.ink)
-                .accessibilityIdentifier("todayBriefing")
-        }
+        Text(model.briefing)
+            .tonyText(.briefing)
+            .foregroundStyle(TonyColor.ink)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("todayBriefing")
     }
 
     private var timeline: some View {
         VStack(alignment: .leading, spacing: TonySpacing.large) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: TonySpacing.small) {
-                    sectionTitle(model.timelineTitle)
-                    Spacer()
-                    timelineHint
-                }
-                VStack(alignment: .leading, spacing: TonySpacing.xSmall) {
-                    sectionTitle(model.timelineTitle)
-                    timelineHint
-                }
-            }
+            sectionTitle(model.timelineTitle)
             VStack(spacing: 0) {
                 ForEach(model.timeline) { entry in
                     TimelineItem(entry.item)
                 }
             }
-            DashedButton(model.addTask)
         }
-    }
-
-    private var timelineHint: some View {
-        Text(model.timelineHint)
-            .tonyText(.caption)
-            .foregroundStyle(TonyColor.muted)
     }
 
     private var tiles: some View {
@@ -106,7 +79,7 @@ public struct TodayScreen: View {
                     repeating: GridItem(.flexible(), spacing: TonySpacing.medium, alignment: .top),
                     count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
                 ),
-                spacing: TonySpacing.medium
+                spacing: TonySpacing.inset
             ) {
                 ForEach(model.tiles) { tile in
                     Tile(tile.tile)

@@ -7,7 +7,13 @@ extension Bundle {
 /// The Figma colour variables (`color/*`). The app is dark only, so each has a single value.
 public enum TonyColor {
     public static let canvas = Color("Canvas", bundle: .design)
-    public static let glow = Color("Glow", bundle: .design)
+    /// The header gradient at the top of a tab, from the top down to the canvas.
+    public static let header = [
+        Color("HeaderViolet", bundle: .design),
+        Color("HeaderIndigo", bundle: .design),
+        Color("HeaderNavy", bundle: .design),
+        Color("HeaderNight", bundle: .design),
+    ]
     public static let sidebar = Color("Sidebar", bundle: .design)
     public static let surface = Color("Surface", bundle: .design)
     public static let surfaceRaised = Color("SurfaceRaised", bundle: .design)
@@ -25,6 +31,25 @@ public enum TonyColor {
     public static let glassEdge = Color("GlassEdge", bundle: .design)
     /// The dark round behind a task's icon.
     public static let glassBar = Color("GlassBar", bundle: .design)
+    /// The outline of a timeline marker that is still to do, and the rail between markers.
+    public static let ring = Color("Ring", bundle: .design)
+    /// The area colours of the tiles (`color/area/*`): bed sheets, plants, home, training, supplements, sleep.
+    public static let areaYellow = Color("AreaYellow", bundle: .design)
+    public static let areaGreen = Color("AreaGreen", bundle: .design)
+    public static let areaBlue = Color("AreaBlue", bundle: .design)
+    public static let areaOrange = Color("AreaOrange", bundle: .design)
+    public static let areaTeal = Color("AreaTeal", bundle: .design)
+    public static let areaIndigo = Color("AreaIndigo", bundle: .design)
+}
+
+/// How much of a colour shows through where Figma draws it see-through.
+public enum TonyOpacity {
+    /// The fill of a tile, over its area colour.
+    public static let tile = 0.5
+    /// The darker fill of a tile that needs attention.
+    public static let tileNeglected = 0.25
+    /// The meetings on the timeline, which step back from the tasks.
+    public static let meetings = 0.8
 }
 
 /// The spacings used in the Figma file, in points.
@@ -67,13 +92,21 @@ public enum TonySize {
     /// The pen on a task's icon that says it can be changed.
     public static let editBadge: CGFloat = 24
     public static let rail: CGFloat = 2
-    public static let nowDot: CGFloat = 14
+    /// The round marker of a task or of "now" on the timeline.
+    public static let marker: CGFloat = 22
+    /// The tick inside a done marker.
+    public static let markerCheck: CGFloat = 12
+    /// The gap above a task's marker, so it lines up with the task's name.
+    public static let markerOffset: CGFloat = 19
     public static let meetingsDot: CGFloat = 10
     public static let nowMarkerHeight: CGFloat = 30
     public static let meetingsMarkerHeight: CGFloat = 34
     public static let track: CGFloat = 10
     public static let tonyHeader: CGFloat = 128
-    public static let tonyByline: CGFloat = 28
+    /// The height of the header gradient at the top of a tab.
+    public static let headerGradient: CGFloat = 860
+    /// A tile's emoji.
+    public static let tileIcon: CGFloat = 28
     public static let avatar: CGFloat = 60
 }
 

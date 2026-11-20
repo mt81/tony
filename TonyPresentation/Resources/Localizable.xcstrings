@@ -1,6 +1,22 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ · a good moment to start" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · a good moment to start"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · un bon moment pour commencer"
+          }
+        }
+      }
+    },
     "%@, %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -199,23 +215,6 @@
         }
       }
     },
-    "+ Add a task" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Add a task"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Ajouter une tâche"
-          }
-        }
-      }
-    },
     "A free day" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -297,23 +296,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter une sous-tâche"
-          }
-        }
-      }
-    },
-    "Add a task" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a task"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter une tâche"
           }
         }
       }
@@ -1292,6 +1274,22 @@
         }
       }
     },
+    "Good job, today you already did %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good job, today you already did %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bravo, aujourd'hui tu as déjà fait %@."
+          }
+        }
+      }
+    },
     "Home days: %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1809,23 +1807,6 @@
         }
       }
     },
-    "Now · a good moment for %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Now · a good moment for %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maintenant · un bon moment pour %@"
-          }
-        }
-      }
-    },
     "Office days: %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2081,23 +2062,6 @@
         }
       }
     },
-    "Suggestions, not orders" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggestions, not orders"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Des suggestions, pas des ordres"
-          }
-        }
-      }
-    },
     "Tasks" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2196,23 +2160,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aujourd’hui"
-          }
-        }
-      }
-    },
-    "Tony" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tony"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tony"
           }
         }
       }

@@ -1,9 +1,11 @@
 import CoreText
 import SwiftUI
 
-/// The Figma type styles (`Tony/*`). Titles and numerals use Sometype Mono; the rest uses the system font where Figma has Inter.
+/// The Figma type styles (`Tony/*`). The display, Tony's briefing and numerals use Lekton; the rest uses the system font where Figma has Inter.
 public enum TonyTextStyle: Sendable, CaseIterable {
     case display
+    /// What Tony says about the day.
+    case briefing
     case heading
     case numeral
     /// What the user types in the task composer.
@@ -22,6 +24,7 @@ public enum TonyTextStyle: Sendable, CaseIterable {
     var size: CGFloat {
         switch self {
         case .display: 21
+        case .briefing: 17
         case .heading: 22
         case .numeral: 26
         case .titleLarge: 22
@@ -38,13 +41,14 @@ public enum TonyTextStyle: Sendable, CaseIterable {
         switch self {
         case .display, .heading, .titleLarge, .title, .bodyLarge, .body, .bodySmall, .caption: .regular
         case .labelLarge, .label, .labelSmall: .medium
-        case .numeral, .labelStrong: .semibold
+        case .labelStrong: .semibold
+        case .briefing, .numeral: .bold
         }
     }
 
-    var usesSometypeMono: Bool {
+    var usesLekton: Bool {
         switch self {
-        case .display, .heading, .numeral: true
+        case .display, .briefing, .numeral: true
         default: false
         }
     }
@@ -54,7 +58,7 @@ public enum TonyTextStyle: Sendable, CaseIterable {
         switch self {
         case .display, .heading, .numeral, .titleLarge: .title2
         case .title: .title3
-        case .bodyLarge: .body
+        case .bodyLarge, .briefing: .body
         case .labelLarge: .callout
         case .body, .label, .labelStrong: .subheadline
         case .bodySmall: .footnote
@@ -63,10 +67,10 @@ public enum TonyTextStyle: Sendable, CaseIterable {
     }
 
     func font(size: CGFloat) -> Font {
-        guard usesSometypeMono, SometypeMono.isRegistered else {
-            return .system(size: size, weight: weight, design: usesSometypeMono ? .monospaced : .default)
+        guard usesLekton, Lekton.isRegistered else {
+            return .system(size: size, weight: weight, design: usesLekton ? .monospaced : .default)
         }
-        return .custom(SometypeMono.familyName, fixedSize: size).weight(weight)
+        return .custom(weight == .bold ? Lekton.bold : Lekton.regular, fixedSize: size)
     }
 }
 
@@ -91,14 +95,16 @@ private struct TonyTextModifier: ViewModifier {
     }
 }
 
-private enum SometypeMono {
-    static let familyName = "Sometype Mono"
+private enum Lekton {
+    static let regular = "Lekton-Regular"
+    static let bold = "Lekton-Bold"
 
-    /// Fonts in a framework are not picked up from Info.plist, so the file is registered on first use.
+    /// Fonts in a framework are not picked up from Info.plist, so the files are registered on first use.
     static let isRegistered: Bool = {
-        guard let url = Bundle.design.url(forResource: "SometypeMono", withExtension: "ttf") else {
+        let urls = [regular, bold].compactMap { Bundle.design.url(forResource: $0, withExtension: "ttf") }
+        guard urls.count == 2 else {
             return false
         }
-        return CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        return urls.allSatisfy { CTFontManagerRegisterFontsForURL($0 as CFURL, .process, nil) }
     }()
 }

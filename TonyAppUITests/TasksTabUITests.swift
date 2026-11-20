@@ -64,7 +64,7 @@ struct TasksScreen {
 
     func runCatalogueSuggestion() {
         openTasks()
-        app.buttons["addTask"].tap()
+        tapAdd()
         compose("UITest laundry")
 
         XCTAssertTrue(scrollToStep(named: "Load the washing machine"))
@@ -76,7 +76,7 @@ struct TasksScreen {
 
     func runComposer() {
         openTasks()
-        app.buttons["addTask"].tap()
+        tapAdd()
         compose("UITest plants every 5 days")
 
         XCTAssertEqual(app.textFields["taskName"].value as? String, "UITest plants")
@@ -143,7 +143,12 @@ struct TasksScreen {
             app.launch()
         }
         app.buttons["Tasks"].firstMatch.tap()
-        XCTAssertTrue(app.buttons["addTask"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["tasksTitle"].waitForExistence(timeout: 15))
+    }
+
+    /// The + beside the tabs.
+    func tapAdd() {
+        app.buttons["Add a task"].firstMatch.tap()
     }
 
     private func relaunch() {
@@ -156,7 +161,7 @@ struct TasksScreen {
     }
 
     func create(_ name: String, hasDeadline: Bool = false) {
-        app.buttons["addTask"].tap()
+        tapAdd()
         compose(name)
         if hasDeadline {
             app.buttons["deadline"].tap()
