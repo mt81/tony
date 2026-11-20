@@ -93,7 +93,7 @@ Every screen has one store, with its own state, and follows one unidirectional p
 - Never commit or push directly to `main`. Every change reaches it through a PR.
 - One chunk is one PR. The PR closes the chunk's issue (`Closes #3`).
 - Do not start a chunk before the chunks it depends on are merged.
-- Merge with rebase (`gh pr merge --rebase`). No merge commits, and no merging one branch back into another.
+- Rebase the branch onto `main` locally, then squash-merge it (`gh pr merge --squash`). The commit is one very brief subject saying what the change does, with no description. No merge commits, and no merging one branch back into another.
 - To catch up with `main`, rebase onto it. Force-push only your own feature branch, with `--force-with-lease`.
 - Delete the branch once its PR is merged.
 
