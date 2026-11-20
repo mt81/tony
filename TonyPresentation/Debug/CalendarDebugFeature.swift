@@ -3,7 +3,7 @@ import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
-/// Debug builds only: asks for calendar access and lists today's blocks, to check the calendar adapter on a device.
+/// Debug builds only: asks for calendar access, and shows today's weather and blocks, to check the calendar and weather adapters on a device.
 /// Its text is for developers, so it is in English and not in the String Catalog.
 public enum CalendarDebugFeature: Feature {
     public struct State: Sendable, Equatable {
@@ -66,10 +66,17 @@ public enum CalendarDebugFeature: Feature {
             case .notDetermined: "Calendar access: not asked yet"
             case nil: "Calendar access: checking"
             }
+        let weather =
+            if let planned = state.planned {
+                planned.context.conditions.weather.map { "Weather today: \($0.rawValue)" } ?? "Weather: not read (no task avoids weather, or no forecast)"
+            } else {
+                "Weather: checking"
+            }
 
         return CalendarDebugScreenDataModel(
             title: "Calendar check",
             access: access,
+            weather: weather,
             requestAccess: state.access == .notDetermined
                 ? ButtonDataModel(
                     title: "Ask for calendar access",
