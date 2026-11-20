@@ -24,7 +24,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 - A test target links every framework its tests import; a framework does not pass its dependencies on to them.
 - A framework finds its own resources with `#bundle` (`Color("Canvas", bundle: #bundle)`), never `Bundle.main`.
 - The `Info.plist` and `.entitlements` files of the app and the extension are in `Configuration/`. The frameworks and test targets generate theirs.
-- Two shared schemes: `TonyApp` builds and runs the app and runs the UI tests; `TonyUnitTests` runs the unit tests.
+- Three shared schemes: `TonyApp` builds and runs the app and runs the UI tests; `TonyUnitTests` runs the unit tests; `TonyUIKit` builds the UI kit on its own, for its previews.
 - The app and the extension share data through the app group `group.com.mt81.tony`.
 - Debug builds have a fourth tab, Debug, with the developer screens: the model check (it runs the evaluation set on the on-device model and reports the pass rate, and shows what the widget and the background task noted), the calendar check (calendar access and today's blocks as the planner sees them) and the component gallery. Its text is for developers, in English and not translated. Release builds have no Debug tab.
 - Debug builds have one launch argument: `-now 08:00` freezes the clock at that time today, to see the plan at another hour.
