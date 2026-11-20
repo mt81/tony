@@ -26,10 +26,7 @@ final class YouTabUITests: XCTestCase {
             app.swipeUp()
         }
         add.tap()
-        let field = app.textFields["taskName"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText(taskName)
+        tasks.compose(taskName)
         app.buttons["saveTask"].tap()
 
         tasks.openTasks()

@@ -60,6 +60,8 @@ public enum TodayFeature: Feature {
         public var briefingWriter: BriefingWriter
         public var repository: any Repository
         public var catalog: (any TaskCatalog)?
+        /// Reads the sentence a new task is typed in, with the rules; nil when there is no model.
+        public var languageService: (any LanguageService)? = nil
         public var calendar: Calendar
         /// The language of the briefing and of the catalogue's answers.
         public var locale: Locale
@@ -144,6 +146,15 @@ public enum TodayFeature: Feature {
                 after: environment.suggestionDelay
             )
             return action.map { .editor($0) }
+        case .editor(.read(let sentence, let now)):
+            let action = await TaskEditor.read(
+                sentence: sentence,
+                now: now,
+                calendar: environment.calendar,
+                locale: environment.locale,
+                service: environment.languageService
+            )
+            return .editor(action)
         }
         return .planned(await coordinator.current)
     }

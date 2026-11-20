@@ -229,32 +229,32 @@ extension EvaluationCase {
     ]
 
     private static let englishSentences: [(String, String, Cadence?)] = [
-        ("Water the plants every 5 days", "plants", .afterCompletion(days: 5)),
+        ("Water the plants every 5 days", "plants", .every(5, .day)),
         ("Take out the trash every Tuesday", "trash", .weekdays([.tuesday])),
         ("Go to the gym 3 times a week", "gym", .timesPerWeek(3)),
         ("Renew my passport", "passport", nil),
-        ("Change the bed sheets every two weeks", "sheets", .afterCompletion(days: 14)),
+        ("Change the bed sheets every two weeks", "sheets", .every(2, .week)),
         ("Meal prep on Sundays and Wednesdays", "meal", .weekdays([.sunday, .wednesday])),
-        ("Take my supplements every morning", "supplements", .afterCompletion(days: 1)),
+        ("Take my supplements every morning", "supplements", .every(1, .day)),
         ("Run twice a week", "run", .timesPerWeek(2)),
         ("Call the dentist", "dentist", nil),
-        ("Clean the bathroom once every ten days", "bathroom", .afterCompletion(days: 10)),
-        ("Water the garden every other day", "garden", .afterCompletion(days: 2)),
+        ("Clean the bathroom once every ten days", "bathroom", .every(10, .day)),
+        ("Water the garden every other day", "garden", .every(2, .day)),
         ("Yoga on Mondays, Wednesdays and Fridays", "yoga", .weekdays([.monday, .wednesday, .friday])),
     ]
 
     private static let frenchSentences: [(String, String, Cadence?)] = [
-        ("Arroser les plantes tous les 5 jours", "plantes", .afterCompletion(days: 5)),
+        ("Arroser les plantes tous les 5 jours", "plantes", .every(5, .day)),
         ("Sortir les poubelles chaque mardi", "poubelles", .weekdays([.tuesday])),
         ("Aller à la salle de sport 3 fois par semaine", "sport", .timesPerWeek(3)),
         ("Renouveler mon passeport", "passeport", nil),
-        ("Changer les draps toutes les deux semaines", "draps", .afterCompletion(days: 14)),
+        ("Changer les draps toutes les deux semaines", "draps", .every(2, .week)),
         ("Préparer les repas le dimanche et le mercredi", "repas", .weekdays([.sunday, .wednesday])),
-        ("Prendre mes compléments chaque matin", "compléments", .afterCompletion(days: 1)),
+        ("Prendre mes compléments chaque matin", "compléments", .every(1, .day)),
         ("Courir deux fois par semaine", "courir", .timesPerWeek(2)),
         ("Appeler le dentiste", "dentiste", nil),
-        ("Nettoyer la salle de bain une fois tous les dix jours", "salle de bain", .afterCompletion(days: 10)),
-        ("Arroser le jardin un jour sur deux", "jardin", .afterCompletion(days: 2)),
+        ("Nettoyer la salle de bain une fois tous les dix jours", "salle de bain", .every(10, .day)),
+        ("Arroser le jardin un jour sur deux", "jardin", .every(2, .day)),
         ("Yoga le lundi, le mercredi et le vendredi", "yoga", .weekdays([.monday, .wednesday, .friday])),
     ]
 

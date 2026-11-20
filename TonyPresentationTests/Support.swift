@@ -29,7 +29,7 @@ enum Sample {
         _ number: Int,
         _ name: String,
         kind: TonyTask.Kind = .recurring,
-        cadence: Cadence? = .afterCompletion(days: 5),
+        cadence: Cadence? = .every(5, .day),
         mustHappenBy: Date? = nil
     ) throws -> TonyTask {
         TonyTask(
@@ -164,20 +164,20 @@ actor UnansweredCalendarSource: CalendarSource {
 /// A language model that always gives the same briefing, and keeps what it was asked.
 final class FakeLanguageService: LanguageService {
     private let answer: String
-    private let draft: TaskDraft?
+    private let reading: TaskReading?
     private let readRoutine: Routine?
     private let asked = Mutex<[(instructions: String, plan: String)]>([])
 
-    init(briefing: String = "", draft: TaskDraft? = nil, routine: Routine? = nil) {
+    init(briefing: String = "", reading: TaskReading? = nil, routine: Routine? = nil) {
         answer = briefing
-        self.draft = draft
+        self.reading = reading
         readRoutine = routine
     }
 
-    func taskDraft(instructions: String, sentence: String) throws -> TaskDraft {
+    func taskReading(instructions: String, sentence: String) throws -> TaskReading {
         asked.withLock { $0.append((instructions, sentence)) }
-        guard let draft else { throw CocoaError(.featureUnsupported) }
-        return draft
+        guard let reading else { throw CocoaError(.featureUnsupported) }
+        return reading
     }
 
     func routine(instructions: String, description: String) throws -> Routine {

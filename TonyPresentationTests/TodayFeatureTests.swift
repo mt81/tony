@@ -229,15 +229,18 @@ private func morningMeetings() throws -> [DateInterval] {
 
     empty.addTask.action.execute()
     let editor = try #require(day.model().editor)
-    editor.name.onChange.execute("Laundry")
+    try #require(editor.composer).composer.text.onChange.execute("Laundry")
+    try #require(day.model().editor?.composer).composer.send.action.execute()
     await day.store.waitForEffects()
+    let form = try #require(day.model().editor?.form)
     try #require(day.model().editor).save.action.execute()
     await day.store.waitForEffects()
     let model = day.model()
 
     #expect(empty.addTask.title == "+ Add a task")
     #expect(editor.title == "New task")
-    #expect(editor.delete == nil)
+    #expect(form.name.text == "Laundry")
+    #expect(form.delete == nil)
     #expect(model.editor == nil)
     #expect(await day.repository.savedTasks.map(\.name) == ["Laundry"])
     #expect(await day.repository.savedTasks.first?.steps.map(\.name) == ["Load", "Wash"])
@@ -260,7 +263,9 @@ private func morningMeetings() throws -> [DateInterval] {
 @Test func aTaskThatCannotBeSavedShowsAnAlert() async throws {
     let day = try Day(hour: 8, tasks: [])
     await day.open().addTask.action.execute()
-    day.store.send(.editor(.nameChanged("Passport")))
+    day.store.send(.editor(.sentenceChanged("Passport")))
+    day.store.send(.editor(.sentenceSent))
+    await day.store.waitForEffects()
     await day.repository.setFailsOnSave(true)
 
     day.store.send(.editorSaved)

@@ -5,8 +5,9 @@ import Foundation
 public protocol LanguageService: Sendable {
     /// Words the day described by the plan text, following the instructions. Throws when the model cannot answer.
     func briefing(instructions: String, plan: String) async throws -> String
-    /// Reads one sentence as a task: its name and how it repeats. Throws when the model cannot answer.
-    func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft
+    /// Reads one sentence as a task: its name, icon, how it repeats, when it fits, its sub tasks and deadline.
+    /// Throws when the model cannot answer.
+    func taskReading(instructions: String, sentence: String) async throws -> TaskReading
     /// Reads a description of the user's week as a routine. Throws when the model cannot answer.
     func routine(instructions: String, description: String) async throws -> Routine
 }

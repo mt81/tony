@@ -43,7 +43,9 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 @Test func savingANewTaskClosesTheEditorAndSavesIt() throws {
     var state = try loadedState()
     _ = TasksFeature.reduce(&state, .addTapped(id: try Sample.identifier(7), stepID: try Sample.identifier(8), now: try Sample.november(10)))
-    _ = TasksFeature.reduce(&state, .editor(.nameChanged("Dentist")))
+    _ = TasksFeature.reduce(&state, .editor(.sentenceChanged("Dentist")))
+    _ = TasksFeature.reduce(&state, .editor(.sentenceSent))
+    _ = TasksFeature.reduce(&state, .editor(.sentenceRead(TaskDraft(name: "Dentist", cadence: nil), stepIDs: [])))
 
     let effects = TasksFeature.reduce(&state, .editorSaved)
 
@@ -112,6 +114,29 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 }
 
 @MainActor
+@Test func rowsNameTheIntervalAndWhatItCountsFrom() throws {
+    var state = TasksFeature.State()
+    let fixedMonthly = Cadence.interval(Cadence.Interval(count: 1, unit: .month), countedFrom: .schedule(from: try Sample.november(1)))
+    let tasks = [
+        try Sample.task(1, "Sheets", cadence: .every(2, .week)),
+        try Sample.task(2, "Kettle", cadence: .every(3, .month)),
+        try Sample.task(3, "Boiler", cadence: .every(1, .year)),
+        try Sample.task(4, "Rent", cadence: fixedMonthly),
+    ]
+    _ = TasksFeature.reduce(&state, .loaded(tasks: tasks, completions: []))
+
+    let (english, _) = try dataModel(state)
+    let (french, _) = try dataModel(state, language: "fr")
+
+    #expect(english.sections[0].rows.map(\.subtitle) == [
+        "Every 2 weeks after last time", "Every 3 months after last time", "Every year after last time", "Every month",
+    ])
+    #expect(french.sections[0].rows.map(\.subtitle) == [
+        "Toutes les 2 semaines après la dernière fois", "Tous les 3 mois après la dernière fois", "Chaque année après la dernière fois", "Tous les mois",
+    ])
+}
+
+@MainActor
 @Test func aNeglectedTaskShowsDueInTheWarningStyle() throws {
     var state = TasksFeature.State()
     let plants = try Sample.task(1, "Plants")
@@ -140,29 +165,100 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 }
 
 @MainActor
-@Test func theEditorDataModelFollowsTheEditorState() throws {
+@Test func aNewTaskOpensOnTheComposer() throws {
     var state = try loadedState()
     _ = TasksFeature.reduce(&state, .addTapped(id: try Sample.identifier(7), stepID: try Sample.identifier(8), now: try Sample.november(10)))
 
     let (blank, _) = try dataModel(state)
     let blankEditor = try #require(blank.editor)
+    let blankComposer = try #require(blankEditor.composer)
     #expect(blankEditor.title == "New task")
-    #expect(blankEditor.delete == nil)
+    #expect(blankEditor.form == nil)
     #expect(!blankEditor.save.isEnabled)
-    #expect(blankEditor.cadence?.count?.title == "Every 7 days")
+    #expect(blankComposer.prompt == "Describe your task")
+    #expect(!blankComposer.composer.send.isEnabled)
 
-    _ = TasksFeature.reduce(&state, .editor(.nameChanged("Plants")))
-    _ = TasksFeature.reduce(&state, .editor(.cadenceKindChanged(.weekdays)))
-    let (named, sent) = try dataModel(state, language: "fr")
-    let editor = try #require(named.editor)
+    _ = TasksFeature.reduce(&state, .editor(.sentenceChanged("Arroser les plantes")))
+    let (typed, sent) = try dataModel(state, language: "fr")
+    let editor = try #require(typed.editor)
+    let composer = try #require(editor.composer)
     #expect(editor.title == "Nouvelle tâche")
-    #expect(editor.cadence?.count == nil)
-    #expect(editor.cadence?.weekdays.first?.title == "Lundi")
-    #expect(!editor.save.isEnabled)
+    #expect(composer.prompt == "Décrivez votre tâche")
+    #expect(composer.composer.send.isEnabled)
 
-    editor.cadence?.weekdays.first?.onChange.execute(true)
-    editor.name.onChange.execute("Water")
-    #expect(sent.actions == [.editor(.weekdayToggled(.monday, isOn: true)), .editor(.nameChanged("Water"))])
+    composer.composer.send.action.execute()
+    #expect(sent.actions == [.editor(.sentenceSent)])
+
+    _ = TasksFeature.reduce(&state, .editor(.sentenceSent))
+    let reading = try #require(try dataModel(state).0.editor?.composer)
+    #expect(reading.composer.isSending)
+    #expect(!reading.composer.send.isEnabled)
+}
+
+@MainActor
+@Test func theFormShowsEveryValueInTheUsersLanguage() throws {
+    var state = try loadedState()
+    _ = TasksFeature.reduce(&state, .rowTapped(id: try Sample.identifier(3), now: try Sample.november(10)))
+
+    let english = try #require(try dataModel(state).0.editor?.form)
+    let french = try #require(try dataModel(state, language: "fr").0.editor?.form)
+
+    #expect(try dataModel(state).0.editor?.title == "Edit task")
+    #expect(english.name.text == "Plants")
+    #expect(english.delete != nil)
+    #expect(english.repeats.row.value == "Every 5 days")
+    #expect(english.countedFrom?.row.value == "Last time done")
+    #expect(english.deadline.row.value == "None")
+    #expect(english.location.row.value == "Anywhere")
+    #expect(english.timeOfDay.row.value == "Any time")
+    #expect(english.weather.row.value == "Any weather")
+    #expect(english.subtasks.subtasks.map(\.duration.selectedID) == ["30"])
+    #expect(french.repeats.row.value == "Tous les 5 jours")
+    #expect(french.countedFrom?.row.value == "La dernière fois")
+    #expect(french.timeOfDay.row.value == "N’importe quand")
+}
+
+@MainActor
+@Test func theFormSendsWhatTheUserPicks() throws {
+    var state = try loadedState()
+    _ = TasksFeature.reduce(&state, .rowTapped(id: try Sample.identifier(3), now: try Sample.november(10)))
+    let (model, sent) = try dataModel(state)
+    let form = try #require(model.editor?.form)
+
+    form.repeats.choices.onSelect.execute(TaskEditor.Repeats.everyMonth.rawValue)
+    form.countedFrom?.choices.onSelect.execute("fixed")
+    form.location.choices.onSelect.execute("home")
+    form.timeOfDay.items[1].onChange.execute(true)
+    form.weather.items[0].onChange.execute(true)
+    form.name.onChange.execute("Water")
+
+    #expect(sent.actions == [
+        .editor(.repeatsChanged(.everyMonth)),
+        .editor(.countedFromChanged(isFixed: true)),
+        .editor(.locationChanged(.home)),
+        .editor(.windowToggled(.morning, isOn: true)),
+        .editor(.weatherToggled(nil, isOn: true)),
+        .editor(.nameChanged("Water")),
+    ])
+}
+
+@MainActor
+@Test func customShowsItsFrequencyAndWeekdays() throws {
+    var state = try loadedState()
+    _ = TasksFeature.reduce(&state, .rowTapped(id: try Sample.identifier(3), now: try Sample.november(10)))
+    _ = TasksFeature.reduce(&state, .editor(.repeatsChanged(.custom)))
+    _ = TasksFeature.reduce(&state, .editor(.customUnitChanged(.week)))
+
+    let weekly = try #require(try dataModel(state, language: "fr").0.editor?.form?.repeats.custom)
+    #expect(weekly.frequency.selectedID == "week")
+    #expect(weekly.count?.title == "Toutes les 5 semaines")
+    #expect(weekly.weekdays.first?.title == "Lundi")
+
+    _ = TasksFeature.reduce(&state, .editor(.weekdayToggled(.monday, isOn: true)))
+    let onMondays = try #require(try dataModel(state).0.editor?.form?.repeats)
+    #expect(onMondays.custom?.count == nil)
+    #expect(onMondays.row.value == "Every Monday")
+    #expect(try dataModel(state).0.editor?.form?.countedFrom == nil)
 }
 
 @MainActor
@@ -184,7 +280,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 @MainActor
 @Test func savingStoresTheTaskAndReloads() async throws {
     let repository = FakeRepository()
-    let environment = TasksFeature.Environment(repository: repository, catalog: nil, locale: Locale(identifier: "en"))
+    let environment = TasksFeature.Environment(repository: repository, catalog: nil, locale: Locale(identifier: "en"), calendar: Sample.calendar)
     let task = try Sample.task(1, "Laundry")
 
     let action = await TasksFeature.run(.save(task), in: environment)
@@ -196,7 +292,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
 @Test func aFailedSaveReportsTheFailure() async throws {
     let repository = FakeRepository()
     await repository.setFailsOnSave(true)
-    let environment = TasksFeature.Environment(repository: repository, catalog: nil, locale: Locale(identifier: "en"))
+    let environment = TasksFeature.Environment(repository: repository, catalog: nil, locale: Locale(identifier: "en"), calendar: Sample.calendar)
 
     #expect(await TasksFeature.run(.save(try Sample.task(1, "Laundry")), in: environment) == .failed)
 }
@@ -207,6 +303,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
         repository: FakeRepository(),
         catalog: FakeCatalog(),
         locale: Locale(identifier: "en"),
+        calendar: Sample.calendar,
         suggestionDelay: .zero
     )
     let store = Store<TasksFeature>(state: TasksFeature.State(), environment: environment)
@@ -216,7 +313,6 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     await store.waitForEffects()
 
     #expect(store.state.editor?.task.steps.map(\.name) == ["Load", "Wash"])
-    #expect(store.dataModel(context: try Sample.context()).editor?.steps.footer == "Suggested by Tony. Change anything that does not fit.")
 }
 
 @MainActor
@@ -225,6 +321,7 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
         repository: FakeRepository(),
         catalog: FakeCatalog(),
         locale: Locale(identifier: "en"),
+        calendar: Sample.calendar,
         suggestionDelay: .milliseconds(50)
     )
     let store = Store<TasksFeature>(state: TasksFeature.State(), environment: environment)
@@ -238,85 +335,85 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     #expect(store.state.editor?.suggestedSteps == nil)
 }
 
-// MARK: Quick add
+// MARK: Composing
 
+/// Types the sentence in a new task's composer and sends it, then returns the form it fills.
 @MainActor
-private func quickAdd(_ sentence: String, language: String = "en", languageService: (any LanguageService)? = nil) async throws -> (Store<TasksFeature>, TaskEditorDataModel) {
+private func compose(_ sentence: String, language: String = "en", languageService: (any LanguageService)? = nil) async throws -> (Store<TasksFeature>, TaskFormDataModel) {
     let locale = Locale(identifier: language)
     let environment = TasksFeature.Environment(
         repository: FakeRepository(),
         catalog: FakeCatalog(),
         languageService: languageService,
         locale: locale,
+        calendar: Sample.calendar,
         suggestionDelay: .zero
     )
     let store = Store<TasksFeature>(state: TasksFeature.State(), environment: environment)
     let context = try Sample.context(language: language)
+    store.send(.addTapped(id: try Sample.identifier(7), stepID: try Sample.identifier(8), now: try Sample.november(10)))
 
-    store.dataModel(context: context).quickAdd.onChange.execute(sentence)
-    let submit = try #require(store.dataModel(context: context).quickAdd.onSubmit)
-    submit.execute()
+    try #require(store.dataModel(context: context).editor?.composer).composer.text.onChange.execute(sentence)
+    try #require(store.dataModel(context: context).editor?.composer).composer.send.action.execute()
     await store.waitForEffects()
-    return (store, try #require(store.dataModel(context: context).editor))
+    return (store, try #require(store.dataModel(context: context).editor?.form))
 }
 
 @MainActor
 @Test func aSentenceFillsTheFormInEnglish() async throws {
-    let (store, editor) = try await quickAdd("Water the plants every 5 days")
+    let (store, form) = try await compose("Water the plants every 5 days")
 
-    #expect(editor.title == "New task")
-    #expect(editor.name.text == "Water the plants")
-    #expect(editor.kind.selectedID == TonyTask.Kind.recurring.rawValue)
-    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.afterCompletion.rawValue)
-    #expect(editor.cadence?.count?.title == "Every 5 days")
-    #expect(editor.save.isEnabled)
-    #expect(store.state.quickAdd.isEmpty)
+    #expect(form.name.text == "Water the plants")
+    #expect(form.repeats.row.value == "Every 5 days")
+    #expect(form.repeats.choices.selectedID == TaskEditor.Repeats.custom.rawValue)
+    #expect(form.countedFrom?.row.value == "Last time done")
+    #expect(store.dataModel(context: try Sample.context()).editor?.save.isEnabled == true)
     #expect(store.state.tasks.isEmpty)
 }
 
 @MainActor
 @Test func aSentenceFillsTheFormInFrench() async throws {
-    let (_, editor) = try await quickAdd("Arroser les plantes tous les 5 jours", language: "fr")
+    let (_, form) = try await compose("Arroser les plantes tous les 5 jours", language: "fr")
 
-    #expect(editor.name.text == "Arroser les plantes")
-    #expect(editor.cadence?.repeats.selectedID == TaskEditor.CadenceKind.afterCompletion.rawValue)
-    #expect(editor.cadence?.count?.title == "Tous les 5 jours")
+    #expect(form.name.text == "Arroser les plantes")
+    #expect(form.repeats.row.value == "Tous les 5 jours")
 }
 
 @MainActor
 @Test func aSentenceCanGiveWeekdaysAGoalOrAOneTimeTaskAndItsSteps() async throws {
-    let (_, trash) = try await quickAdd("Take out the trash every Tuesday")
-    let (_, gym) = try await quickAdd("Go to the gym 3 times a week")
-    let (_, passport) = try await quickAdd("Renew my passport")
-    let (laundryStore, _) = try await quickAdd("Laundry every week")
+    let (_, trash) = try await compose("Take out the trash every Tuesday")
+    let (gymStore, gym) = try await compose("Go to the gym 3 times a week")
+    let (passportStore, passport) = try await compose("Renew my passport")
+    let (laundryStore, laundry) = try await compose("Laundry every two weeks")
 
-    #expect(trash.cadence?.weekdays.filter(\.isOn).map(\.title) == ["Tuesday"])
-    #expect(gym.kind.selectedID == TonyTask.Kind.goal.rawValue)
-    #expect(gym.cadence?.count?.title == "3 times a week")
-    #expect(passport.kind.selectedID == TonyTask.Kind.oneTime.rawValue)
-    #expect(passport.cadence == nil)
+    #expect(trash.repeats.row.value == "Every Tuesday")
+    #expect(gym.repeats.row.value == "3 times a week")
+    #expect(gymStore.state.editor?.editedTask.kind == .goal)
+    #expect(passport.repeats.row.value == "Never")
+    #expect(passport.countedFrom == nil)
+    #expect(passportStore.state.editor?.editedTask.kind == .oneTime)
+    #expect(laundry.repeats.choices.selectedID == TaskEditor.Repeats.everyTwoWeeks.rawValue)
     #expect(laundryStore.state.editor?.task.steps.map(\.name) == ["Load", "Wash"])
 }
 
 @MainActor
-@Test func theModelIsAskedOnlyForWhatTheRulesDoNotRead() async throws {
-    let service = FakeLanguageService(draft: TaskDraft(name: "Water the plants", cadence: .afterCompletion(days: 3)))
+@Test func theModelFillsWhatTheRulesDoNotRead() async throws {
+    let reading = TaskReading(
+        name: "Water the plants",
+        icon: "🪴",
+        cadence: .every(3, .day),
+        requirements: Requirements(location: .home, windows: [.morning])
+    )
+    let service = FakeLanguageService(reading: reading)
 
-    let (_, byRules) = try await quickAdd("Water the plants every 5 days", languageService: service)
-    let (_, byModel) = try await quickAdd("Water the plants every couple of days", languageService: service)
+    let (_, byRules) = try await compose("Water the plants every 5 days", languageService: service)
+    let (_, byModel) = try await compose("Water the plants every couple of days", languageService: service)
 
-    #expect(byRules.cadence?.count?.title == "Every 5 days")
-    #expect(byModel.name.text == "Water the plants")
-    #expect(byModel.cadence?.count?.title == "Every 3 days")
-    #expect(service.requests.map(\.plan) == ["Water the plants every couple of days"])
-    #expect(service.requests.first?.instructions.hasSuffix("The sentence is in English.") == true)
-}
-
-@MainActor
-@Test func anEmptySentenceOpensNothing() throws {
-    var state = TasksFeature.State()
-    _ = TasksFeature.reduce(&state, .quickAddChanged("   "))
-
-    #expect(TasksFeature.reduce(&state, .quickAddSubmitted(id: try Sample.identifier(1), stepID: try Sample.identifier(2), now: try Sample.november(10))).isEmpty)
-    #expect(state.editor == nil)
+    #expect(byRules.repeats.row.value == "Every 5 days")
+    #expect(byRules.icon.text == "🪴")
+    #expect(byRules.location.row.value == "At home")
+    #expect(byRules.timeOfDay.row.value == "Morning")
+    #expect(byModel.repeats.row.value == "Every 3 days")
+    #expect(service.requests.map(\.plan) == ["Water the plants every 5 days", "Water the plants every couple of days"])
+    #expect(service.requests.first?.instructions.contains("The sentence is in English. Today is Tuesday, November 10, 2026.") == true)
 }

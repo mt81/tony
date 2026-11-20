@@ -40,7 +40,7 @@ private final class ScriptedService: LanguageService {
         return answer
     }
 
-    func taskDraft(instructions: String, sentence: String) async throws -> TaskDraft { throw CocoaError(.featureUnsupported) }
+    func taskReading(instructions: String, sentence: String) async throws -> TaskReading { throw CocoaError(.featureUnsupported) }
     func routine(instructions: String, description: String) async throws -> Routine { throw CocoaError(.featureUnsupported) }
 }
 

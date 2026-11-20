@@ -14,7 +14,6 @@ public struct TasksScreen: View {
     public var body: some View {
         List {
             header
-            quickAdd
             ForEach(model.sections) { section in
                 Section {
                     ForEach(section.rows) { row in
@@ -59,18 +58,6 @@ public struct TasksScreen: View {
             .accessibilityIdentifier(ifPresent: model.add.accessibilityIdentifier)
         }
         .plainRow()
-    }
-
-    private var quickAdd: some View {
-        TextFieldView(model.quickAdd)
-            .tonyText(.body)
-            .foregroundStyle(TonyColor.ink)
-            .submitLabel(.done)
-            .padding(TonySpacing.large)
-            .frame(minHeight: TonySize.touchTarget)
-            .background(TonyColor.sidebar, in: .rect(cornerRadius: TonyRadius.row))
-            .padding(.top, TonySpacing.medium)
-            .plainRow()
     }
 
     private func sectionHeader(_ section: TaskSectionDataModel) -> some View {

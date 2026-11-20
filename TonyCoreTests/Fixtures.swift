@@ -28,7 +28,7 @@ enum Fixtures {
             icon: "washer",
             kind: .recurring,
             rank: 0,
-            cadence: .afterCompletion(days: 5),
+            cadence: .every(5, .day),
             requirements: Requirements(location: .home),
             steps: [
                 Step(id: try identifier(2), name: "Wash", mode: .background, duration: 45 * 60),
@@ -62,7 +62,7 @@ enum Fixtures {
         _ number: Int,
         _ name: String,
         rank: Int = 0,
-        cadence: Cadence? = .afterCompletion(days: 5),
+        cadence: Cadence? = .every(5, .day),
         requirements: Requirements = Requirements(),
         steps: [Step]? = nil,
         mustHappenBy: Date? = nil

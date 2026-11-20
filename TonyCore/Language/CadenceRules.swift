@@ -1,7 +1,7 @@
 import Foundation
 
 /// Reads how a task repeats from a sentence, with rules, in English and French:
-/// "every 5 days", "every Tuesday and Friday", "3 times a week", "tous les 5 jours", "chaque mardi", "3 fois par semaine".
+/// "every 5 days", "every month", "every Tuesday and Friday", "3 times a week", "tous les 5 jours", "chaque mardi", "3 fois par semaine".
 /// What is left of the sentence is the task's name.
 public enum CadenceRules {
     public static func draft(from sentence: String, locale: Locale) -> TaskDraft {
@@ -26,23 +26,32 @@ public enum CadenceRules {
             isFrench
             ? [
                 (number + " fois par semaine", { times, _ in times.map { .timesPerWeek($0) } }),
-                ("tou(?:s|tes) les " + number + " jours", { days, _ in days.map { .afterCompletion(days: $0) } }),
-                ("toutes les " + number + " semaines", { weeks, _ in weeks.map { .afterCompletion(days: $0 * 7) } }),
-                ("(?:tous les jours|chaque jour)", { _, _ in .afterCompletion(days: 1) }),
-                ("(?:chaque semaine|toutes les semaines)", { _, _ in .afterCompletion(days: 7) }),
-                ("(?:chaque mois|tous les mois)", { _, _ in .afterCompletion(days: 30) }),
+                ("tou(?:s|tes) les " + number + " jours", { days, _ in days.map { .every($0, .day) } }),
+                ("toutes les " + number + " semaines", { weeks, _ in weeks.map { .every($0, .week) } }),
+                ("tous les " + number + " mois", { months, _ in months.map { .every($0, .month) } }),
+                ("tous les " + number + " ans", { years, _ in years.map { .every($0, .year) } }),
+                ("(?:en semaine|chaque jour de (?:la )?semaine|du lundi au vendredi)", { _, _ in .weekdays(workweek) }),
+                ("(?:tous les jours|chaque jour)", { _, _ in .every(1, .day) }),
+                ("(?:chaque semaine|toutes les semaines)", { _, _ in .every(1, .week) }),
+                ("(?:chaque mois|tous les mois)", { _, _ in .every(1, .month) }),
+                ("(?:chaque annee|tous les ans)", { _, _ in .every(1, .year) }),
                 ("(?:chaque|tous les|les|le) " + day + "(?:(?:,| et|, et) (?:le |les )?" + day + ")*", { _, text in days(in: text, weekdays) }),
             ]
             : [
                 (number + " times (?:a|per) week", { times, _ in times.map { .timesPerWeek($0) } }),
                 ("once (?:a|per) week", { _, _ in .timesPerWeek(1) }),
                 ("twice (?:a|per) week", { _, _ in .timesPerWeek(2) }),
-                ("every " + number + " days", { days, _ in days.map { .afterCompletion(days: $0) } }),
-                ("every " + number + " weeks", { weeks, _ in weeks.map { .afterCompletion(days: $0 * 7) } }),
-                ("every other day", { _, _ in .afterCompletion(days: 2) }),
-                ("(?:every day|each day|daily)", { _, _ in .afterCompletion(days: 1) }),
-                ("(?:every week|each week|weekly)", { _, _ in .afterCompletion(days: 7) }),
-                ("(?:every month|each month|monthly)", { _, _ in .afterCompletion(days: 30) }),
+                ("every " + number + " days", { days, _ in days.map { .every($0, .day) } }),
+                ("every " + number + " weeks", { weeks, _ in weeks.map { .every($0, .week) } }),
+                ("every " + number + " months", { months, _ in months.map { .every($0, .month) } }),
+                ("every " + number + " years", { years, _ in years.map { .every($0, .year) } }),
+                ("every other day", { _, _ in .every(2, .day) }),
+                ("every other week", { _, _ in .every(2, .week) }),
+                ("(?:every weekday|on weekdays|weekdays)", { _, _ in .weekdays(workweek) }),
+                ("(?:every day|each day|daily)", { _, _ in .every(1, .day) }),
+                ("(?:every week|each week|weekly)", { _, _ in .every(1, .week) }),
+                ("(?:every month|each month|monthly)", { _, _ in .every(1, .month) }),
+                ("(?:every year|each year|yearly|annually)", { _, _ in .every(1, .year) }),
                 ("(?:every|each|on) " + day + "(?:(?:,| and|, and) " + day + ")*", { _, text in days(in: text, weekdays) }),
             ]
 
@@ -55,6 +64,8 @@ public enum CadenceRules {
         }
         return TaskDraft(name: name(sentence, locale: locale), cadence: nil)
     }
+
+    private static let workweek: Set<Locale.Weekday> = [.monday, .tuesday, .wednesday, .thursday, .friday]
 
     private static let englishNumbers = ["one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7]
     private static let frenchNumbers = ["un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5, "six": 6, "sept": 7]
@@ -85,10 +96,10 @@ public enum CadenceRules {
 }
 
 extension Cadence {
-    /// A cadence the task form can show: 1 to 365 days, at least one weekday, 1 to 7 times a week.
+    /// A cadence the task form can show: a count its unit offers, at least one weekday, 1 to 7 times a week.
     var isSensible: Bool {
         switch self {
-        case .afterCompletion(let days): (1...365).contains(days)
+        case .interval(let interval, _): (1...interval.unit.maximumCount).contains(interval.count)
         case .weekdays(let weekdays): !weekdays.isEmpty
         case .timesPerWeek(let times): (1...7).contains(times)
         }

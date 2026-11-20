@@ -17,7 +17,7 @@ final class TasksTabUITests: XCTestCase {
     @MainActor
     func testASentenceFillsTheTaskForm() {
         continueAfterFailure = false
-        TasksScreen().runQuickAdd()
+        TasksScreen().runComposer()
     }
 }
 
@@ -39,7 +39,8 @@ struct TasksScreen {
 
         row("UITest Alpha").tap()
         let name = app.textFields["taskName"]
-        name.tap()
+        // The name wraps onto more lines, so a tap in its middle would put the cursor there: tap at its end.
+        name.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
         name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: "Alpha".count) + "Gamma")
         app.buttons["saveTask"].tap()
         XCTAssertTrue(row("UITest Gamma").waitForExistence(timeout: 5))
@@ -64,33 +65,45 @@ struct TasksScreen {
     func runCatalogueSuggestion() {
         openTasks()
         app.buttons["addTask"].tap()
-        let field = app.textFields["taskName"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText("UITest laundry")
+        compose("UITest laundry")
 
         XCTAssertTrue(scrollToStep(named: "Load the washing machine"))
         XCTAssertTrue(scrollToStep(named: "Fold"))
-        XCTAssertTrue(app.staticTexts["Suggested by Tony. Change anything that does not fit."].waitForExistence(timeout: 5))
 
         app.buttons["Cancel"].tap()
         XCTAssertFalse(row("UITest laundry").exists)
     }
 
-    func runQuickAdd() {
+    func runComposer() {
         openTasks()
-        let quickAdd = app.textFields["quickAdd"]
-        XCTAssertTrue(quickAdd.waitForExistence(timeout: 5))
-        quickAdd.tap()
-        quickAdd.typeText("UITest plants every 5 days\n")
+        app.buttons["addTask"].tap()
+        compose("UITest plants every 5 days")
 
-        let name = app.textFields["taskName"]
-        XCTAssertTrue(name.waitForExistence(timeout: 5))
-        XCTAssertEqual(name.value as? String, "UITest plants")
+        XCTAssertEqual(app.textFields["taskName"].value as? String, "UITest plants")
         XCTAssertTrue(app.staticTexts["Every 5 days"].waitForExistence(timeout: 5))
+
+        let icon = app.textFields["taskIcon"]
+        icon.tap()
+        icon.typeText("🪴")
+        XCTAssertEqual(icon.value as? String, "🪴")
+
+        app.buttons["repeats"].tap()
+        app.buttons["Every week"].tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts["Every week"].waitForExistence(timeout: 5))
 
         app.buttons["Cancel"].tap()
         XCTAssertFalse(row("UITest plants").exists)
+    }
+
+    /// Types the task in the composer and sends it, then waits for the form.
+    func compose(_ sentence: String) {
+        let field = app.descendants(matching: .any)["taskSentence"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(sentence)
+        app.buttons["sendTask"].tap()
+        XCTAssertTrue(app.textFields["taskName"].waitForExistence(timeout: 15))
     }
 
     /// Drags one row past the top edge of another, slowly, and holds it there before letting go.
@@ -144,16 +157,13 @@ struct TasksScreen {
 
     func create(_ name: String, hasDeadline: Bool = false) {
         app.buttons["addTask"].tap()
-        let field = app.textFields["taskName"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText(name)
+        compose(name)
         if hasDeadline {
+            app.buttons["deadline"].tap()
             let deadline = app.switches["Must happen by a date"]
-            for _ in 0..<6 where !(deadline.exists && deadline.isHittable) {
-                app.swipeUp()
-            }
+            XCTAssertTrue(deadline.waitForExistence(timeout: 5))
             deadline.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+            app.navigationBars.buttons.element(boundBy: 0).tap()
         }
         app.buttons["saveTask"].tap()
         XCTAssertTrue(row(name).waitForExistence(timeout: 5))

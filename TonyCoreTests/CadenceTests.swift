@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import TonyCore
 
-/// Days are days of November 2026: the 2nd is a Monday, and weeks start on Monday.
+/// Days are days of November 2026: the 2nd is a Monday, and weeks start on Monday. Day 0 is 31 October, day 31 is 1 December.
 struct CadenceCase: Sendable, CustomTestStringConvertible {
     var testDescription: String
     var cadence: Cadence?
@@ -61,7 +61,7 @@ struct CadenceCase: Sendable, CustomTestStringConvertible {
     }
 }
 
-private let everyFiveDays = Cadence.afterCompletion(days: 5)
+private let everyFiveDays = Cadence.every(5, .day)
 private let mondayAndThursday = Cadence.weekdays([.monday, .thursday])
 private let threePerWeek = Cadence.timesPerWeek(3)
 
@@ -78,6 +78,13 @@ private let cadenceCases: [CadenceCase] = [
         "after completion, skipped",
         everyFiveDays, done: [2], unfinished: [7, 8], on: 9, isDue: true, neglect: expm1(2.0 / 5)
     ),
+
+    CadenceCase("every 2 weeks, done, day before due", .every(2, .week), done: [2], on: 15, isDue: false),
+    CadenceCase("every 2 weeks, done, due day", .every(2, .week), done: [2], on: 16, isDue: true),
+    CadenceCase("every month, done, day before due", .every(1, .month), done: [3], on: 32, isDue: false),
+    CadenceCase("every month, done, due day", .every(1, .month), done: [3], on: 33, isDue: true),
+    CadenceCase("every month, late", .every(1, .month), done: [3], on: 43, isDue: true, neglect: expm1(10.0 / 30)),
+    CadenceCase("every year, done", .every(1, .year), done: [3], on: 360, isDue: false),
 
     CadenceCase("weekdays, never done, before first weekday", mondayAndThursday, on: 1, isDue: false),
     CadenceCase("weekdays, never done, first weekday", mondayAndThursday, on: 2, isDue: true),
@@ -104,6 +111,54 @@ private let cadenceCases: [CadenceCase] = [
     CadenceCase("one-time, done", nil, done: [3], on: 20, isDue: false),
 ]
 
+/// A fixed schedule, starting on a day of November 2026.
+struct ScheduleCase: Sendable, CustomTestStringConvertible {
+    var testDescription: String
+    var interval: Cadence.Interval
+    var start: Int
+    var done: [Int]
+    var on: Int
+    var isDue: Bool
+    var neglect: Double
+
+    init(_ testDescription: String, _ interval: Cadence.Interval, from start: Int, done: [Int] = [], on: Int, isDue: Bool, neglect: Double = 0) {
+        self.testDescription = testDescription
+        self.interval = interval
+        self.start = start
+        self.done = done
+        self.on = on
+        self.isDue = isDue
+        self.neglect = neglect
+    }
+
+    func cadenceCase() throws -> CadenceCase {
+        let cadence = Cadence.interval(interval, countedFrom: .schedule(from: try Fixtures.november(start)))
+        return CadenceCase(testDescription, cadence, done: done, on: on, isDue: isDue, neglect: neglect)
+    }
+}
+
+private let twoWeeks = Cadence.Interval(count: 2, unit: .week)
+private let oneMonth = Cadence.Interval(count: 1, unit: .month)
+
+private let scheduleCases: [ScheduleCase] = [
+    ScheduleCase("fixed, before the start", twoWeeks, from: 9, on: 3, isDue: false),
+    ScheduleCase("fixed, start day", twoWeeks, from: 2, on: 2, isDue: true),
+    ScheduleCase("fixed, done, between two times", twoWeeks, from: 2, done: [2], on: 10, isDue: false),
+    ScheduleCase("fixed, done, next time", twoWeeks, from: 2, done: [2], on: 16, isDue: true),
+    ScheduleCase("fixed, missed, stays due", twoWeeks, from: 2, done: [2], on: 18, isDue: true, neglect: expm1(2.0 / 14)),
+    ScheduleCase("fixed, done late, keeps the rhythm", twoWeeks, from: 2, done: [2, 18], on: 29, isDue: false),
+    ScheduleCase("fixed, done late, next time on the rhythm", twoWeeks, from: 2, done: [2, 18], on: 30, isDue: true),
+    ScheduleCase("fixed, on the 31st, falls on the 30th in November", oneMonth, from: 0, done: [1], on: 29, isDue: false),
+    ScheduleCase("fixed, on the 31st, the 30th in November", oneMonth, from: 0, done: [1], on: 30, isDue: true),
+    ScheduleCase("fixed, on the 31st, back to the 31st in December", oneMonth, from: 0, done: [30], on: 60, isDue: false),
+    ScheduleCase("fixed, on the 31st, the 31st in December", oneMonth, from: 0, done: [30], on: 61, isDue: true),
+]
+
+@Test(arguments: scheduleCases)
+func fixedScheduleDueAndNeglect(scheduleCase: ScheduleCase) throws {
+    try dueAndNeglect(cadenceCase: try scheduleCase.cadenceCase())
+}
+
 @Test(arguments: cadenceCases)
 func dueAndNeglect(cadenceCase: CadenceCase) throws {
     let task = try cadenceCase.task()
@@ -118,8 +173,8 @@ func dueAndNeglect(cadenceCase: CadenceCase) throws {
 
 @Test func sameDelayWeighsMoreOnAShortCadence() throws {
     let day = try Fixtures.november(18)
-    let weekly = try CadenceCase("weekly", .afterCompletion(days: 7), done: [1], on: 18, isDue: true).task()
-    let monthly = try CadenceCase("monthly", .afterCompletion(days: 30), on: 11, isDue: true).task()
+    let weekly = try CadenceCase("weekly", .every(1, .week), done: [1], on: 18, isDue: true).task()
+    let monthly = try CadenceCase("monthly", .every(1, .month), on: 11, isDue: true).task()
     let doneOnTheFirst = [
         Completion(id: UUID(), taskID: weekly.id, date: try Fixtures.november(1), outcome: .done),
     ]

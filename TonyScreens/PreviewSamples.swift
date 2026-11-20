@@ -90,7 +90,6 @@ enum PreviewSamples {
         TasksScreenDataModel(
             title: "Tasks",
             add: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }),
-            quickAdd: TextFieldDataModel(title: "Tell Tony what to add", text: "", prompt: "Tell Tony… “water the plants every 5 days”", onChange: Action(id: "preview") { _ in }),
             sections: [
                 TaskSectionDataModel(
                     id: "recurring",
@@ -126,78 +125,85 @@ enum PreviewSamples {
         )
     }
 
-    static func step(_ name: String, mode: String, minutes: Int, gap: Int?) -> StepDataModel {
-        StepDataModel(
+    static let noAction = Action(id: "preview") { (_: Void) in }
+
+    static func row(_ systemImage: String, _ title: String, _ value: String) -> DetailRowDataModel {
+        DetailRowDataModel(systemImage: systemImage, title: title, value: value)
+    }
+
+    static func picker(_ title: String, _ options: [String], selected: String) -> PickerDataModel {
+        PickerDataModel(title: title, options: options.map { .init(id: $0, title: $0) }, selectedID: selected, onSelect: Action(id: "preview") { _ in })
+    }
+
+    static func checklist(_ titles: [String], on: Set<String>) -> [ToggleDataModel] {
+        titles.map { ToggleDataModel(id: $0, title: $0, isOn: on.contains($0), onChange: Action(id: "preview") { _ in }) }
+    }
+
+    static func subtask(_ name: String, minutes: Int) -> SubtaskDataModel {
+        SubtaskDataModel(
             id: UUID(),
-            name: TextFieldDataModel(title: "Step name", text: name, onChange: Action(id: "preview") { _ in }),
-            mode: PickerDataModel(
-                title: "How",
-                options: [.init(id: "active", title: "I do it"), .init(id: "background", title: "It runs on its own")],
-                selectedID: mode,
-                onSelect: Action(id: "preview") { _ in }
+            name: TextFieldDataModel(title: "Sub task", text: name, onChange: Action(id: "preview") { _ in }),
+            duration: picker("Duration", ["5 min", "10 min", "15 min", "30 min", "45 min", "1 hr"], selected: "\(minutes) min")
+        )
+    }
+
+    static var taskComposer: TaskEditorDataModel {
+        TaskEditorDataModel(
+            id: UUID(),
+            title: "New task",
+            composer: TaskComposerDataModel(
+                prompt: "Describe your task",
+                composer: ComposerDataModel(
+                    text: TextFieldDataModel(
+                        title: "Describe your task",
+                        text: "Do dark clothes laundry every two weeks",
+                        prompt: "Water the plants every 5 days",
+                        onChange: Action(id: "preview") { _ in }
+                    ),
+                    send: ButtonDataModel(title: "Send", systemImage: "arrow.up", action: noAction),
+                    isSending: false
+                )
             ),
-            duration: StepperDataModel(title: "Lasts \(minutes) min", value: minutes, range: 5...480, step: 5, onChange: Action(id: "preview") { _ in }),
-            gap: gap.map { StepperDataModel(title: "Then wait \($0) min", value: $0, range: 0...480, step: 5, onChange: Action(id: "preview") { _ in }) }
+            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel, action: noAction),
+            save: ButtonDataModel(title: "Save", systemImage: "checkmark", isEnabled: false, action: noAction)
         )
     }
 
     static var taskEditor: TaskEditorDataModel {
         TaskEditorDataModel(
             id: UUID(),
-            title: "Edit task",
-            name: TextFieldDataModel(title: "Name", text: "Laundry", onChange: Action(id: "preview") { _ in }),
-            icon: TextFieldDataModel(title: "Icon", text: "🧺", onChange: Action(id: "preview") { _ in }),
-            kind: PickerDataModel(
-                title: "Kind",
-                options: [.init(id: "recurring", title: "Recurring task"), .init(id: "goal", title: "Goal"), .init(id: "oneTime", title: "One-time task")],
-                selectedID: "recurring",
-                onSelect: Action(id: "preview") { _ in }
-            ),
-            cadence: CadenceSectionDataModel(
-                header: "Cadence",
-                repeats: PickerDataModel(
-                    title: "Repeats",
-                    options: [.init(id: "afterCompletion", title: "After it was last done"), .init(id: "weekdays", title: "On fixed days")],
-                    selectedID: "afterCompletion",
-                    onSelect: Action(id: "preview") { _ in }
+            title: "New task",
+            form: TaskFormDataModel(
+                icon: TextFieldDataModel(title: "Icon", text: "🧺", onChange: Action(id: "preview") { _ in }),
+                name: TextFieldDataModel(title: "Name", text: "Dark clothes laundry", onChange: Action(id: "preview") { _ in }),
+                scheduleHeader: "Schedule",
+                repeats: RepeatsDataModel(
+                    row: row("repeat", "Repeats", "Every 2 weeks"),
+                    choices: picker("Repeats", ["Never", "Every day", "Weekdays", "Every week", "Every 2 weeks", "Every month", "Every year", "Times a week", "Custom"], selected: "Every 2 weeks")
                 ),
-                count: StepperDataModel(title: "Every 7 days", value: 7, range: 1...365, onChange: Action(id: "preview") { _ in }),
-                weekdays: []
-            ),
-            whenItFits: WhenItFitsSectionDataModel(
-                header: "When it fits",
-                location: PickerDataModel(
-                    title: "Where",
-                    options: [.init(id: "anywhere", title: "Anywhere"), .init(id: "home", title: "At home")],
-                    selectedID: "home",
-                    onSelect: Action(id: "preview") { _ in }
+                countedFrom: CountedFromDataModel(
+                    row: row("checkmark.circle", "Counted from", "Last time done"),
+                    choices: picker("Counted from", ["Last time done", "Fixed schedule"], selected: "Last time done")
                 ),
-                toggles: [
-                    ToggleDataModel(id: "morning", title: "Morning", isOn: false, onChange: Action(id: "preview") { _ in }),
-                    ToggleDataModel(id: "evening", title: "Evening", isOn: true, onChange: Action(id: "preview") { _ in }),
-                ]
+                deadline: DeadlineDataModel(
+                    row: row("calendar", "Deadline", "None"),
+                    toggle: ToggleDataModel(id: "deadline", title: "Must happen by a date", isOn: false, onChange: Action(id: "preview") { _ in })
+                ),
+                whenItFitsHeader: "When it fits",
+                location: ChoiceDataModel(row: row("location", "Where", "At home"), choices: picker("Where", ["Anywhere", "At home", "At the office"], selected: "At home")),
+                timeOfDay: ChecklistDataModel(row: row("clock", "Time of day", "Any time"), items: checklist(["Any time", "Morning", "Work hours", "Evening"], on: ["Any time"])),
+                weather: ChecklistDataModel(row: row("cloud.rain", "Weather", "Any weather"), items: checklist(["Any weather", "Not in the rain", "Not in the snow"], on: ["Any weather"])),
+                subtasks: SubtasksSectionDataModel(
+                    header: "Sub tasks",
+                    subtasks: [subtask("Load the washing machine", minutes: 10), subtask("Hang to dry", minutes: 15), subtask("Fold", minutes: 15)],
+                    add: ButtonDataModel(title: "Add a sub task", systemImage: "plus", action: noAction),
+                    canDelete: true,
+                    move: Action(id: "preview") { _ in },
+                    delete: Action(id: "preview") { _ in }
+                )
             ),
-            steps: StepsSectionDataModel(
-                header: "Steps",
-                footer: "Suggested by Tony. Change anything that does not fit.",
-                steps: [
-                    step("Load the washing machine", mode: "active", minutes: 10, gap: 0),
-                    step("Wash", mode: "background", minutes: 45, gap: 0),
-                    step("Fold", mode: "active", minutes: 15, gap: nil),
-                ],
-                add: ButtonDataModel(title: "Add a step", action: Action(id: "preview") { _ in }),
-                canDelete: true,
-                move: Action(id: "preview") { _ in },
-                delete: Action(id: "preview") { _ in }
-            ),
-            deadline: DeadlineSectionDataModel(
-                header: "Deadline",
-                toggle: ToggleDataModel(id: "deadline", title: "Must happen by a date", isOn: true, onChange: Action(id: "preview") { _ in }),
-                date: DatePickerDataModel(title: "Date", date: .now, onChange: Action(id: "preview") { _ in })
-            ),
-            delete: ButtonDataModel(title: "Delete task", role: .destructive, action: Action(id: "preview") { _ in }),
-            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel, action: Action(id: "preview") { _ in }),
-            save: ButtonDataModel(title: "Save", systemImage: "checkmark", action: Action(id: "preview") { _ in })
+            cancel: ButtonDataModel(title: "Cancel", systemImage: "xmark", role: .cancel, action: noAction),
+            save: ButtonDataModel(title: "Save", systemImage: "checkmark", action: noAction)
         )
     }
 

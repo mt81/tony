@@ -10,14 +10,16 @@ struct ModelInstructionsTests {
 
         #expect(english.contains("English"))
         #expect(french.contains("French"))
-        #expect(!english.contains("{") && !french.contains("{"))
+        #expect(!english.contains("{language}") && !french.contains("{language}"))
     }
 
-    @Test func theScreensReadThePromptFiles() {
+    @Test func theScreensReadThePromptFiles() throws {
         let french = Locale(identifier: "fr_FR")
+        let task = ModelInstructions.task(french, now: try Sample.november(19), calendar: Sample.calendar)
 
         #expect(ModelInstructions.briefing(french) == ModelInstructions.prompt("briefing", french))
-        #expect(ModelInstructions.task(french) == ModelInstructions.prompt("task", french))
+        #expect(task == ModelInstructions.prompt("task", french).replacing("{today}", with: "Thursday, November 19, 2026"))
+        #expect(!task.contains("{"))
         #expect(ModelInstructions.routine(french) == ModelInstructions.prompt("routine", french))
     }
 

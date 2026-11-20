@@ -89,7 +89,8 @@ extension EvaluationCase {
                 }
                 return EvaluationResult(output: text, duration: duration, problems: problems)
             case .task(let sentence, let nameKeyword, let cadence):
-                let draft = try await service.taskDraft(instructions: ModelInstructions.task(locale), sentence: sentence)
+                let instructions = ModelInstructions.task(locale, now: Self.evaluationDay, calendar: Self.calendar)
+                let draft = try await service.taskReading(instructions: instructions, sentence: sentence)
                 var problems: [String] = []
                 if !TaskSentenceParser.isValid(draft, for: sentence) {
                     problems.append("the app would drop this answer")
@@ -122,6 +123,9 @@ extension EvaluationCase {
         calendar.firstWeekday = 2
         return calendar
     }()
+
+    /// The day the task sentences are read on: Thursday 19 November 2026, 9:00 UTC.
+    static let evaluationDay = Date(timeIntervalSinceReferenceDate: 816_771_600)
 
     private static func text(_ routine: Routine) -> String {
         func days(_ weekdays: Set<Locale.Weekday>) -> String {

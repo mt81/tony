@@ -87,3 +87,23 @@ extension TaskRowDataModel: Equatable {
             && lhs.open.isEqual(to: rhs.open)
     }
 }
+
+/// A form row that opens a page: an icon, what it sets, and its value.
+@MemberwiseInit(.public)
+public struct DetailRowDataModel: Hashable, Sendable {
+    /// An SF Symbol.
+    public var systemImage: String
+    public var title: String
+    public var value: String
+    public var accessibilityIdentifier: String? = nil
+}
+
+/// A box to type a sentence in, with a button that sends it.
+@MemberwiseInit(.public)
+public struct ComposerDataModel: Equatable {
+    public var text: TextFieldDataModel
+    /// Disabled while there is nothing to send.
+    public var send: ButtonDataModel
+    /// The sentence was sent and its answer has not come back.
+    public var isSending: Bool
+}
