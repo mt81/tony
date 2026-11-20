@@ -89,7 +89,7 @@ public struct TasksScreen: View {
         if let hint {
             Text(hint)
                 .tonyText(.caption)
-                .foregroundStyle(TonyColor.muted)
+                .foregroundStyle(TonyColor.ink)
         }
     }
 

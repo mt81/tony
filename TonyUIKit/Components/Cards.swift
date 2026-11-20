@@ -15,7 +15,7 @@ public struct TaskRow: View {
             if !dynamicTypeSize.isAccessibilitySize {
                 Image(systemName: "line.3.horizontal")
                     .tonyText(.labelLarge)
-                    .foregroundStyle(TonyColor.muted)
+                    .foregroundStyle(TonyColor.ink)
                     .accessibilityHidden(true)
                 IconCircle(icon: model.icon, isNeglected: model.isNeglected)
             }
@@ -24,7 +24,7 @@ public struct TaskRow: View {
                     IconCircle(icon: model.icon, isNeglected: model.isNeglected)
                 }
                 Text(model.title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
-                Text(model.subtitle).tonyText(.caption).foregroundStyle(TonyColor.muted)
+                Text(model.subtitle).tonyText(.caption).foregroundStyle(TonyColor.ink)
                 if dynamicTypeSize.isAccessibilitySize {
                     Chip(model.status).padding(.top, TonySpacing.tight)
                 }
@@ -36,32 +36,49 @@ public struct TaskRow: View {
         }
         .padding(.horizontal, TonySpacing.inset)
         .padding(.vertical, TonySpacing.medium)
-        .background(TonyColor.surface, in: .rect(cornerRadius: TonyRadius.row))
+        .glassCard(cornerRadius: TonyRadius.row)
         .accessibilityElement(children: .combine)
     }
 }
 
-/// A "How things are" tile: an area or a task with its mood.
+/// A "How things are" tile: a task with its mood, on its area colour.
 public struct Tile: View {
     private let model: TileDataModel
+    @ScaledMetric(relativeTo: .title) private var iconSize = TonySize.tileIcon
 
     public init(_ model: TileDataModel) {
         self.model = model
     }
 
     public var body: some View {
+        let colour = Self.colour(model.colour)
         VStack(alignment: .leading, spacing: TonySpacing.tight) {
             Text(model.icon)
-                .tonyText(.numeral)
+                .font(.system(size: iconSize))
                 .accessibilityHidden(true)
                 .padding(.bottom, TonySpacing.xSmall)
             Text(model.title).tonyText(.labelLarge).foregroundStyle(TonyColor.ink)
-            Text(model.detail).tonyText(.caption).foregroundStyle(model.isNeglected ? TonyColor.warning : TonyColor.muted)
+            Text(model.detail).tonyText(.caption).foregroundStyle(model.isNeglected ? TonyColor.warning : TonyColor.ink)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(TonySpacing.large)
-        .background(model.isNeglected ? TonyColor.warningSoft : TonyColor.surface, in: .rect(cornerRadius: TonyRadius.tile))
+        .background(colour.opacity(model.isNeglected ? TonyOpacity.tileNeglected : TonyOpacity.tile), in: .rect(cornerRadius: TonyRadius.tile))
+        .overlay {
+            RoundedRectangle(cornerRadius: TonyRadius.tile)
+                .strokeBorder(colour, lineWidth: TonySize.glassEdge)
+        }
         .accessibilityElement(children: .combine)
+    }
+
+    private static func colour(_ colour: TileDataModel.Colour) -> Color {
+        switch colour {
+        case .yellow: TonyColor.areaYellow
+        case .green: TonyColor.areaGreen
+        case .blue: TonyColor.areaBlue
+        case .orange: TonyColor.areaOrange
+        case .teal: TonyColor.areaTeal
+        case .indigo: TonyColor.areaIndigo
+        }
     }
 }
 
@@ -76,11 +93,11 @@ public struct Stat: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: TonySpacing.xSmall) {
             Text(model.value).tonyText(.numeral).foregroundStyle(TonyColor.ink)
-            Text(model.label).tonyText(.caption).foregroundStyle(TonyColor.muted)
+            Text(model.label).tonyText(.caption).foregroundStyle(TonyColor.ink)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(TonySpacing.large)
-        .background(TonyColor.surface, in: .rect(cornerRadius: TonyRadius.stat))
+        .glassCard(cornerRadius: TonyRadius.stat)
         .accessibilityElement(children: .combine)
     }
 }
@@ -107,9 +124,20 @@ public struct AreaRow: View {
                 }
                 .clipShape(.rect(cornerRadius: TonyRadius.track))
                 .accessibilityHidden(true)
-            Text(model.status).tonyText(.caption).foregroundStyle(TonyColor.muted)
+            Text(model.status).tonyText(.caption).foregroundStyle(TonyColor.ink)
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+extension View {
+    /// The see-through card of the tabs: the glass fill with its edge.
+    public func glassCard(cornerRadius: CGFloat) -> some View {
+        background(TonyColor.glass, in: .rect(cornerRadius: cornerRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge)
+            }
     }
 }
 
@@ -144,10 +172,14 @@ public struct AreaRow: View {
     .dynamicTypeSize(.accessibility5)
 }
 
-#Preview("Tile") {
-    HStack(alignment: .top, spacing: TonySpacing.medium) {
-        Tile(TileDataModel(icon: "🌿", title: "Plants", detail: "In 4 days"))
-        Tile(TileDataModel(icon: "🛏️🪰", title: "Bed sheets", detail: "16 days. The flies moved in.", isNeglected: true))
+#Preview("Tiles") {
+    LazyVGrid(columns: [GridItem(.flexible(), alignment: .top), GridItem(.flexible(), alignment: .top)], spacing: TonySpacing.medium) {
+        Tile(TileDataModel(icon: "🛏️", title: "Bed sheets", detail: "16 days since last time", colour: .yellow, isNeglected: true))
+        Tile(TileDataModel(icon: "🪴", title: "Plants", detail: "5 days since last time", colour: .green, isNeglected: true))
+        Tile(TileDataModel(icon: "🏠", title: "Home", detail: "In 3 days", colour: .blue))
+        Tile(TileDataModel(icon: "🏋️", title: "Training", detail: "2 of 4 this week", colour: .orange))
+        Tile(TileDataModel(icon: "💊", title: "Supplements", detail: "Done today", colour: .teal))
+        Tile(TileDataModel(icon: "😴", title: "Sleep", detail: "Every day", colour: .indigo))
     }
     .tonyPreview()
 }

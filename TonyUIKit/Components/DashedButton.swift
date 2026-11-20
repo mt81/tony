@@ -15,12 +15,12 @@ public struct DashedButton: View {
         } label: {
             Text(model.title)
                 .tonyText(.label)
-                .foregroundStyle(TonyColor.muted)
+                .foregroundStyle(TonyColor.ink)
                 .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
                 .padding(.vertical, TonySpacing.xSmall)
                 .overlay {
                     RoundedRectangle(cornerRadius: TonyRadius.row)
-                        .strokeBorder(TonyColor.line, style: StrokeStyle(lineWidth: TonySize.border, dash: [TonySpacing.tight]))
+                        .strokeBorder(TonyColor.glassEdge, style: StrokeStyle(lineWidth: TonySize.border, dash: [TonySpacing.tight]))
                 }
         }
         .buttonStyle(.plain)

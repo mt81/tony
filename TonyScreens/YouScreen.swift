@@ -41,7 +41,8 @@ private struct YouHeader: View {
                     .tonyText(.heading)
                     .foregroundStyle(TonyColor.ink)
                     .frame(width: TonySize.avatar, height: TonySize.avatar)
-                    .background(TonyColor.surfaceRaised, in: .circle)
+                    .background(TonyColor.glassBar, in: .circle)
+                    .overlay { Circle().strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge) }
                     .accessibilityHidden(true)
             }
             Text(viewModel.name)
@@ -83,7 +84,7 @@ private struct RoutineCard: View {
         } label: {
             Text(edit.title)
                 .tonyText(.caption)
-                .foregroundStyle(TonyColor.muted)
+                .foregroundStyle(TonyColor.ink)
                 .frame(minWidth: TonySize.touchTarget, minHeight: TonySize.touchTarget, alignment: .trailing)
         }
         .buttonStyle(.plain)
@@ -131,7 +132,7 @@ private struct YouCard<Content: View>: View {
         VStack(alignment: .leading, spacing: TonySpacing.small) { content }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(TonySpacing.panelInset)
-            .background(TonyColor.surface, in: .rect(cornerRadius: TonyRadius.tile))
+            .glassCard(cornerRadius: TonyRadius.tile)
     }
 }
 
@@ -160,7 +161,7 @@ private struct YouCardText: View {
     var body: some View {
         Text(text)
             .tonyText(.body)
-            .foregroundStyle(TonyColor.muted)
+            .foregroundStyle(TonyColor.ink)
     }
 }
 

@@ -26,15 +26,10 @@ enum PreviewSamples {
         TodayScreenDataModel(
             date: "Thursday, November 12",
             headline: "A light day, Matteo",
-            briefing: BriefingDataModel(
-                author: "Tony",
-                time: "· 8:00",
-                text: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight."
-            ),
+            briefing: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight.",
             timelineTitle: "Your day",
-            timelineHint: "Suggestions, not orders",
             timeline: [
-                .init(id: "now", item: .now(text: "Now · a good moment for Laundry · Wash")),
+                .init(id: "done", item: .done(text: "Good job, today you already did Supplements and Grocery.")),
                 .init(
                     id: "laundry",
                     item: .task(
@@ -44,7 +39,8 @@ enum PreviewSamples {
                             title: "Laundry · Wash",
                             reason: "Before your 10:00 meetings. It runs on its own.",
                             actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
-                            check: check
+                            check: check,
+                            now: "8:30 · a good moment to start"
                         ),
                         isLast: false
                     )
@@ -53,13 +49,13 @@ enum PreviewSamples {
                 .init(id: "plants", item: .task(.init(icon: "🥀", time: "11:15", title: "Water the plants", reason: "8 days since last time", check: check, isNeglected: true), isLast: false)),
                 .init(id: "gym", item: .task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true)),
             ],
-            addTask: ButtonDataModel(title: "+ Add a task", action: Action(id: "preview") { _ in }),
+            addTask: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }),
             tilesTitle: "How things are",
             tiles: [
-                .init(id: UUID(), tile: TileDataModel(icon: "🥀", title: "Water the plants", detail: "8 days since last time", isNeglected: true)),
-                .init(id: UUID(), tile: TileDataModel(icon: "🏋️", title: "Gym", detail: "2 of 4 this week")),
-                .init(id: UUID(), tile: TileDataModel(icon: "🧺", title: "Laundry", detail: "Today")),
-                .init(id: UUID(), tile: TileDataModel(icon: "🧹", title: "Vacuum", detail: "In 3 days")),
+                .init(id: UUID(), tile: TileDataModel(icon: "🥀", title: "Water the plants", detail: "8 days since last time", colour: .green, isNeglected: true)),
+                .init(id: UUID(), tile: TileDataModel(icon: "🏋️", title: "Gym", detail: "2 of 4 this week", colour: .orange)),
+                .init(id: UUID(), tile: TileDataModel(icon: "🧺", title: "Laundry", detail: "Today", colour: .yellow)),
+                .init(id: UUID(), tile: TileDataModel(icon: "🧹", title: "Vacuum", detail: "In 3 days", colour: .blue)),
             ],
             editor: editor,
             dismissEditor: Action(id: "preview") { _ in },
@@ -72,11 +68,10 @@ enum PreviewSamples {
         TodayScreenDataModel(
             date: "Saturday, November 14",
             headline: "A free day",
-            briefing: BriefingDataModel(author: "Tony", time: "· 9:00", text: "Nothing needs you today. Enjoy it."),
+            briefing: "Nothing needs you today. Enjoy it.",
             timelineTitle: "Your day",
-            timelineHint: "Suggestions, not orders",
             timeline: [.init(id: "now", item: .now(text: "Now"))],
-            addTask: ButtonDataModel(title: "+ Add a task", action: Action(id: "preview") { _ in }),
+            addTask: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }),
             tilesTitle: "How things are",
             tiles: [],
             editor: nil,

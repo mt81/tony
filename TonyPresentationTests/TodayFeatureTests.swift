@@ -101,11 +101,12 @@ private func morningMeetings() throws -> [DateInterval] {
     let afternoon = await day.open()
 
     #expect(morning.taskItems.map(\.time) == ["8:00", "8:30"])
+    #expect(morning.taskItems.map(\.now) == ["8:00 · a good moment to start", nil])
     #expect(morning.meetings == ["10:00 3 meetings, back to back until 11:00"])
-    #expect(morning.briefing.time == "· 8:00")
     #expect(afternoon.taskItems.map(\.time) == ["17:00", "17:30"])
+    #expect(afternoon.taskItems.map(\.now) == [nil, nil])
+    #expect(afternoon.timeline.first?.item == .now(text: "Now"))
     #expect(afternoon.meetings.isEmpty)
-    #expect(afternoon.briefing.time == "· 14:00")
 }
 
 @MainActor
@@ -121,7 +122,20 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(before.taskItems.map(\.time) == ["8:00", "8:30"])
     #expect(after.taskItems.map(\.title) == ["Vacuum"])
     #expect(after.taskItems.map(\.time) == ["8:00"])
+    #expect(before.timeline.first?.item != .done(text: "Good job, today you already did Plants."))
+    #expect(after.timeline.first?.item == .done(text: "Good job, today you already did Plants."))
+    #expect(day.model(language: "fr_FR").timeline.first?.item == .done(text: "Bravo, aujourd'hui tu as déjà fait Plants."))
     #expect(await day.repository.completions().map(\.outcome) == [.done, .done])
+}
+
+@MainActor
+@Test func tilesTakeTheAreaColoursInTheOrderOfTheTasks() async throws {
+    let tasks = try (1...7).map { try Sample.task($0, "Task \($0)") }
+    let day = try Day(hour: 8, tasks: tasks)
+
+    let model = await day.open()
+
+    #expect(model.tiles.map(\.tile.colour) == [.yellow, .green, .blue, .orange, .teal, .indigo])
 }
 
 // MARK: Answers
@@ -178,7 +192,7 @@ private func morningMeetings() throws -> [DateInterval] {
 
     let model = await day.open()
 
-    #expect(model.briefing.text == "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
+    #expect(model.briefing == "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
     #expect(service.requests.count == 1)
     #expect(service.requests.first?.plan == """
         Tuesday 10 November
@@ -197,8 +211,8 @@ private func morningMeetings() throws -> [DateInterval] {
     let wrongTask = try Day(hour: 8, tasks: [plants, gym], languageService: FakeLanguageService(briefing: "Plants first, then the gym."))
     try await wrongTask.repository.save(try Sample.done(gym, day: 9))
 
-    #expect(await wrongTime.open().briefing.text == "One thing would be nice today: Plants.")
-    #expect(await wrongTask.open().briefing.text == "One thing would be nice today: Plants.")
+    #expect(await wrongTime.open().briefing == "One thing would be nice today: Plants.")
+    #expect(await wrongTask.open().briefing == "One thing would be nice today: Plants.")
 }
 
 @MainActor
@@ -212,11 +226,11 @@ private func morningMeetings() throws -> [DateInterval] {
     await day.store.waitForEffects()
 
     // Opening twice asks once. The new plan is asked twice: the answer still names Plants, now done, so it is retried, then dropped.
-    #expect(first.briefing.text == "Les Plants d'abord, puis le Vacuum.")
+    #expect(first.briefing == "Les Plants d'abord, puis le Vacuum.")
     #expect(service.requests.count == 3)
     #expect(service.requests.first?.plan == "mardi 10 novembre\n8:00 Plants. Le premier moment qui convient.\n8:30 Vacuum. Le premier moment qui convient.")
     #expect(service.requests.last?.plan == "mardi 10 novembre\n8:00 Vacuum. Le premier moment qui convient.")
-    #expect(day.model(language: "fr_FR").briefing.text == "Une chose serait bien aujourd'hui : Vacuum.")
+    #expect(day.model(language: "fr_FR").briefing == "Une chose serait bien aujourd'hui : Vacuum.")
     #expect(service.requests.first?.instructions.contains("Write in French") == true)
 }
 
@@ -237,7 +251,8 @@ private func morningMeetings() throws -> [DateInterval] {
     await day.store.waitForEffects()
     let model = day.model()
 
-    #expect(empty.addTask.title == "+ Add a task")
+    #expect(empty.addTask.title == "Add a task")
+    #expect(empty.addTask.systemImage == "plus")
     #expect(editor.title == "New task")
     #expect(form.name.text == "Laundry")
     #expect(form.delete == nil)
@@ -296,14 +311,16 @@ private func morningMeetings() throws -> [DateInterval] {
 
     #expect(english.date == "Tuesday 10 November")
     #expect(english.headline == "A light day")
-    #expect(english.briefing.text == "2 things would be nice today: Plants and Vacuum. You have 3 meetings left today, the next at 10:00.")
-    #expect(english.timeline.first?.id == "now")
+    #expect(english.briefing == "2 things would be nice today: Plants and Vacuum. You have 3 meetings left today, the next at 10:00.")
+    #expect(!english.timeline.contains { $0.id == "now" })
+    #expect(english.taskItems[0].now == "8:00 · a good moment to start")
     #expect(english.taskItems[0].reason == "The first moment that fits.")
     #expect(english.taskItems[0].check.title == "Mark Plants as done")
     #expect(french.date == "mardi 10 novembre")
     #expect(french.headline == "Une journée légère")
-    #expect(french.briefing.text == "2 choses seraient bien aujourd'hui : Plants et Vacuum. Il te reste 3 réunions aujourd'hui, la prochaine à 10:00.")
+    #expect(french.briefing == "2 choses seraient bien aujourd'hui : Plants et Vacuum. Il te reste 3 réunions aujourd'hui, la prochaine à 10:00.")
     #expect(french.meetings == ["10:00 3 réunions à la suite jusqu'à 11:00"])
+    #expect(french.taskItems[0].now == "8:00 · un bon moment pour commencer")
 }
 
 @MainActor
@@ -311,8 +328,8 @@ private func morningMeetings() throws -> [DateInterval] {
     let one = try Day(hour: 8, tasks: [try Sample.task(1, "Plants")])
     let none = try Day(hour: 8, tasks: [])
 
-    #expect(await one.open().briefing.text == "One thing would be nice today: Plants.")
-    #expect(await none.open().briefing.text == "Nothing needs you today. Enjoy it.")
+    #expect(await one.open().briefing == "One thing would be nice today: Plants.")
+    #expect(await none.open().briefing == "Nothing needs you today. Enjoy it.")
     #expect(none.model().headline == "A free day")
     #expect(none.model().timeline.map(\.id) == ["now"])
 }
