@@ -235,6 +235,7 @@ enum PreviewSamples {
         return CalendarDebugScreenDataModel(
             title: "Calendar check",
             access: "Calendar access: not asked yet",
+            weather: "Weather today: rain",
             requestAccess: ButtonDataModel(title: "Ask for calendar access", action: Action(id: "preview") { _ in }),
             refresh: ButtonDataModel(title: "Read the calendar again", action: Action(id: "preview") { _ in }),
             plannedAt: "Read at 8:00",
