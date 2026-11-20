@@ -4,6 +4,7 @@ Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day a
 
 - Build chunks: https://claude.ai/artifact/YF6oBu6Zf1ZaBBcYMMMjUL
 - Solution document (decisions D1 to D14, spikes S1 to S5): https://claude.ai/artifact/2tZQjv5SA6uZzWBjjmWnkU
+- Energy model (draft: the battery model of energy, its inputs, rests and task drain, still being decided): https://claude.ai/artifact/Bonir4MtzufUKT2xZmw2Pi
 - Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
 
 ## Project layout
