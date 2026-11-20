@@ -215,23 +215,6 @@
         }
       }
     },
-    "+ Add a task" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Add a task"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Ajouter une tâche"
-          }
-        }
-      }
-    },
     "A free day" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -313,23 +296,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter une sous-tâche"
-          }
-        }
-      }
-    },
-    "Add a task" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a task"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter une tâche"
           }
         }
       }

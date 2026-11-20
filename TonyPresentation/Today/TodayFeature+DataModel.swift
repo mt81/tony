@@ -18,12 +18,6 @@ extension TodayFeature {
             briefing: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing,
             timelineTitle: localized("Your day", locale),
             timeline: timeline(state: state, wording: wording, send: send),
-            addTask: ButtonDataModel(
-                title: localized("Add a task", locale),
-                systemImage: "plus",
-                accessibilityIdentifier: "todayAddTask",
-                action: TonyUIModels.Action(id: "addTapped", parameters: context.now) { now, _ in send(.addTapped(id: UUID(), stepID: UUID(), now: now)) }
-            ),
             tilesTitle: localized("How things are", locale),
             tiles: tiles(state: state, wording: wording),
             editor: state.editor.map { editor in

@@ -46,7 +46,7 @@ private struct YouHeader: View {
                     .accessibilityHidden(true)
             }
             Text(viewModel.name)
-                .tonyText(.display)
+                .tonyText(.heading)
                 .foregroundStyle(TonyColor.ink)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("youName")

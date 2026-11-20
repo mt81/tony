@@ -21,11 +21,7 @@ final class YouTabUITests: XCTestCase {
         XCTAssertTrue(headline.waitForExistence(timeout: 5))
         XCTAssertTrue(headline.label.hasSuffix(", UITest Name"))
 
-        let add = app.buttons["todayAddTask"]
-        for _ in 0..<6 where !(add.exists && add.isHittable) {
-            app.swipeUp()
-        }
-        add.tap()
+        tasks.tapAdd()
         tasks.compose(taskName)
         app.buttons["saveTask"].tap()
 

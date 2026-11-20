@@ -31,7 +31,7 @@ public enum TonyColor {
     public static let glassEdge = Color("GlassEdge", bundle: .design)
     /// The dark round behind a task's icon.
     public static let glassBar = Color("GlassBar", bundle: .design)
-    /// The outline of a timeline marker that is still to do.
+    /// The outline of a timeline marker that is still to do, and the rail between markers.
     public static let ring = Color("Ring", bundle: .design)
     /// The area colours of the tiles (`color/area/*`): bed sheets, plants, home, training, supplements, sleep.
     public static let areaYellow = Color("AreaYellow", bundle: .design)

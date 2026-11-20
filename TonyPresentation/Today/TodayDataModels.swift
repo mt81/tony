@@ -23,7 +23,6 @@ public struct TodayScreenDataModel {
     public var briefing: String
     public var timelineTitle: String
     public var timeline: [TimelineEntry]
-    public var addTask: ButtonDataModel
     public var tilesTitle: String
     public var tiles: [IdentifiedTile]
     /// The task form, while a task is being added.
@@ -40,7 +39,6 @@ extension TodayScreenDataModel: Equatable {
             && lhs.briefing == rhs.briefing
             && lhs.timelineTitle == rhs.timelineTitle
             && lhs.timeline == rhs.timeline
-            && lhs.addTask == rhs.addTask
             && lhs.tilesTitle == rhs.tilesTitle
             && lhs.tiles == rhs.tiles
             && lhs.editor == rhs.editor

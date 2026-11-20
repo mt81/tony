@@ -24,7 +24,6 @@ public struct TasksScreen: View {
                     sectionHeader(section)
                 }
             }
-            addTaskRow
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -37,27 +36,12 @@ public struct TasksScreen: View {
     }
 
     private var header: some View {
-        HStack(spacing: TonySpacing.medium) {
-            Text(model.title)
-                .tonyText(.display)
-                .foregroundStyle(TonyColor.ink)
-                .accessibilityAddTraits(.isHeader)
-            Spacer()
-            Button {
-                model.add.action.execute()
-            } label: {
-                Image(systemName: model.add.systemImage ?? "plus")
-                    .tonyText(.heading)
-                    .foregroundStyle(TonyColor.onAccent)
-                    .padding(TonySpacing.snug)
-                    .frame(minWidth: TonySize.touchTarget, minHeight: TonySize.touchTarget)
-                    .background(TonyColor.accent, in: .circle)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(model.add.title)
-            .accessibilityIdentifier(ifPresent: model.add.accessibilityIdentifier)
-        }
-        .plainRow()
+        Text(model.title)
+            .tonyText(.heading)
+            .foregroundStyle(TonyColor.ink)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityIdentifier("tasksTitle")
+            .plainRow()
     }
 
     private func sectionHeader(_ section: TaskSectionDataModel) -> some View {
@@ -105,12 +89,6 @@ public struct TasksScreen: View {
             ButtonView(row.delete)
         }
         .plainRow()
-    }
-
-    private var addTaskRow: some View {
-        DashedButton(model.addTask)
-            .padding(.top, TonySpacing.small)
-            .plainRow()
     }
 }
 

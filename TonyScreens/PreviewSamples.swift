@@ -49,7 +49,6 @@ enum PreviewSamples {
                 .init(id: "plants", item: .task(.init(icon: "🥀", time: "11:15", title: "Water the plants", reason: "8 days since last time", check: check, isNeglected: true), isLast: false)),
                 .init(id: "gym", item: .task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true)),
             ],
-            addTask: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }),
             tilesTitle: "How things are",
             tiles: [
                 .init(id: UUID(), tile: TileDataModel(icon: "🥀", title: "Water the plants", detail: "8 days since last time", colour: .green, isNeglected: true)),
@@ -71,7 +70,6 @@ enum PreviewSamples {
             briefing: "Nothing needs you today. Enjoy it.",
             timelineTitle: "Your day",
             timeline: [.init(id: "now", item: .now(text: "Now"))],
-            addTask: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }),
             tilesTitle: "How things are",
             tiles: [],
             editor: nil,
@@ -84,7 +82,6 @@ enum PreviewSamples {
     static func tasks(editor: TaskEditorDataModel? = nil) -> TasksScreenDataModel {
         TasksScreenDataModel(
             title: "Tasks",
-            add: ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }),
             sections: [
                 TaskSectionDataModel(
                     id: "recurring",
@@ -112,7 +109,6 @@ enum PreviewSamples {
                     move: Action(id: "preview") { _ in }
                 ),
             ],
-            addTask: ButtonDataModel(title: "+ Add a task", action: Action(id: "preview") { _ in }),
             editor: editor,
             dismissEditor: Action(id: "preview") { _ in },
             alert: nil,

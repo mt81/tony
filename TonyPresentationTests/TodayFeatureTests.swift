@@ -239,9 +239,9 @@ private func morningMeetings() throws -> [DateInterval] {
 @MainActor
 @Test func aTaskAddedFromTodayIsSavedAndPlanned() async throws {
     let day = try Day(hour: 8, tasks: [])
-    let empty = await day.open()
+    _ = await day.open()
 
-    empty.addTask.action.execute()
+    day.store.send(.addTapped(id: UUID(), stepID: UUID(), now: day.clock.now))
     let editor = try #require(day.model().editor)
     try #require(editor.composer).composer.text.onChange.execute("Laundry")
     try #require(day.model().editor?.composer).composer.send.action.execute()
@@ -251,8 +251,6 @@ private func morningMeetings() throws -> [DateInterval] {
     await day.store.waitForEffects()
     let model = day.model()
 
-    #expect(empty.addTask.title == "Add a task")
-    #expect(empty.addTask.systemImage == "plus")
     #expect(editor.title == "New task")
     #expect(form.name.text == "Laundry")
     #expect(form.delete == nil)
@@ -266,7 +264,8 @@ private func morningMeetings() throws -> [DateInterval] {
 @Test func cancellingTheFormSavesNothing() async throws {
     let day = try Day(hour: 8, tasks: [])
 
-    await day.open().addTask.action.execute()
+    _ = await day.open()
+    day.store.send(.addTapped(id: UUID(), stepID: UUID(), now: day.clock.now))
     try #require(day.model().editor).cancel.action.execute()
     await day.store.waitForEffects()
 
@@ -277,7 +276,8 @@ private func morningMeetings() throws -> [DateInterval] {
 @MainActor
 @Test func aTaskThatCannotBeSavedShowsAnAlert() async throws {
     let day = try Day(hour: 8, tasks: [])
-    await day.open().addTask.action.execute()
+    _ = await day.open()
+    day.store.send(.addTapped(id: UUID(), stepID: UUID(), now: day.clock.now))
     day.store.send(.editor(.sentenceChanged("Passport")))
     day.store.send(.editor(.sentenceSent))
     await day.store.waitForEffects()

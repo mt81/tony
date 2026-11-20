@@ -13,31 +13,19 @@ public struct TodayScreen: View {
     }
 
     public var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: TonySpacing.section) {
-                    header
-                    briefing
-                    timeline
-                    if !model.tiles.isEmpty {
-                        tiles
-                    }
-                }
-                .padding(.horizontal, TonySpacing.page)
-                .padding(.bottom, TonySpacing.section)
-            }
-            .background { PageBackground() }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        model.addTask.action.execute()
-                    } label: {
-                        Label(model.addTask.title, systemImage: model.addTask.systemImage ?? "plus")
-                    }
-                    .accessibilityIdentifier(ifPresent: model.addTask.accessibilityIdentifier)
+        ScrollView {
+            VStack(alignment: .leading, spacing: TonySpacing.section) {
+                header
+                briefing
+                timeline
+                if !model.tiles.isEmpty {
+                    tiles
                 }
             }
+            .padding(.horizontal, TonySpacing.page)
+            .padding(.bottom, TonySpacing.section)
         }
+        .background { PageBackground() }
         .onAppear { model.onAppear.execute() }
         .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor.execute() } })) { editor in
             TaskEditorScreen(editor)

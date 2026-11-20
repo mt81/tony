@@ -24,12 +24,12 @@ public struct TimelineItem: View {
     private var rail: some View {
         VStack(spacing: 0) {
             if hasLineAbove {
-                line(TonyColor.line)
+                line(TonyColor.ring)
                     .frame(height: markerOffset)
             }
             marker
             if !isLast {
-                line(isDone ? TonyColor.ink : TonyColor.line)
+                line(isDone ? TonyColor.ink : TonyColor.ring)
                     .frame(maxHeight: .infinity)
             }
         }
