@@ -185,6 +185,7 @@ During development, run the smallest relevant test first (`xcodebuild test -proj
 - Do not stop to ask questions about decisions already covered by these instructions or established project conventions.
 - Ask Matteo when requirements are ambiguous, architectural approval is needed, or a decision has legal, financial or external consequences (App Store, TestFlight, signing, paid services).
 - Every new piece of UI needs Matteo's approval before it is built: a new screen, sheet, component, or a new state or section of an existing screen. Draw it first as a wireframe in the Figma file, next to the existing frames, and wait for his approval. Build only what he approved, and ask again before departing from it.
+- Figma calls cost credits, so use as few as the work needs. Read a single node, not the whole page. Take one screenshot after composing and one after a fix, never one per section. Build a frame in as few `use_figma` calls as are safe to retry. Copy the existing frames and components instead of drawing again. Never use Figma AI generation (images, vectors, designs) without asking first.
 - Do not silently expand the scope of a task.
 - At completion, report:
   - What changed.
