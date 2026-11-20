@@ -5,12 +5,16 @@ import SwiftUI
 
 #Preview("Colours") {
     let colours: [(name: String, colour: Color)] = [
-        ("canvas", TonyColor.canvas), ("glow", TonyColor.glow), ("sidebar", TonyColor.sidebar),
+        ("canvas", TonyColor.canvas), ("sidebar", TonyColor.sidebar),
         ("surface", TonyColor.surface), ("surfaceRaised", TonyColor.surfaceRaised), ("line", TonyColor.line),
         ("ink", TonyColor.ink), ("muted", TonyColor.muted), ("accent", TonyColor.accent),
         ("accentBand", TonyColor.accentBand), ("warning", TonyColor.warning), ("warningSoft", TonyColor.warningSoft),
         ("onAccent", TonyColor.onAccent), ("glass", TonyColor.glass), ("glassEdge", TonyColor.glassEdge),
-        ("glassBar", TonyColor.glassBar),
+        ("glassBar", TonyColor.glassBar), ("ring", TonyColor.ring),
+        ("headerViolet", TonyColor.header[0]), ("headerIndigo", TonyColor.header[1]), ("headerNavy", TonyColor.header[2]),
+        ("headerNight", TonyColor.header[3]),
+        ("areaYellow", TonyColor.areaYellow), ("areaGreen", TonyColor.areaGreen), ("areaBlue", TonyColor.areaBlue),
+        ("areaOrange", TonyColor.areaOrange), ("areaTeal", TonyColor.areaTeal), ("areaIndigo", TonyColor.areaIndigo),
     ]
     return ScrollView {
         VStack(alignment: .leading, spacing: TonySpacing.medium) {
@@ -109,7 +113,6 @@ import SwiftUI
         }
         .foregroundStyle(TonyColor.ink)
         TonyImage().frame(width: TonySize.tonyHeader, height: TonySize.tonyHeader)
-        TonyImage().frame(width: TonySize.tonyByline, height: TonySize.tonyByline)
     }
     .tonyPreview()
 }
