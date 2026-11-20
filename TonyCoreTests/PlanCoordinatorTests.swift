@@ -48,21 +48,55 @@ private actor InMemoryRepository: Repository {
     func save(_ preference: Preference) {}
 }
 
+/// Answers with a fixed forecast, and counts how often it is asked.
+private final class FakeWeatherSource: WeatherSource {
+    private let forecast: WeatherCondition?
+    private let readCount = Mutex(0)
+
+    init(forecast: WeatherCondition?) {
+        self.forecast = forecast
+    }
+
+    var reads: Int { readCount.withLock { $0 } }
+
+    func condition(on day: Date) -> WeatherCondition? {
+        readCount.withLock { $0 += 1 }
+        return forecast
+    }
+}
+
 /// Saturday 7 November 2026 at 8:00, with two tasks due and an empty calendar.
 private struct Setup {
     let clock: TestClock
     let repository: InMemoryRepository
     let calendarSource: FakeCalendarSource
+    let weatherSource: FakeWeatherSource
     let coordinator: PlanCoordinator
     let tasks: [TonyTask]
 
-    init(routine: Routine? = nil, access: CalendarAccess = .granted, day: Int = 7) throws {
-        tasks = [try Fixtures.task(1, "Plants", rank: 0), try Fixtures.task(2, "Vacuum", rank: 1)]
+    /// `plantsAvoid` is the weather the first task should not be done in.
+    init(
+        routine: Routine? = nil,
+        access: CalendarAccess = .granted,
+        forecast: WeatherCondition? = nil,
+        plantsAvoid: Set<WeatherCondition> = [],
+        day: Int = 7
+    ) throws {
+        tasks = [
+            try Fixtures.task(1, "Plants", rank: 0, requirements: Requirements(avoidedWeather: plantsAvoid)),
+            try Fixtures.task(2, "Vacuum", rank: 1),
+        ]
         let clock = TestClock(try Fixtures.november(day, hour: 8))
         self.clock = clock
         repository = InMemoryRepository(tasks: tasks, routine: routine)
         calendarSource = FakeCalendarSource(access: access)
-        coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Fixtures.calendar) { clock.now }
+        weatherSource = FakeWeatherSource(forecast: forecast)
+        coordinator = PlanCoordinator(
+            repository: repository,
+            calendarSource: calendarSource,
+            weatherSource: weatherSource,
+            calendar: Fixtures.calendar
+        ) { clock.now }
     }
 
     func current() async throws -> PlannedDay {
@@ -186,4 +220,29 @@ private struct Setup {
     await setup.coordinator.refresh()
 
     #expect(try await setup.current() == before)
+}
+
+@Test(arguments: [
+    (WeatherCondition?.some(.rain), false),
+    (.clear, true),
+    (nil, true),
+])
+func theDaysWeatherDecidesWhetherATaskThatAvoidsItIsPlanned(forecast: WeatherCondition?, isPlanned: Bool) async throws {
+    let setup = try Setup(forecast: forecast, plantsAvoid: [.rain])
+
+    await setup.coordinator.start()
+
+    let planned = try await setup.current()
+    #expect(planned.context.conditions.weather == forecast)
+    #expect(planned.plan.items.contains { $0.taskID == setup.tasks[0].id } == isPlanned)
+    #expect(planned.plan.items.contains { $0.taskID == setup.tasks[1].id })
+}
+
+@Test func theWeatherIsReadOnlyWhenATaskAvoidsSome() async throws {
+    let setup = try Setup(forecast: .rain)
+
+    await setup.coordinator.start()
+
+    #expect(setup.weatherSource.reads == 0)
+    #expect(try await setup.current().context.conditions.weather == nil)
 }

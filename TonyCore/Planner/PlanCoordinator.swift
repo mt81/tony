@@ -26,6 +26,7 @@ extension Routine {
 public actor PlanCoordinator {
     private let repository: any Repository
     private let calendarSource: any CalendarSource
+    private let weatherSource: any WeatherSource
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     private let configuration: PlannerConfiguration
@@ -42,12 +43,14 @@ public actor PlanCoordinator {
     public init(
         repository: any Repository,
         calendarSource: any CalendarSource,
+        weatherSource: any WeatherSource,
         calendar: Calendar,
         configuration: PlannerConfiguration = PlannerConfiguration(),
         now: @escaping @Sendable () -> Date
     ) {
         self.repository = repository
         self.calendarSource = calendarSource
+        self.weatherSource = weatherSource
         self.calendar = calendar
         self.configuration = configuration
         self.now = now
@@ -129,12 +132,13 @@ public actor PlanCoordinator {
         let routine = (try? await repository.routine()) ?? .standard
         let dayInterval = calendar.dateInterval(of: .day, for: now) ?? DateInterval(start: today, duration: 86_400)
         let busyIntervals = (try? await calendarSource.busyIntervals(in: dayInterval)) ?? []
+        let weather = tasks.contains(where: \.avoidsWeather) ? await weatherSource.condition(on: now) : nil
 
         let context = DayContext(
             routine: routine,
             busyIntervals: busyIntervals,
             status: status?.day == today ? status?.value ?? .normal : .normal,
-            conditions: DayConditions(),
+            conditions: DayConditions(weather: weather),
             day: now,
             calendar: calendar
         )
@@ -155,5 +159,12 @@ public actor PlanCoordinator {
 
     private func removeSubscriber(_ id: UUID) {
         subscribers[id] = nil
+    }
+}
+
+extension TonyTask {
+    /// Whether the task, or one of its steps, should not be done in some weather: only then is the weather read.
+    fileprivate var avoidsWeather: Bool {
+        !requirements.avoidedWeather.isEmpty || steps.contains { !$0.requirements.avoidedWeather.isEmpty }
     }
 }

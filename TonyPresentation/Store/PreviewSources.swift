@@ -36,4 +36,9 @@ struct PreviewCalendarSource: CalendarSource {
     func busyIntervals(in interval: DateInterval) -> [DateInterval] { [] }
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
+
+/// No forecast, as when the weather cannot be read. Previews only.
+struct PreviewWeatherSource: WeatherSource {
+    func condition(on day: Date) -> WeatherCondition? { nil }
+}
 #endif

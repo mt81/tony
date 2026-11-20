@@ -41,6 +41,23 @@
           }
         }
       }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony reads roughly where you are to know today's weather, so tasks that need dry weather are not suggested in the rain."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony lit à peu près où tu es pour connaître la météo du jour, et ne pas te proposer sous la pluie les tâches qui demandent du beau temps."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
