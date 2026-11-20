@@ -134,6 +134,13 @@ struct FakeCalendarSource: CalendarSource {
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
 
+/// Always gives the same forecast; none by default.
+struct FakeWeatherSource: WeatherSource {
+    var forecast: WeatherCondition?
+
+    func condition(on day: Date) -> WeatherCondition? { forecast }
+}
+
 final class TestClock: Sendable {
     private let date: Mutex<Date>
 

@@ -15,7 +15,7 @@ Tony is part of the AHDH Claude project
 | `TonyUIKit` (framework) | The reusable UI, on its own: the SwiftUI controls and components that draw the `TonyUIModels` data models, the colour, type, spacing and radius tokens, fonts and artwork | Xcode previews, and the component gallery in the Debug tab (debug builds) |
 | `TonyPresentation` (framework) | The glue between business and UI, with each screen's state, its store and its view model; the data models of its parts; presentation strings | Unit tests (`TonyPresentationTests`) |
 | `TonyScreens` (framework) | The SwiftUI screens that draw the `TonyPresentation` data models with the components of `TonyUIKit` | Xcode previews |
-| `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit) | Simulator (`TonyAppUITests`), then device |
+| `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit, WeatherKit) | Simulator (`TonyAppUITests`), then device |
 | `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
 
 - Everything lives in one Xcode project, `Tony.xcodeproj`, committed and edited in Xcode. There is no project generator. The one Swift package is MemberwiseInit (`gohanlon/swift-memberwise-init-macro`, exact version 0.6.0), whose `@MemberwiseInit(.public)` writes the public memberwise init of a struct in `TonyCore`, `TonyUIModels` and `TonyPresentation`. A struct whose init only assigns its properties uses it instead of a hand-written init.
@@ -159,6 +159,7 @@ During development, run the smallest relevant test first (`xcodebuild test -proj
 - A request carries only the generic, anonymous input the service needs. The task catalogue receives the name of a task being created and the language, nothing else. Until it exists, `TableTaskCatalog` answers from `TonyApp/Catalog/TaskCatalog.json` and nothing leaves the device.
 - Ask for each permission when the feature that needs it is first used, and keep the app working when it is refused.
 - Read only what the feature needs (busy intervals, not event titles; sleep and workouts, not other health data).
+- The weather comes from WeatherKit, which receives an approximate location (reduced accuracy) and nothing else. It is read only when some task avoids some weather.
 - Fixtures and tests use invented data, never Matteo's real calendar or health records.
 
 ## Accessibility and compatibility
