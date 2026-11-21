@@ -13,10 +13,20 @@ private struct FixedCalendarSource: CalendarSource {
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
 
-private func environment(access: CalendarAccess, busy: [DateInterval] = []) throws -> CalendarDebugFeature.Environment {
+private func environment(
+    access: CalendarAccess,
+    busy: [DateInterval] = [],
+    tasks: [TonyTask] = [],
+    forecast: WeatherCondition? = nil
+) throws -> CalendarDebugFeature.Environment {
     let source = FixedCalendarSource(currentAccess: access, busy: busy)
     let now = try Sample.november(2, hour: 8)
-    let coordinator = PlanCoordinator(repository: FakeRepository(), calendarSource: source, calendar: Sample.calendar) { now }
+    let coordinator = PlanCoordinator(
+        repository: FakeRepository(tasks: tasks),
+        calendarSource: source,
+        weatherSource: FakeWeatherSource(forecast: forecast),
+        calendar: Sample.calendar
+    ) { now }
     return CalendarDebugFeature.Environment(calendarSource: source, coordinator: coordinator)
 }
 
@@ -65,4 +75,22 @@ private func environment(access: CalendarAccess, busy: [DateInterval] = []) thro
 
     _ = CalendarDebugFeature.reduce(&state, .loaded(access: .denied, planned: state.planned))
     #expect(CalendarDebugFeature.dataModel(for: state, context: try Sample.context(day: 2)) { _ in }.requestAccess == nil)
+}
+
+@MainActor
+@Test func theWeatherLineShowsWhatThePlannerSaw() async throws {
+    var outdoor = try Sample.task(1, "Run")
+    outdoor.requirements.avoidedWeather = [.rain]
+    var state = CalendarDebugFeature.State()
+    let context = try Sample.context(day: 2)
+
+    #expect(CalendarDebugFeature.dataModel(for: state, context: context) { _ in }.weather == "Weather: checking")
+
+    let notRead = try #require(await CalendarDebugFeature.run(.load, in: try environment(access: .granted, forecast: .rain)))
+    _ = CalendarDebugFeature.reduce(&state, notRead)
+    #expect(CalendarDebugFeature.dataModel(for: state, context: context) { _ in }.weather == "Weather: not read (no task avoids weather, or no forecast)")
+
+    let rainy = try #require(await CalendarDebugFeature.run(.load, in: try environment(access: .granted, tasks: [outdoor], forecast: .rain)))
+    _ = CalendarDebugFeature.reduce(&state, rainy)
+    #expect(CalendarDebugFeature.dataModel(for: state, context: context) { _ in }.weather == "Weather today: rain")
 }

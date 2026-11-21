@@ -11,7 +11,7 @@ private struct You {
 
     init(calendarSource: any CalendarSource = FakeCalendarSource(), languageService: (any LanguageService)? = nil, language: String = "en") throws {
         let now = try Sample.november(10)
-        let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Sample.calendar) { now }
+        let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, weatherSource: FakeWeatherSource(), calendar: Sample.calendar) { now }
         store = YouStore(
             repository: repository,
             calendarSource: calendarSource,

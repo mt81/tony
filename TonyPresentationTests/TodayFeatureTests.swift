@@ -24,6 +24,7 @@ private struct Day {
         let coordinator = PlanCoordinator(
             repository: repository,
             calendarSource: FakeCalendarSource(busyIntervals: meetings),
+            weatherSource: FakeWeatherSource(),
             calendar: Sample.calendar
         ) { clock.now }
         store = Store(

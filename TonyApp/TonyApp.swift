@@ -51,7 +51,13 @@ struct AppStores {
         let languageService = FoundationModelsLanguageService()
 
         self.now = now
-        coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: .current, now: now)
+        coordinator = PlanCoordinator(
+            repository: repository,
+            calendarSource: calendarSource,
+            weatherSource: WeatherKitWeatherSource(calendar: .current),
+            calendar: .current,
+            now: now
+        )
         today = Store(
             state: TodayFeature.State(),
             environment: TodayFeature.Environment(
