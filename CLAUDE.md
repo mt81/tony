@@ -1,194 +1,157 @@
 # Tony
 
-Tony is part of the AHDH Claude project
-- Project: https://claude.ai/cowork/project/01a1cafa-136f-77e7-947e-4dbd55343a28.
-- Documentation will live in Notion under this page https://app.notion.com/p/Tony-42281c5914d280518492fb08cb48c089
-- Design: Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
+iOS 27 app (iPhone, iPad; English, French) that plans the day around recurring tasks, goals and the calendar. Part of the AHDH Claude project.
 
-## Project layout
+- Project: https://claude.ai/cowork/project/01a1cafa-136f-77e7-947e-4dbd55343a28
+- Docs (Notion): https://app.notion.com/p/Tony-42281c5914d280518492fb08cb48c089
+- Figma (colours, type, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
+
+## Writing
+
+- Replies to Matteo and PR descriptions: short, to the point. No reasoning or background unless asked.
+- PR description: what changed (bullets), tests run, device checks left, questions. Copy the chunk's "Done when" with one line of proof each. Screenshots for visual changes.
+- Report at completion: what changed, tests run, tests not run and why (device checks included), decisions for Matteo.
+
+## Targets
 
 | Target | Contains | Verified by |
 | --- | --- | --- |
-| `TonyCore` (framework) | Domain model, cadence, context builder, planner, consistency, protocols | Unit tests (`TonyCoreTests`) |
-| `TonyStore` (framework) | SwiftData models and the `Repository` implementation, shared by the app and the extension | Unit tests (`TonyStoreTests`), in memory |
-| `TonyUIModels` (framework) | The data models of controls and components, in plain Swift | Through the previews of `TonyUIKit` |
-| `TonyUIKit` (framework) | The reusable UI, on its own: the SwiftUI controls and components that draw the `TonyUIModels` data models, the colour, type, spacing and radius tokens, fonts and artwork | Xcode previews, and the component gallery in the Debug tab (debug builds) |
-| `TonyPresentation` (framework) | The glue between business and UI, with each screen's state, its store and its view model; the data models of its parts; presentation strings | Unit tests (`TonyPresentationTests`) |
-| `TonyScreens` (framework) | The SwiftUI screens that draw the `TonyPresentation` data models with the components of `TonyUIKit` | Xcode previews |
-| `TonyApp` (iOS app) | Wiring and system adapters: creates the stores, puts the screens in the tab bar, and holds the adapters over system frameworks (EventKit, WeatherKit) | Simulator (`TonyAppUITests`), then device |
-| `TonyWidgets` (extension) | Widget timeline provider, App Intents | Device |
+| `TonyCore` | Domain model, cadence, context, planner, consistency, protocols | `TonyCoreTests` |
+| `TonyStore` | SwiftData models, `Repository` implementation (app and extension) | `TonyStoreTests`, in memory |
+| `TonyUIModels` | Data models of controls and components, plain Swift | `TonyUIKit` previews |
+| `TonyUIKit` | SwiftUI controls and components, tokens (colour, type, spacing, radius), fonts, artwork | Previews, Debug component gallery |
+| `TonyPresentation` | Per screen: state, store, view model, part data models; presentation strings | `TonyPresentationTests` |
+| `TonyScreens` | SwiftUI screens drawing `TonyPresentation` models with `TonyUIKit` | Previews |
+| `TonyApp` | Wiring, tab bar, system adapters (EventKit, WeatherKit) | `TonyAppUITests`, then device |
+| `TonyWidgets` | Widget timeline provider, App Intents | Device |
 
-- Everything lives in one Xcode project, `Tony.xcodeproj`, committed and edited in Xcode. There is no project generator. The one Swift package is MemberwiseInit (`gohanlon/swift-memberwise-init-macro`, exact version 0.6.0), whose `@MemberwiseInit(.public)` writes the public memberwise init of a struct in `TonyCore`, `TonyUIModels` and `TonyPresentation`. A struct whose init only assigns its properties uses it instead of a hand-written init.
-- Each target has a folder of the same name at the root (its tests in `<Target>Tests/`). The folders are synchronized with the project: adding a file to a folder adds it to its target.
-- A test target links every framework its tests import; a framework does not pass its dependencies on to them.
-- A framework finds its own resources with `#bundle` (`Color("Canvas", bundle: #bundle)`), never `Bundle.main`.
-- The `Info.plist` and `.entitlements` files of the app and the extension are in `Configuration/`. The frameworks and test targets generate theirs.
-- Three shared schemes: `TonyApp` builds and runs the app and runs the UI tests; `TonyUnitTests` runs the unit tests; `TonyUIKit` builds the UI kit on its own, for its previews.
-- The app and the extension share data through the app group `group.com.mt81.tony`.
-- Debug builds have a fourth tab, Debug, with the developer screens: the model check (it runs the evaluation set on the on-device model and reports the pass rate, and shows what the widget and the background task noted), the calendar check (calendar access and today's blocks as the planner sees them) and the component gallery. Its text is for developers, in English and not translated. Release builds have no Debug tab.
-- Debug builds have one launch argument: `-now 08:00` freezes the clock at that time today, to see the plan at another hour.
-- The app declares the background refresh mode with one task identifier, `com.mt81.tony.refresh`. Until C21 only the debug model check uses it.
-- `TonyDebug/` holds debug-only source compiled into both the app and the widget extension.
+- One Xcode project, `Tony.xcodeproj`, edited in Xcode, no generator. Folders `<Target>/` and `<Target>Tests/` are synchronized: a file added to a folder joins its target.
+- One package: MemberwiseInit 0.6.0 (exact). Structs whose init only assigns use `@MemberwiseInit(.public)` (`TonyCore`, `TonyUIModels`, `TonyPresentation`).
+- A test target links every framework its tests import.
+- Frameworks load resources with `#bundle`, never `Bundle.main`.
+- App and extension `Info.plist` and `.entitlements` are in `Configuration/`.
+- Shared schemes: `TonyApp` (app, UI tests), `TonyUnitTests`, `TonyUIKit` (previews).
+- App group: `group.com.mt81.tony`.
+- Debug builds only: a Debug tab (model check, calendar check, component gallery; English, not translated), and the launch argument `-now 08:00` to freeze the clock today.
+- Background task identifier `com.mt81.tony.refresh`, used only by the debug model check until C21.
+- `TonyDebug/`: debug-only source compiled into app and extension.
 
 ## Commands
 
-| Command | What it does |
+| Command | Does |
 | --- | --- |
-| `make test` | Import check, then `TonyCore`, `TonyStore` and `TonyPresentation` unit tests |
-| `make test-ui` | Runs the UI tests of `TonyAppUITests` in the simulator |
+| `make test` | Import check, then `TonyCore`, `TonyStore`, `TonyPresentation` unit tests |
+| `make test-ui` | `TonyAppUITests` in the simulator |
 | `make build` | Builds the app for the simulator |
-| `make run` | Builds, installs and launches in the simulator |
+| `make run` | Builds, installs, launches in the simulator |
 | `make clean` | Deletes build output |
 
-The Makefile sets `DEVELOPER_DIR` to Xcode. Outside it, `xcodebuild` and `xcrun simctl` need `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`, and `xcodebuild` needs `-skipMacroValidation` to run the MemberwiseInit macro. Xcode asks once to trust the macro.
+Outside the Makefile: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`, and `xcodebuild -skipMacroValidation`.
+One suite: `xcodebuild test -project Tony.xcodeproj -scheme TonyUnitTests -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -skipMacroValidation -only-testing:TonyCoreTests/<suite>`.
 
-## Architecture ownership and decisions
+## Decisions
 
-- Matteo owns architecture decisions.
-- Follow the established architecture, target boundaries, technologies and conventions.
-- Do not introduce, replace or significantly restructure architectural patterns, technologies, dependencies, integrations or target boundaries without Matteo's approval.
-- Decisions D1 to D14 in the solution document are taken as written. Changing one needs Matteo's approval.
-- Local implementation decisions within established patterns are delegated to Claude.
-- For architectural concerns, present the problem, viable options, tradeoffs and recommendation. Wait for approval before implementing changes that require architectural approval.
-- Do not ask for approval for routine implementation details already covered by these instructions or established project conventions.
-- Flag architectural risks and inconsistencies even when they are outside the requested scope. Do not fix them without approval.
+- Matteo owns architecture. Follow the existing architecture, targets, technologies and conventions.
+- His approval is needed to add, replace or restructure patterns, technologies, dependencies, integrations or targets, and to change decisions D1 to D14 (solution document).
+- For those, bring problem, options, tradeoffs, recommendation; wait.
+- Local implementation choices within the patterns are yours; don't ask about them.
+- Flag architectural risks outside the task; don't fix them unasked.
+- Ask Matteo when requirements are ambiguous, or for legal, financial or external consequences (App Store, TestFlight, signing, paid services).
+- New UI (screen, sheet, component, new state or section) is drawn first as a Figma wireframe beside the existing frames and approved by Matteo. Build only what he approved.
+- Figma costs credits: read single nodes, one screenshot after composing and one after a fix, few `use_figma` calls, copy existing frames and components. No Figma AI generation without asking.
 
-## Architecture rules
+## Architecture
 
-- Logic lives in `TonyCore`. It never imports UIKit, SwiftUI, EventKit, HealthKit, WeatherKit, WidgetKit, SwiftData or UserNotifications. `make check-imports` enforces the first four.
-- System frameworks sit behind protocols declared in `TonyCore` (`CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`, `TaskCatalog`). The app provides the real adapters; tests use fakes.
-- The planner is deterministic: the current time, calendar and locale are passed in (`plan(..., now:)`), never read from `Date()`, `Calendar.current` or `Locale.current` inside `TonyCore`.
-- The on-device model only words and parses. It never decides the plan. Model output is validated against the plan, and every model feature has a template or rule-based fallback.
-- The business layer (`TonyCore`) and the views (`TonyUIKit`, `TonyUIModels`, `TonyScreens`) do not know each other. A view never sees a business object such as `TonyTask`: it only sees data models.
-- The `TonyPresentation` target is the only one that knows both. Its stores turn user actions into changes, and its view models turn business state into what the views show. It imports `TonyUIModels`, never SwiftUI or the views.
-- The `TonyScreens` target imports `TonyPresentation` for the screens' view models and data models, and `TonyUIKit` for the components. It never imports `TonyCore`.
-- `TonyApp` wires the stores to their adapters and shows the screens. `make check-imports` enforces all of these boundaries.
+- Logic lives in `TonyCore`, which never imports UIKit, SwiftUI, EventKit, HealthKit, WeatherKit, WidgetKit, SwiftData or UserNotifications.
+- System frameworks sit behind `TonyCore` protocols: `CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`, `TaskCatalog`. Adapters in the app, fakes in tests. No other seams on speculation.
+- The planner is deterministic: time, calendar and locale are passed in, never `Date()`, `Calendar.current` or `Locale.current` in `TonyCore`.
+- The on-device model only words and parses, never decides the plan. Its output is validated, and every model feature has a rule-based fallback.
+- Views (`TonyUIKit`, `TonyUIModels`, `TonyScreens`) never see business types; they see data models.
+- `TonyPresentation` is the only target that knows both. It imports `TonyUIModels`, never SwiftUI or views.
+- `TonyScreens` imports `TonyPresentation` and `TonyUIKit`, never `TonyCore`.
+- `TonyApp` wires stores to adapters. `make check-imports` enforces these boundaries.
+- Domain types are `Codable` and `Sendable`. Swift 6 strict concurrency on.
 
 ## Screens
 
-Every screen has one store, with its own state, and follows one unidirectional pattern (the You tab: `YouState`, `YouStore`, `YouViewModel`):
+One store per screen, unidirectional (see the You tab: `YouState`, `YouStore`, `YouViewModel`):
 
-1. The state is an internal `@Observable` class of business values (`YouState`). Only `TonyPresentation` sees it.
-2. The store holds the state and is the only thing that writes to it. It has one method per change (`startEditing()`, `save()`), and does the async work (repository, calendar, model) inside them. Its dependencies, clock included, are passed to its `init`.
-3. The view model is a struct over the store and the presentation context. Each public property calls a static reducer that takes the whole state and returns what the view shows (`name(state, context:)`): formatting, strings, the components' data models and the closures that call the store's methods. Reducers are pure.
-4. The view takes the view model, and each part of the screen is its own small view that reads only its own properties. Observation tracks the state properties each reducer reads, so a change redraws only the parts that read it.
-5. The user acts on a view, which calls a closure of a data model, which calls a method of the store.
+1. State: internal `@Observable` class of business values, seen only by `TonyPresentation`.
+2. Store: the only writer of the state; one method per change; does the async work; dependencies (clock included) passed to `init`.
+3. View model: struct over store and presentation context. Each property calls a pure static reducer on the whole state (`name(state, context:)`) that returns what the view shows.
+4. View: takes the view model; each part is a small view reading only its own properties.
+5. User action → data model closure → store method.
 
-- A form with its own lifetime may get a child store, created by its screen's store when it opens.
-- Today, Tasks and the Debug screens still use the earlier `Store<Feature>` with actions and effects, until they are converted.
-- A screen's view model has a `preview(...)` factory under `#if DEBUG`, on the in-memory sources of `TonyPresentation/Store/PreviewSources.swift`.
+- A form with its own lifetime may get a child store, created by its screen's store.
+- Today, Tasks and Debug still use the older `Store<Feature>` until converted.
+- View models have a `preview(...)` factory under `#if DEBUG`, on `TonyPresentation/Store/PreviewSources.swift`.
+- Components take their own data model: values already localised and formatted, plus actions. Actions are `Action(id:parameters:) { parameters, argument in … }` (`TonyUIModels/Action.swift`); equality is identifier and parameters, so parameters hold everything the closure depends on. Awaited lifecycle work (`load()`) stays an async view model method.
+- Views decide nothing: no `if` on domain state, no formatting, no own strings.
+- Component data models in `TonyUIModels`, their views in `TonyUIKit`. Screen view models in `TonyPresentation`, screens in `TonyScreens`.
+- Every view and token has a preview with sample data, inside `#if DEBUG`, not translated.
+- Stores and view models are tested in `TonyPresentationTests` with fakes. UI tests only check wiring.
 
-- Every component takes its own data model: the values it shows, already localised and formatted, and the closures it calls. Everything the user can act on has an action, an `any Executable<Argument>` the view can only `execute(_:)` with what the user gave (`execute()` for a tap, the new text, the new state of a toggle): an `Action(id:parameters:) { parameters, argument in … }` (`TonyUIModels/Action.swift`). Two actions are equal when their identifier and parameters are, so the parameters hold everything the closure depends on; anything else is read when it runs. Lifecycle work the view awaits, like `load()`, stays an async method of the view model.
-- Views decide nothing: no `if` on domain state, no formatting, no strings of their own. They lay out what the data model says.
-- A control's or a component's data model lives in `TonyUIModels` and its view in `TonyUIKit`. A screen's view model lives beside its store in `TonyPresentation` and its view in `TonyScreens`.
-- Every view has an Xcode preview with sample data, and so do the tokens (colours, type styles, spacings, radii, artwork). Previews and their sample data are inside `#if DEBUG`; their text is sample data, not translated. A new view comes with its preview.
-- Stores and view models are tested in `TonyPresentation` with fakes: call the store's methods and read the view model, or call a reducer on a state built by hand; UI tests only check that the screens are wired.
-- Domain types are `Codable` and `Sendable`. Swift 6 strict concurrency stays on.
+## Git
 
-## Git flow
-
-- `main` is the only long-lived branch.
-- Start every change on a new branch from an up-to-date `main`. One chunk per branch, named with the chunk ID and a short kebab-case description (`c03-cadence-and-neglect`). Work outside a chunk takes a plain kebab-case name.
-- Never commit or push directly to `main`. Every change reaches it through a PR.
-- One chunk is one PR. The PR closes the chunk's issue (`Closes #3`).
-- Do not start a chunk before the chunks it depends on are merged.
-- Rebase the branch onto `main` locally, then squash-merge it (`gh pr merge --squash`). The commit is one very brief subject saying what the change does, with no description. No merge commits, and no merging one branch back into another.
-- To catch up with `main`, rebase onto it. Force-push only your own feature branch, with `--force-with-lease`.
-- Delete the branch once its PR is merged.
-
-## Commits and PRs
-
-- Small commits when they make sense, one logical change each. The subject says what changed, in the imperative.
-- Commit only source and `Tony.xcodeproj`: never `build/`, `.build/`, `DerivedData/`, `xcuserdata/`, or local files like `.DS_Store`.
-- PR description: what changed and why, how it was tested (commands, simulators and devices), screenshots for visual changes, open questions for Matteo.
-- Copy the chunk's "Done when" into the PR and say how each part was shown to hold.
-- Keep PRs reviewable. Split unrelated changes into separate PRs.
+- `main` is the only long-lived branch. Never commit or push to it; everything goes through a PR.
+- Branch from an up-to-date `main`: `c03-cadence-and-neglect` for a chunk, plain kebab-case otherwise.
+- One chunk, one PR, closing its issue (`Closes #3`). Start a chunk only after its dependencies are merged.
+- Catch up by rebasing onto `main`. Force-push only your own branch, `--force-with-lease`.
+- Merge with `gh pr merge --squash`, one brief subject, no body. No merge commits. Delete the branch after.
+- Small commits, imperative subject. Commit only source and `Tony.xcodeproj`, never build output, `xcuserdata/` or `.DS_Store`.
+- Keep PRs reviewable; split unrelated changes.
 
 ## Before every push
 
-All of these pass, every time. Never push red.
+Never push red.
 
-1. `make test`: the import check and every `TonyCore`, `TonyStore` and `TonyPresentation` test pass.
-2. `make build`: the app and the widget extension build with no errors and no warnings.
-3. `make run` and `make test-ui` when the change touches the app: it launches in the simulator and the changed screen behaves as described.
-4. Look at it when the change is visual: English and French, iPhone and iPad, the largest Dynamic Type size. The app is dark only.
-5. Read your own diff: no secrets, no debug code, no leftover files, no unrelated changes.
+1. `make test` passes.
+2. `make build`: no errors, no warnings.
+3. App changes: `make run` and `make test-ui`.
+4. Visual changes: look at English and French, iPhone and iPad, largest Dynamic Type.
+5. Read the diff: no secrets, debug code, leftovers or unrelated changes.
 
-During development, run the smallest relevant test first (`xcodebuild test -project Tony.xcodeproj -scheme TonyUnitTests -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -skipMacroValidation -only-testing:TonyCoreTests/<suite>`). Before pushing, run all the gates above.
+- Never claim a test passed unless it ran. Say which couldn't run and why.
+- A failing test means fixing the code, or the test if behaviour changed on purpose. Never skip, loosen or delete one. Known gaps use `withKnownIssue` with a reason.
+- Claude can't run on a real iPhone. `needs device` chunks aren't done until Matteo checks them: list what to check, never report it as verified.
 
-- Never claim a test passed unless it was actually executed.
-- If a test cannot be executed, report it and explain why.
-- When a test fails, fix the code or, if the behaviour changed on purpose, the test. Never skip, loosen or delete a test to get green.
-- A known gap is marked with `withKnownIssue` and its reason.
-- Claude cannot run on a real iPhone. A chunk labelled `needs device` is not done until Matteo has run it on one: say exactly what to check on the device, and never report that part as verified.
+## Code
 
-## Development practices
-
-- Fix the cause, not the symptom. Keep the change to what was asked; flag other problems instead of fixing them on the side.
-- Names in full words (`completion`, `busyInterval`, `weeklyQuota`). Only `x`, `y` and `_` may be short. Follow the Swift API Design Guidelines.
-- Very few comments: only for something genuinely surprising. Explain the change in the PR instead.
-- Fix warnings like errors: the compiler and the build end with none. Never silence one with `@unchecked Sendable`, `nonisolated(unsafe)` or `@preconcurrency` without a one-line reason.
-- No force unwraps, `try!` or `fatalError` in shipping code paths. Tests may use `#require`.
-- Tests use Swift Testing (`import Testing`). Planner behaviour is tested with fixtures and table-driven cases, not through the UI. Only the UI tests in `TonyAppUITests` use XCTest, because Swift Testing cannot drive an app.
-- New behaviour comes with a test, or an updated one.
-- No hardcoded user-facing text: every string goes through the String Catalog, in English and French. Templates are localised too.
-- The on-device model's prompts are plain text files in `TonyPresentation/Prompts`, one per prompt (`briefing.txt`), in English. Each names the language to answer in with `{language}`, filled from the locale that is passed in.
-- No hardcoded colours, fonts, sizes or radii in views: use the design tokens and components of `TonyUIKit`, taken from the Figma file.
-- Shell scripts and Makefile targets read step by step: named variables, one action per line. No dense one-liners.
-- Prefer Apple frameworks over third-party code.
-- ALWAYS evaluate existing solid libraries before developing in house when Apple frameworks do not cover the need. Bring Matteo the candidates with their reliability, ease of use, adoption, maintenance and licence, and a recommendation; he picks.
-- No new dependency (Swift package or build tool), external service or network request without Matteo's approval. Pin exact versions.
-- No new entitlement, capability, permission prompt or background mode without Matteo's approval. Every permission has a usage description in both languages.
-- Secrets, signing certificates and provisioning profiles never go in the repo or in logs.
-- Keep the docs true: when a rule or decision changes, update CLAUDE.md in the same PR.
-
-## Simplicity
-
-- Prefer the simplest implementation that satisfies the chunk.
-- Do not introduce abstractions, helpers, configuration or extensibility without a demonstrated need. The protocols listed under Architecture rules are the agreed seams; do not add others on speculation.
-- Do not build ahead: a chunk delivers what its issue says, not what a later chunk will need.
-- Reuse existing patterns before introducing alternatives.
-- Avoid duplicating existing functionality.
-- Avoid refactoring unrelated code.
-- Do not optimize prematurely. Address measurable performance problems or explicit requirements.
+- First read the chunk's issue, its dependencies and the code around the change.
+- Fix causes, not symptoms. Stay in scope; flag other problems.
+- Simplest thing that satisfies the chunk. No abstractions, helpers, configuration or building ahead without a need. Reuse patterns, don't duplicate, don't refactor unrelated code, don't optimise without a measured problem.
+- Full-word names (`completion`, `busyInterval`); only `x`, `y`, `_` short. Swift API Design Guidelines.
+- Comments only for the surprising.
+- No warnings. `@unchecked Sendable`, `nonisolated(unsafe)` or `@preconcurrency` only with a one-line reason.
+- No force unwraps, `try!` or `fatalError` in shipping code. Tests may `#require`.
+- Swift Testing everywhere except the XCTest UI tests. Planner behaviour: fixtures and table-driven tests. New behaviour comes with a test.
+- No hardcoded user-facing text: String Catalog, English and French, templates included.
+- Model prompts: one English `.txt` per prompt in `TonyPresentation/Prompts`, answering in `{language}` from the passed locale.
+- No hardcoded colours, fonts, sizes or radii: `TonyUIKit` tokens and components, from Figma.
+- Shell scripts and Makefile: named variables, one action per line.
+- Prefer Apple frameworks. Otherwise bring Matteo library candidates (reliability, ease, adoption, maintenance, licence, recommendation); he picks.
+- Matteo approves every new dependency, external service, network request, entitlement, capability, permission prompt or background mode. Pin exact versions. Usage descriptions in both languages.
+- No secrets, certificates or profiles in the repo or logs.
+- When a rule or decision changes, update this file in the same PR.
 
 ## Privacy
 
-- Server-side services are fine, such as the task catalogue (D14). Each new one still needs Matteo's approval, like any external service.
-- The app never sends user data to a server: nothing that identifies the person or the device, and none of their task list, completions, calendar, health, routine, preferences or location. Nothing is logged or put in analytics.
-- A request carries only the generic, anonymous input the service needs. The task catalogue receives the name of a task being created and the language, nothing else. Until it exists, `TableTaskCatalog` answers from `TonyApp/Catalog/TaskCatalog.json` and nothing leaves the device.
-- Ask for each permission when the feature that needs it is first used, and keep the app working when it is refused.
-- Read only what the feature needs (busy intervals, not event titles; sleep and workouts, not other health data).
-- The weather comes from WeatherKit, which receives an approximate location (reduced accuracy) and nothing else. It is read only when some task avoids some weather.
-- Fixtures and tests use invented data, never Matteo's real calendar or health records.
+- Server-side services (like the task catalogue, D14) need Matteo's approval.
+- No user data leaves the device: nothing identifying the person or device, no tasks, completions, calendar, health, routine, preferences or location. No logging or analytics.
+- Requests carry only generic, anonymous input. The catalogue gets the new task's name and the language. Until it exists, `TableTaskCatalog` reads `TonyApp/Catalog/TaskCatalog.json`.
+- WeatherKit gets an approximate location only, and only when some task avoids some weather.
+- Ask each permission when its feature is first used; the app works if refused.
+- Read only what's needed (busy intervals, not titles; sleep and workouts, not other health data).
+- Fixtures use invented data, never Matteo's real records.
 
-## Accessibility and compatibility
+## Accessibility, compatibility, localisation
 
-- Every interactive element has a VoiceOver label and is reachable with VoiceOver and Full Keyboard Access.
-- Text uses the type styles and scales with Dynamic Type. Layouts hold at the largest accessibility size.
-- Touch targets are at least 44 by 44 points.
-- Respect Reduce Motion for non-essential motion, and do not carry meaning by colour alone.
-- The app is dark only: Figma defines one palette, and the app forces the dark appearance. Check iPhone and iPad in both orientations where the screen supports them.
-- The deployment target is iOS 27. Do not add availability checks or fallbacks for older versions.
-
-## Localisation
-
-- English and French ship together. A string missing in one language is a bug, not a fallback.
-- Dates, times, numbers and weekdays are formatted with the locale that is passed in, never by hand.
-- Parsing and model prompts are checked in both languages.
-- Flag text that looks misleading or inconsistent rather than inventing corrections.
-
-## Execution
-
-- Before changing code, read the chunk's issue, the chunks it depends on, and the code and conventions around the change.
-- Make changes directly when requirements are clear and within scope.
-- Do not stop to ask questions about decisions already covered by these instructions or established project conventions.
-- Ask Matteo when requirements are ambiguous, architectural approval is needed, or a decision has legal, financial or external consequences (App Store, TestFlight, signing, paid services).
-- Every new piece of UI needs Matteo's approval before it is built: a new screen, sheet, component, or a new state or section of an existing screen. Draw it first as a wireframe in the Figma file, next to the existing frames, and wait for his approval. Build only what he approved, and ask again before departing from it.
-- Figma calls cost credits, so use as few as the work needs. Read a single node, not the whole page. Take one screenshot after composing and one after a fix, never one per section. Build a frame in as few `use_figma` calls as are safe to retry. Copy the existing frames and components instead of drawing again. Never use Figma AI generation (images, vectors, designs) without asking first.
-- Do not silently expand the scope of a task.
-- At completion, report:
-  - What changed.
-  - Tests and checks actually executed.
-  - Any tests that could not be executed and why, including anything left to check on a device.
-  - Outstanding concerns or decisions requiring Matteo's input.
+- VoiceOver labels on every interactive element, reachable with VoiceOver and Full Keyboard Access.
+- Type styles with Dynamic Type; layouts hold at the largest size. Touch targets at least 44 × 44.
+- Respect Reduce Motion; never carry meaning by colour alone.
+- Dark only. Check iPhone and iPad in supported orientations.
+- iOS 27 only: no availability checks.
+- English and French ship together; a missing string is a bug.
+- Dates, times, numbers, weekdays formatted with the passed locale.
+- Parsing and prompts checked in both languages.
+- Flag misleading text instead of inventing fixes.
