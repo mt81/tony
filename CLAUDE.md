@@ -1,10 +1,9 @@
 # Tony
 
-Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day around recurring tasks, goals and the calendar. The work is cut into 28 chunks, C01 to C28, tracked as GitHub issues #1 to #28.
-
-- Build chunks: https://claude.ai/artifact/YF6oBu6Zf1ZaBBcYMMMjUL
-- Solution document (decisions D1 to D14, spikes S1 to S5): https://claude.ai/artifact/2tZQjv5SA6uZzWBjjmWnkU
-- Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
+Tony is part of the AHDH Claude project
+- Project: https://claude.ai/cowork/project/01a1cafa-136f-77e7-947e-4dbd55343a28.
+- Documentation will live in Notion under this page https://app.notion.com/p/Tony-42281c5914d280518492fb08cb48c089
+- Design: Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
 
 ## Project layout
 
@@ -184,6 +183,8 @@ During development, run the smallest relevant test first (`xcodebuild test -proj
 - Make changes directly when requirements are clear and within scope.
 - Do not stop to ask questions about decisions already covered by these instructions or established project conventions.
 - Ask Matteo when requirements are ambiguous, architectural approval is needed, or a decision has legal, financial or external consequences (App Store, TestFlight, signing, paid services).
+- Every new piece of UI needs Matteo's approval before it is built: a new screen, sheet, component, or a new state or section of an existing screen. Draw it first as a wireframe in the Figma file, next to the existing frames, and wait for his approval. Build only what he approved, and ask again before departing from it.
+- Figma calls cost credits, so use as few as the work needs. Read a single node, not the whole page. Take one screenshot after composing and one after a fix, never one per section. Build a frame in as few `use_figma` calls as are safe to retry. Copy the existing frames and components instead of drawing again. Never use Figma AI generation (images, vectors, designs) without asking first.
 - Do not silently expand the scope of a task.
 - At completion, report:
   - What changed.
