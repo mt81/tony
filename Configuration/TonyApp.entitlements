@@ -6,7 +6,5 @@
 	<array>
 		<string>group.com.mt81.tony</string>
 	</array>
-	<key>com.apple.developer.weatherkit</key>
-	<true/>
 </dict>
 </plist>

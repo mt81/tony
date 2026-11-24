@@ -179,6 +179,21 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 }
 
 @MainActor
+@Test func aDescriptionTheModelReadsKeepsTheSavedPlace() async throws {
+    let place = Place(name: "Lyon", latitude: 45.76, longitude: 4.84)
+    var saved = Routine.standard
+    saved.place = place
+    let you = try You(languageService: FakeLanguageService(routine: .standard))
+    try await you.repository.save(saved)
+    try await you.open().routine.edit.action.execute()
+
+    you.store.changeDescription("Office on Tuesdays")
+    await you.store.readDescription()
+
+    #expect(you.store.state.editor?.routine.place == place)
+}
+
+@MainActor
 @Test func aDescriptionThatCannotBeReadLeavesTheFormAndSaysSo() async throws {
     var backwards = Routine.standard
     backwards.workEnd = DateComponents(hour: 6, minute: 0)

@@ -10,4 +10,6 @@ public struct Routine: Codable, Sendable, Hashable {
     public var workEnd: DateComponents
     public var wakeTime: DateComponents
     public var bedtime: DateComponents
+    /// Where the weather is read; nil until the user saves one.
+    public var place: Place? = nil
 }

@@ -138,7 +138,7 @@ struct FakeCalendarSource: CalendarSource {
 struct FakeWeatherSource: WeatherSource {
     var forecast: WeatherCondition?
 
-    func condition(on day: Date) -> WeatherCondition? { forecast }
+    func condition(on day: Date, at place: Place) -> WeatherCondition? { forecast }
 }
 
 final class TestClock: Sendable {

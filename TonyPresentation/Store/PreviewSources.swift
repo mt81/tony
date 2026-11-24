@@ -39,6 +39,6 @@ struct PreviewCalendarSource: CalendarSource {
 
 /// No forecast, as when the weather cannot be read. Previews only.
 struct PreviewWeatherSource: WeatherSource {
-    func condition(on day: Date) -> WeatherCondition? { nil }
+    func condition(on day: Date, at place: Place) -> WeatherCondition? { nil }
 }
 #endif

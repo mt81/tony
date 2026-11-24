@@ -132,7 +132,12 @@ public actor PlanCoordinator {
         let routine = (try? await repository.routine()) ?? .standard
         let dayInterval = calendar.dateInterval(of: .day, for: now) ?? DateInterval(start: today, duration: 86_400)
         let busyIntervals = (try? await calendarSource.busyIntervals(in: dayInterval)) ?? []
-        let weather = tasks.contains(where: \.avoidsWeather) ? await weatherSource.condition(on: now) : nil
+        let weather: WeatherCondition? =
+            if let place = routine.place, tasks.contains(where: \.avoidsWeather) {
+                await weatherSource.condition(on: now, at: place)
+            } else {
+                nil
+            }
 
         let context = DayContext(
             routine: routine,

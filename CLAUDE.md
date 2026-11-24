@@ -22,7 +22,7 @@ iOS 27 app (iPhone, iPad; English, French) that plans the day around recurring t
 | `TonyUIKit` | SwiftUI controls and components, tokens (colour, type, spacing, radius), fonts, artwork | Previews, Debug component gallery |
 | `TonyPresentation` | Per screen: state, store, view model, part data models; presentation strings | `TonyPresentationTests` |
 | `TonyScreens` | SwiftUI screens drawing `TonyPresentation` models with `TonyUIKit` | Previews |
-| `TonyApp` | Wiring, tab bar, system adapters (EventKit, WeatherKit) | `TonyAppUITests`, then device |
+| `TonyApp` | Wiring, tab bar, system adapters (EventKit), MET Norway weather | `TonyAppUITests`, then device |
 | `TonyWidgets` | Widget timeline provider, App Intents | Device |
 
 - One Xcode project, `Tony.xcodeproj`, edited in Xcode, no generator. Folders `<Target>/` and `<Target>Tests/` are synchronized: a file added to a folder joins its target.
@@ -139,7 +139,7 @@ Never push red.
 - Server-side services (like the task catalogue, D14) need Matteo's approval.
 - No user data leaves the device: nothing identifying the person or device, no tasks, completions, calendar, health, routine, preferences or location. No logging or analytics.
 - Requests carry only generic, anonymous input. The catalogue gets the new task's name and the language. Until it exists, `TableTaskCatalog` reads `TonyApp/Catalog/TaskCatalog.json`.
-- WeatherKit gets an approximate location only, and only when some task avoids some weather.
+- MET Norway (api.met.no) gets the saved place's coordinates rounded to about 10 km, only when some task avoids some weather. The User-Agent names the app and the repo, as MET requires.
 - Ask each permission when its feature is first used; the app works if refused.
 - Read only what's needed (busy intervals, not titles; sleep and workouts, not other health data).
 - Fixtures use invented data, never Matteo's real records.

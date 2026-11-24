@@ -54,7 +54,7 @@ struct AppStores {
         coordinator = PlanCoordinator(
             repository: repository,
             calendarSource: calendarSource,
-            weatherSource: WeatherKitWeatherSource(calendar: .current),
+            weatherSource: MetNorwayWeatherSource(calendar: .current),
             calendar: .current,
             now: now
         )
@@ -86,7 +86,7 @@ struct AppStores {
         #if DEBUG
         calendarDebug = Store(
             state: CalendarDebugFeature.State(),
-            environment: CalendarDebugFeature.Environment(calendarSource: calendarSource, coordinator: coordinator)
+            environment: CalendarDebugFeature.Environment(calendarSource: calendarSource, repository: repository, coordinator: coordinator)
         )
         #endif
     }

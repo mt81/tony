@@ -28,10 +28,6 @@
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Tony reads when you are busy, never what your events are about, to suggest tasks at moments that fit.</string>
-	<key>NSLocationDefaultAccuracyReduced</key>
-	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Tony reads roughly where you are to know today's weather, so tasks that need dry weather are not suggested in the rain.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

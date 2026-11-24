@@ -59,7 +59,7 @@ private final class FakeWeatherSource: WeatherSource {
 
     var reads: Int { readCount.withLock { $0 } }
 
-    func condition(on day: Date) -> WeatherCondition? {
+    func condition(on day: Date, at place: Place) -> WeatherCondition? {
         readCount.withLock { $0 += 1 }
         return forecast
     }
@@ -228,7 +228,7 @@ private struct Setup {
     (nil, true),
 ])
 func theDaysWeatherDecidesWhetherATaskThatAvoidsItIsPlanned(forecast: WeatherCondition?, isPlanned: Bool) async throws {
-    let setup = try Setup(forecast: forecast, plantsAvoid: [.rain])
+    let setup = try Setup(routine: Fixtures.routineWithPlace, forecast: forecast, plantsAvoid: [.rain])
 
     await setup.coordinator.start()
 
@@ -239,10 +239,19 @@ func theDaysWeatherDecidesWhetherATaskThatAvoidsItIsPlanned(forecast: WeatherCon
 }
 
 @Test func theWeatherIsReadOnlyWhenATaskAvoidsSome() async throws {
-    let setup = try Setup(forecast: .rain)
+    let setup = try Setup(routine: Fixtures.routineWithPlace, forecast: .rain)
 
     await setup.coordinator.start()
 
     #expect(setup.weatherSource.reads == 0)
     #expect(try await setup.current().context.conditions.weather == nil)
+}
+
+@Test func theWeatherIsReadOnlyWhenAPlaceIsSaved() async throws {
+    let setup = try Setup(forecast: .rain, plantsAvoid: [.rain])
+
+    await setup.coordinator.start()
+
+    #expect(setup.weatherSource.reads == 0)
+    #expect(try await setup.current().plan.items.contains { $0.taskID == setup.tasks[0].id })
 }

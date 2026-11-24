@@ -20,6 +20,9 @@ public struct CalendarDebugScreen: View {
                 Text(model.weather)
                     .tonyText(.label)
                     .accessibilityIdentifier("weather")
+                ForEach(model.places, id: \.title) { place in
+                    ButtonView(place)
+                }
                 if let requestAccess = model.requestAccess {
                     ButtonView(requestAccess)
                 }
