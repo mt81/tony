@@ -1,11 +1,9 @@
 # Tony
 
-Tony is an iOS 27 app (iPhone and iPad, English and French) that plans the day around recurring tasks, goals and the calendar. The work is cut into 28 chunks, C01 to C28, tracked as GitHub issues #1 to #28.
-
-- Build chunks: https://claude.ai/artifact/YF6oBu6Zf1ZaBBcYMMMjUL
-- Solution document (decisions D1 to D14, spikes S1 to S5): https://claude.ai/artifact/2tZQjv5SA6uZzWBjjmWnkU
-- Energy model (draft: the battery model of energy, its inputs, rests and task drain, still being decided): https://claude.ai/artifact/Bonir4MtzufUKT2xZmw2Pi
-- Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
+Tony is part of the AHDH Claude project
+- Project: https://claude.ai/cowork/project/01a1cafa-136f-77e7-947e-4dbd55343a28.
+- Documentation will live in Notion under this page https://app.notion.com/p/Tony-42281c5914d280518492fb08cb48c089
+- Design: Figma file (colours, type styles, components, wireframes): https://www.figma.com/design/VKMc5C6tBa8W1gemsrrZAc
 
 ## Project layout
 
