@@ -74,16 +74,16 @@ private struct Setup {
     let coordinator: PlanCoordinator
     let tasks: [TonyTask]
 
-    /// `plantsAvoid` is the weather the first task should not be done in.
+    /// `plantsNeed` is the only weather the first task can be done in.
     init(
         routine: Routine? = nil,
         access: CalendarAccess = .granted,
         forecast: WeatherCondition? = nil,
-        plantsAvoid: Set<WeatherCondition> = [],
+        plantsNeed: Set<WeatherCondition> = [],
         day: Int = 7
     ) throws {
         tasks = [
-            try Fixtures.task(1, "Plants", rank: 0, requirements: Requirements(avoidedWeather: plantsAvoid)),
+            try Fixtures.task(1, "Plants", rank: 0, requirements: Requirements(neededWeather: plantsNeed)),
             try Fixtures.task(2, "Vacuum", rank: 1),
         ]
         let clock = TestClock(try Fixtures.november(day, hour: 8))
@@ -224,11 +224,13 @@ private struct Setup {
 
 @Test(arguments: [
     (WeatherCondition?.some(.rain), false),
+    (.thunder, false),
     (.clear, true),
+    (.fair, true),
     (nil, true),
 ])
-func theDaysWeatherDecidesWhetherATaskThatAvoidsItIsPlanned(forecast: WeatherCondition?, isPlanned: Bool) async throws {
-    let setup = try Setup(routine: Fixtures.routineWithPlace, forecast: forecast, plantsAvoid: [.rain])
+func theDaysWeatherDecidesWhetherATaskThatNeedsSomeIsPlanned(forecast: WeatherCondition?, isPlanned: Bool) async throws {
+    let setup = try Setup(routine: Fixtures.routineWithPlace, forecast: forecast, plantsNeed: [.clear, .fair])
 
     await setup.coordinator.start()
 
@@ -238,7 +240,7 @@ func theDaysWeatherDecidesWhetherATaskThatAvoidsItIsPlanned(forecast: WeatherCon
     #expect(planned.plan.items.contains { $0.taskID == setup.tasks[1].id })
 }
 
-@Test func theWeatherIsReadOnlyWhenATaskAvoidsSome() async throws {
+@Test func theWeatherIsReadOnlyWhenATaskNeedsSome() async throws {
     let setup = try Setup(routine: Fixtures.routineWithPlace, forecast: .rain)
 
     await setup.coordinator.start()
@@ -248,7 +250,7 @@ func theDaysWeatherDecidesWhetherATaskThatAvoidsItIsPlanned(forecast: WeatherCon
 }
 
 @Test func theWeatherIsReadOnlyWhenAPlaceIsSaved() async throws {
-    let setup = try Setup(forecast: .rain, plantsAvoid: [.rain])
+    let setup = try Setup(forecast: .rain, plantsNeed: [.clear])
 
     await setup.coordinator.start()
 

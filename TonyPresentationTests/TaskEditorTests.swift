@@ -279,13 +279,13 @@ func eachRepeatsChoiceSetsItsCadence(repeats: TaskEditor.Repeats, cadence: Caden
     _ = TaskEditor.reduce(&state, .windowToggled(.evening, isOn: true))
     _ = TaskEditor.reduce(&state, .weatherToggled(.rain, isOn: true))
     #expect(state.task.requirements.windows == [.morning, .evening])
-    #expect(state.task.requirements.avoidedWeather == [.rain])
+    #expect(state.task.requirements.neededWeather == [.rain])
 
     _ = TaskEditor.reduce(&state, .windowToggled(nil, isOn: true))
     _ = TaskEditor.reduce(&state, .weatherToggled(nil, isOn: true))
 
     #expect(state.task.requirements.windows.isEmpty)
-    #expect(state.task.requirements.avoidedWeather.isEmpty)
+    #expect(state.task.requirements.neededWeather.isEmpty)
 }
 
 // MARK: Saving

@@ -52,7 +52,7 @@ public struct TaskFormDataModel: Equatable {
     public var whenItFitsHeader: String
     public var location: ChoiceDataModel
     public var timeOfDay: ChecklistDataModel
-    public var weather: ChecklistDataModel
+    public var weather: WeatherPickerDataModel
     public var subtasks: SubtasksSectionDataModel
     /// Nil for a task that is not saved yet.
     public var delete: ButtonDataModel? = nil
@@ -106,6 +106,16 @@ public struct ChoiceDataModel: Equatable {
 public struct ChecklistDataModel: Equatable {
     public var row: DetailRowDataModel
     public var items: [ToggleDataModel]
+}
+
+/// A row whose page picks the weather a task needs: any weather, or some of the tiles.
+@MemberwiseInit(.public)
+public struct WeatherPickerDataModel: Equatable {
+    public var row: DetailRowDataModel
+    public var any: ToggleDataModel
+    public var header: String
+    public var conditions: [IconToggleDataModel]
+    public var footer: String
 }
 
 @MemberwiseInit(.public)

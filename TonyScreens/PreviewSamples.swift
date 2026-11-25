@@ -183,7 +183,15 @@ enum PreviewSamples {
                 whenItFitsHeader: "When it fits",
                 location: ChoiceDataModel(row: row("location", "Where", "At home"), choices: picker("Where", ["Anywhere", "At home", "At the office"], selected: "At home")),
                 timeOfDay: ChecklistDataModel(row: row("clock", "Time of day", "Any time"), items: checklist(["Any time", "Morning", "Work hours", "Evening"], on: ["Any time"])),
-                weather: ChecklistDataModel(row: row("cloud.rain", "Weather", "Any weather"), items: checklist(["Any weather", "Not in the rain", "Not in the snow"], on: ["Any weather"])),
+                weather: WeatherPickerDataModel(
+                    row: row("cloud.sun", "Weather", "☀️ 🌤️ Clear or fair"),
+                    any: ToggleDataModel(id: "any", title: "Any weather", isOn: false, onChange: Action(id: "preview") { _ in }),
+                    header: "Can happen in",
+                    conditions: [("☀️", "Clear", true), ("🌤️", "Fair", true), ("⛅️", "Partly cloudy", false), ("☁️", "Cloudy", false), ("🌫️", "Fog", false), ("🌧️", "Rain", false), ("🌨️", "Sleet", false), ("❄️", "Snow", false), ("⛈️", "Thunder", false)].map { icon, title, isOn in
+                        IconToggleDataModel(id: title, icon: icon, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
+                    },
+                    footer: "Tony plans it only on days with this weather. When there’s no forecast, any day works."
+                ),
                 subtasks: SubtasksSectionDataModel(
                     header: "Sub tasks",
                     subtasks: [subtask("Load the washing machine", minutes: 10), subtask("Hang to dry", minutes: 15), subtask("Fold", minutes: 15)],

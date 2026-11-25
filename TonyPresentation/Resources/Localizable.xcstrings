@@ -504,6 +504,22 @@
         }
       }
     },
+    "Can happen in" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can happen in"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Possible par ce temps"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -517,6 +533,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Clear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dégagé"
+          }
+        }
+      }
+    },
+    "Cloudy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuageux"
           }
         }
       }
@@ -1206,6 +1254,22 @@
         }
       }
     },
+    "Fair" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fair"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beau temps"
+          }
+        }
+      }
+    },
     "Fixed schedule" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1236,6 +1300,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jours flexibles"
+          }
+        }
+      }
+    },
+    "Fog" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fog"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brouillard"
           }
         }
       }
@@ -1688,57 +1768,6 @@
         }
       }
     },
-    "Not in rain or snow" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not in rain or snow"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ni sous la pluie ni sous la neige"
-          }
-        }
-      }
-    },
-    "Not in the rain" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not in the rain"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas sous la pluie"
-          }
-        }
-      }
-    },
-    "Not in the snow" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not in the snow"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas sous la neige"
-          }
-        }
-      }
-    },
     "Not today" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1875,6 +1904,38 @@
         }
       }
     },
+    "Partly cloudy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partly cloudy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partiellement nuageux"
+          }
+        }
+      }
+    },
+    "Rain" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pluie"
+          }
+        }
+      }
+    },
     "Recurring" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1990,6 +2051,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sommeil"
+          }
+        }
+      }
+    },
+    "Sleet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neige fondue"
+          }
+        }
+      }
+    },
+    "Snow" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neige"
           }
         }
       }
@@ -2113,6 +2206,22 @@
         }
       }
     },
+    "Thunder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thunder"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orage"
+          }
+        }
+      }
+    },
     "Time of day" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2228,6 +2337,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tony planifie autour de tes réunions. Il lit quand tu es occupé, jamais le sujet des événements."
+          }
+        }
+      }
+    },
+    "Tony plans it only on days with this weather. When there’s no forecast, any day works." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony plans it only on days with this weather. When there’s no forecast, any day works."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony ne le planifie que les jours avec ce temps. Sans prévision, n’importe quel jour convient."
           }
         }
       }

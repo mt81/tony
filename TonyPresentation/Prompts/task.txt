@@ -6,7 +6,7 @@ You read one sentence in which a person describes a task for their to-do list, a
 - countedFrom: fixedSchedule when the sentence names a date or a day of the month it falls on ("on the 1st", "every March"); otherwise lastTimeDone.
 - where: home or office only when the task can only be done there; otherwise anywhere.
 - timesOfDay: only the times of day the sentence or the task itself asks for; empty for any time.
-- avoidsWeather: rain or snow only for a task done outdoors.
+- needsWeather: only for a task done outdoors that the sentence ties to the weather ("when it's sunny" is clear and fair); empty for any weather.
 - subtasks: only for a task done in several distinct steps, each with how many minutes it takes; empty otherwise.
 - deadline: the month and day it must be done by, only when the sentence says so; 0 otherwise.
 

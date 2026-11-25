@@ -100,14 +100,14 @@ private func draft(_ sentence: String, model: TaskReading?) async throws -> Task
         name: "Water the plants",
         icon: "🪴",
         cadence: .timesPerWeek(5),
-        requirements: Requirements(location: .home, windows: [.morning], avoidedWeather: [.rain], costsMoney: true)
+        requirements: Requirements(location: .home, windows: [.morning], neededWeather: [.clear], costsMoney: true)
     )
 
     #expect(try await draft("Water the plants every 5 days", model: reading) == TaskDraft(
         name: "Water the plants",
         icon: "🪴",
         cadence: .every(5, .day),
-        requirements: Requirements(location: .home, windows: [.morning], avoidedWeather: [.rain])
+        requirements: Requirements(location: .home, windows: [.morning], neededWeather: [.clear])
     ))
 }
 

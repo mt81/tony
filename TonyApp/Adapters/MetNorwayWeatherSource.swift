@@ -84,25 +84,22 @@ private struct Forecast: Decodable {
 }
 
 extension WeatherCondition {
-    /// Folds MET Norway's symbol codes (`lightrainshowers_day`, `partlycloudy_night`…) into the four the planner knows.
+    /// Folds MET Norway's 41 symbol codes (`lightrainshowers_day`, `heavysleetandthunder`…) into nine kinds:
+    /// light, heavy and showers fold in, and thunder wins over what falls with it.
     fileprivate init(symbol: String) {
-        if symbol.contains("snow") || symbol.contains("sleet") {
-            self = .snow
-        } else if symbol.contains("rain") {
-            self = .rain
-        } else if symbol.hasPrefix("clearsky") || symbol.hasPrefix("fair") {
-            self = .clear
-        } else {
-            self = .cloudy
-        }
+        self =
+            if symbol.contains("thunder") { .thunder }
+            else if symbol.contains("snow") { .snow }
+            else if symbol.contains("sleet") { .sleet }
+            else if symbol.contains("rain") { .rain }
+            else if symbol.hasPrefix("clearsky") { .clear }
+            else if symbol.hasPrefix("fair") { .fair }
+            else if symbol.hasPrefix("partlycloudy") { .partlyCloudy }
+            else if symbol.hasPrefix("fog") { .fog }
+            else { .cloudy }
     }
 
     fileprivate var severity: Int {
-        switch self {
-        case .clear: 0
-        case .cloudy: 1
-        case .rain: 2
-        case .snow: 3
-        }
+        Self.allCases.firstIndex(of: self) ?? 0
     }
 }

@@ -97,7 +97,7 @@ public enum CalendarDebugFeature: Feature {
             case (_, nil): "Weather: no city saved"
             case (let planned?, let place?):
                 planned.context.conditions.weather.map { "Weather today in \(place.name): \($0.rawValue)" }
-                    ?? "Weather in \(place.name): not read (no task avoids weather, or no forecast)"
+                    ?? "Weather in \(place.name): not read (no task needs some weather, or no forecast)"
             }
         let places = sampleCities.map { place in
             ButtonDataModel(

@@ -133,7 +133,7 @@ public actor PlanCoordinator {
         let dayInterval = calendar.dateInterval(of: .day, for: now) ?? DateInterval(start: today, duration: 86_400)
         let busyIntervals = (try? await calendarSource.busyIntervals(in: dayInterval)) ?? []
         let weather: WeatherCondition? =
-            if let place = routine.place, tasks.contains(where: \.avoidsWeather) {
+            if let place = routine.place, tasks.contains(where: \.needsWeather) {
                 await weatherSource.condition(on: now, at: place)
             } else {
                 nil
@@ -168,8 +168,8 @@ public actor PlanCoordinator {
 }
 
 extension TonyTask {
-    /// Whether the task, or one of its steps, should not be done in some weather: only then is the weather read.
-    fileprivate var avoidsWeather: Bool {
-        !requirements.avoidedWeather.isEmpty || steps.contains { !$0.requirements.avoidedWeather.isEmpty }
+    /// Whether the task, or one of its steps, can happen only in some weather: only then is the weather read.
+    fileprivate var needsWeather: Bool {
+        !requirements.neededWeather.isEmpty || steps.contains { !$0.requirements.neededWeather.isEmpty }
     }
 }

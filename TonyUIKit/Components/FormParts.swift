@@ -128,6 +128,63 @@ public struct CheckmarkRow: View {
     }
 }
 
+/// Toggles drawn as tiles, an emoji above the title, as many per line as fit.
+/// A tile that is on is outlined in the accent colour and checked.
+public struct IconToggleGrid: View {
+    private let items: [IconToggleDataModel]
+    @ScaledMetric(relativeTo: .body) private var minimumWidth = TonySize.iconToggleTile
+
+    public init(_ items: [IconToggleDataModel]) {
+        self.items = items
+    }
+
+    public var body: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: minimumWidth), spacing: TonySpacing.snug)], spacing: TonySpacing.snug) {
+            ForEach(items) { IconToggleTile(model: $0) }
+        }
+    }
+}
+
+private struct IconToggleTile: View {
+    let model: IconToggleDataModel
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = TonySize.tileIcon
+
+    var body: some View {
+        Button {
+            model.onChange.execute(!model.isOn)
+        } label: {
+            VStack(spacing: TonySpacing.tight) {
+                Text(model.icon)
+                    .font(.system(size: iconSize))
+                HStack(alignment: .firstTextBaseline, spacing: TonySpacing.xSmall) {
+                    if model.isOn {
+                        Image(systemName: "checkmark")
+                    }
+                    Text(model.title)
+                        .lineLimit(2, reservesSpace: true)
+                }
+                .tonyText(model.isOn ? .labelStrong : .label)
+                .foregroundStyle(model.isOn ? TonyColor.ink : TonyColor.muted)
+                .multilineTextAlignment(.center)
+            }
+            .padding(.vertical, TonySpacing.large)
+            .padding(.horizontal, TonySpacing.small)
+            .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
+            .background(TonyColor.glass, in: .rect(cornerRadius: TonyRadius.row))
+            .overlay {
+                RoundedRectangle(cornerRadius: TonyRadius.row)
+                    .strokeBorder(model.isOn ? TonyColor.accent : TonyColor.glassEdge, lineWidth: model.isOn ? TonySize.border : TonySize.glassEdge)
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(model.title)
+        .accessibilityAddTraits(model.isOn ? [.isButton, .isSelected] : .isButton)
+        .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
+    }
+}
+
 /// The header of a section of glass rows.
 public struct FormSectionHeader: View {
     private let title: String
@@ -304,5 +361,13 @@ private final class EmojiKeyboardField: UITextField {
 #Preview("Icon field") {
     IconField(TextFieldDataModel(title: "Icon", text: "🪴", onChange: Action(id: "preview") { _ in }))
         .tonyPreview()
+}
+
+#Preview("Icon toggle grid") {
+    let weather = [("☀️", "Clear", true), ("🌤️", "Fair", true), ("⛅️", "Partly cloudy", false), ("☁️", "Cloudy", false), ("🌫️", "Fog", false), ("🌧️", "Rain", false)]
+    IconToggleGrid(weather.map { icon, title, isOn in
+        IconToggleDataModel(id: title, icon: icon, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
+    })
+    .tonyPreview()
 }
 #endif

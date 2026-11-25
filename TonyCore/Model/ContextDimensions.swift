@@ -23,9 +23,15 @@ public enum Window: String, Codable, Sendable, Hashable, CaseIterable {
     case night
 }
 
+/// The day's weather, from the clearest to the most severe.
 public enum WeatherCondition: String, Codable, Sendable, Hashable, CaseIterable {
     case clear
+    case fair
+    case partlyCloudy
     case cloudy
+    case fog
     case rain
+    case sleet
     case snow
+    case thunder
 }

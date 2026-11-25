@@ -63,6 +63,12 @@ func completionRoundTrips(outcome: Completion.Outcome) throws {
     try expectRoundTrip(preference)
 }
 
+@Test func requirementsSavedBeforeNeededWeatherReadAsAnyWeather() throws {
+    let saved = Data(#"{"windows":["morning"],"avoidedWeather":["rain"],"costsMoney":false}"#.utf8)
+
+    #expect(try JSONDecoder().decode(Requirements.self, from: saved) == Requirements(windows: [.morning]))
+}
+
 @Test func contextDimensionsRoundTrip() throws {
     try expectRoundTrip(Location.allCases)
     try expectRoundTrip(Availability.allCases)

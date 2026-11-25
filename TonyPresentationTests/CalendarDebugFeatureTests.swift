@@ -81,7 +81,7 @@ private func environment(
 @MainActor
 @Test func choosingACitySavesItAndTheWeatherLineShowsWhatThePlannerSaw() async throws {
     var outdoor = try Sample.task(1, "Run")
-    outdoor.requirements.avoidedWeather = [.rain]
+    outdoor.requirements.neededWeather = [.clear]
     let environment = try environment(access: .granted, tasks: [outdoor], forecast: .rain)
     let context = try Sample.context(day: 2)
     var state = CalendarDebugFeature.State()

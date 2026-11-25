@@ -83,7 +83,7 @@ extension Planner {
         if !allowedWindows.contains(block.window) {
             return false
         }
-        if let weather = conditions.weather, requirements.avoidedWeather.contains(weather) {
+        if let weather = conditions.weather, !requirements.neededWeather.isEmpty, !requirements.neededWeather.contains(weather) {
             return false
         }
         if requirements.costsMoney && conditions.budgetIsTight {
@@ -117,12 +117,12 @@ extension Planner {
 }
 
 extension Requirements {
-    /// A step narrows its task's requirements: its own location and windows win, and the restrictions add up.
+    /// A step narrows its task's requirements: its own location, windows and weather win, and the costs add up.
     func merged(with step: Requirements) -> Requirements {
         Requirements(
             location: step.location ?? location,
             windows: step.windows.isEmpty ? windows : step.windows,
-            avoidedWeather: avoidedWeather.union(step.avoidedWeather),
+            neededWeather: step.neededWeather.isEmpty ? neededWeather : step.neededWeather,
             costsMoney: costsMoney || step.costsMoney
         )
     }
