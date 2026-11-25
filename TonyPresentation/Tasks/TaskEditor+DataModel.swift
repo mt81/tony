@@ -306,38 +306,62 @@ extension TaskEditor {
         )
     }
 
-    private static func weather(_ requirements: Requirements, locale: Locale, edit: @escaping @MainActor (Action) -> Void) -> ChecklistDataModel {
-        let avoided = requirements.avoidedWeather
-        let value =
-            switch (avoided.contains(.rain), avoided.contains(.snow)) {
-            case (true, true): localized("Not in rain or snow", locale)
-            case (true, false): localized("Not in the rain", locale)
-            case (false, true): localized("Not in the snow", locale)
-            case (false, false): localized("Any weather", locale)
-            }
-        let conditions: [(WeatherCondition, String)] = [
-            (.rain, localized("Not in the rain", locale)),
-            (.snow, localized("Not in the snow", locale)),
-        ]
+    private static func weather(_ requirements: Requirements, locale: Locale, edit: @escaping @MainActor (Action) -> Void) -> WeatherPickerDataModel {
+        let needed = WeatherCondition.allCases.filter(requirements.neededWeather.contains)
+        let names = needed.enumerated().map { index, condition in
+            index == 0 ? weatherName(condition, locale: locale) : weatherName(condition, locale: locale).lowercased(with: locale)
+        }
+        let value = needed.isEmpty ? localized("Any weather", locale) : names.formatted(.list(type: .or).locale(locale))
 
-        return ChecklistDataModel(
-            row: DetailRowDataModel(systemImage: "cloud.rain", title: localized("Weather", locale), value: value, accessibilityIdentifier: "weather"),
-            items: [
-                ToggleDataModel(
-                    id: "any",
-                    title: localized("Any weather", locale),
-                    isOn: avoided.isEmpty,
-                    onChange: TonyUIModels.Action(id: "weatherToggled", parameters: WeatherCondition?.none) { condition, isOn in edit(.weatherToggled(condition, isOn: isOn)) }
-                )
-            ] + conditions.map { condition, title in
-                ToggleDataModel(
+        return WeatherPickerDataModel(
+            row: DetailRowDataModel(systemImage: "cloud.sun", title: localized("Weather", locale), value: value, accessibilityIdentifier: "weather"),
+            any: ToggleDataModel(
+                id: "any",
+                title: localized("Any weather", locale),
+                isOn: needed.isEmpty,
+                onChange: TonyUIModels.Action(id: "weatherToggled", parameters: WeatherCondition?.none) { condition, isOn in edit(.weatherToggled(condition, isOn: isOn)) }
+            ),
+            header: localized("Can happen in", locale),
+            conditions: WeatherCondition.allCases.map { condition in
+                IconToggleDataModel(
                     id: condition.rawValue,
-                    title: title,
-                    isOn: avoided.contains(condition),
+                    systemImage: weatherSymbol(condition),
+                    title: weatherName(condition, locale: locale),
+                    isOn: requirements.neededWeather.contains(condition),
+                    accessibilityIdentifier: "weather-\(condition.rawValue)",
                     onChange: TonyUIModels.Action(id: "weatherToggled", parameters: Optional(condition)) { condition, isOn in edit(.weatherToggled(condition, isOn: isOn)) }
                 )
-            }
+            },
+            footer: localized("Tony plans it only on days with this weather. When there’s no forecast, any day works.", locale)
         )
+    }
+
+    private static func weatherSymbol(_ condition: WeatherCondition) -> String {
+        switch condition {
+        case .clear: "sun.max"
+        case .fair: "sun.haze"
+        case .partlyCloudy: "cloud.sun"
+        case .cloudy: "cloud"
+        case .fog: "cloud.fog"
+        case .rain: "cloud.rain"
+        case .sleet: "cloud.sleet"
+        case .snow: "cloud.snow"
+        case .thunder: "cloud.bolt"
+        }
+    }
+
+    private static func weatherName(_ condition: WeatherCondition, locale: Locale) -> String {
+        switch condition {
+        case .clear: localized("Clear", locale)
+        case .fair: localized("Fair", locale)
+        case .partlyCloudy: localized("Partly cloudy", locale)
+        case .cloudy: localized("Cloudy", locale)
+        case .fog: localized("Fog", locale)
+        case .rain: localized("Rain", locale)
+        case .sleet: localized("Sleet", locale)
+        case .snow: localized("Snow", locale)
+        case .thunder: localized("Thunder", locale)
+        }
     }
 
     // MARK: Sub tasks

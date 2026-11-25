@@ -107,7 +107,7 @@ struct TaskFormView: View {
             Section {
                 choiceRow(model.location)
                 checklistRow(model.timeOfDay)
-                checklistRow(model.weather)
+                weatherRow
             } header: {
                 FormSectionHeader(model.whenItFitsHeader)
             }
@@ -227,6 +227,32 @@ struct TaskFormView: View {
             DetailRow(checklist.row)
         }
         .accessibilityIdentifier(ifPresent: checklist.row.accessibilityIdentifier)
+    }
+
+    private var weatherRow: some View {
+        let weather = model.weather
+        return NavigationLink {
+            FormPage(title: weather.row.title) {
+                Section {
+                    CheckmarkRow(weather.any)
+                }
+                .glassRow()
+                Section {
+                    ToggleSegments(weather.conditions)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                } header: {
+                    FormSectionHeader(weather.header)
+                } footer: {
+                    Text(weather.footer)
+                        .tonyText(.bodySmall)
+                        .foregroundStyle(TonyColor.muted)
+                }
+            }
+        } label: {
+            DetailRow(weather.row)
+        }
+        .accessibilityIdentifier(ifPresent: weather.row.accessibilityIdentifier)
     }
 
     private var subtasksSection: some View {

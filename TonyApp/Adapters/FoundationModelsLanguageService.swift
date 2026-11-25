@@ -35,8 +35,8 @@ struct FoundationModelsLanguageService: LanguageService {
         var place: String
         @Guide(description: "The times of day it fits, empty for any time", .element(.anyOf(["morning", "workday", "evening"])))
         var timesOfDay: [String]
-        @Guide(description: "The weather it must avoid, empty for any weather", .element(.anyOf(["rain", "snow"])))
-        var avoidsWeather: [String]
+        @Guide(description: "The only weather it can happen in, empty for any weather", .element(.anyOf(["clear", "fair", "partlyCloudy", "cloudy", "fog", "rain", "sleet", "snow", "thunder"])))
+        var needsWeather: [String]
         @Guide(description: "The steps of a task done in several steps, empty otherwise", .maximumCount(8))
         var subtasks: [SubtaskOutput]
         @Guide(description: "The month of the deadline, 0 when there is none", .range(0...12))
@@ -93,7 +93,7 @@ struct FoundationModelsLanguageService: LanguageService {
         let requirements = Requirements(
             location: Location(rawValue: output.place),
             windows: Set(output.timesOfDay.compactMap(Window.init(rawValue:))),
-            avoidedWeather: Set(output.avoidsWeather.compactMap(WeatherCondition.init(rawValue:)))
+            neededWeather: Set(output.needsWeather.compactMap(WeatherCondition.init(rawValue:)))
         )
         return TaskReading(
             name: output.name,

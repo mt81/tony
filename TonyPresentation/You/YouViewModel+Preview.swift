@@ -18,7 +18,7 @@ extension YouViewModel {
         let store = YouStore(
             repository: repository,
             calendarSource: calendarSource,
-            coordinator: PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: .current) { .now },
+            coordinator: PlanCoordinator(repository: repository, calendarSource: calendarSource, weatherSource: PreviewWeatherSource(), calendar: .current) { .now },
             calendar: .current,
             locale: .current,
             now: { .now }

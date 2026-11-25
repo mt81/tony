@@ -57,6 +57,13 @@ enum Fixtures {
         )
     }
 
+    /// The standard routine, with a saved place for the weather.
+    static var routineWithPlace: Routine {
+        var routine = Routine.standard
+        routine.place = Place(name: "Lyon", latitude: 45.76, longitude: 4.84)
+        return routine
+    }
+
     /// A task due since 1 November, with one 30-minute step unless told otherwise.
     static func task(
         _ number: Int,

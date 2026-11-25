@@ -160,7 +160,7 @@ public enum TaskEditor {
         case locationChanged(Location?)
         /// A time of day turned on or off; nil is "Any time", which clears them.
         case windowToggled(Window?, isOn: Bool)
-        /// Weather to avoid turned on or off; nil is "Any weather", which clears it.
+        /// Weather the task needs turned on or off; nil is "Any weather", which clears it.
         case weatherToggled(WeatherCondition?, isOn: Bool)
         case stepNameChanged(id: UUID, name: String)
         case stepMinutesChanged(id: UUID, minutes: Int)
@@ -247,9 +247,9 @@ public enum TaskEditor {
             }
         case .weatherToggled(let condition, let isOn):
             if let condition {
-                state.task.requirements.avoidedWeather.set(condition, isOn)
+                state.task.requirements.neededWeather.set(condition, isOn)
             } else if isOn {
-                state.task.requirements.avoidedWeather = []
+                state.task.requirements.neededWeather = []
             }
         case .stepNameChanged(let id, let name):
             state.updateStep(id) { $0.name = name }

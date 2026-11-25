@@ -2,7 +2,7 @@ import Foundation
 import MemberwiseInit
 import TonyUIModels
 
-/// A debug screen that shows what the calendar gives the planner today.
+/// A debug screen that shows what the calendar and the weather give the planner today.
 @MemberwiseInit(.public)
 public struct CalendarDebugScreenDataModel {
     @MemberwiseInit(.public)
@@ -15,6 +15,9 @@ public struct CalendarDebugScreenDataModel {
 
     public var title: String
     public var access: String
+    public var weather: String
+    /// Saves a sample city for the weather, or clears it.
+    public var places: [ButtonDataModel]
     /// Nil once the user has answered the system prompt.
     public var requestAccess: ButtonDataModel?
     public var refresh: ButtonDataModel
@@ -27,6 +30,8 @@ extension CalendarDebugScreenDataModel: Equatable {
     public static func == (lhs: CalendarDebugScreenDataModel, rhs: CalendarDebugScreenDataModel) -> Bool {
         lhs.title == rhs.title
             && lhs.access == rhs.access
+            && lhs.weather == rhs.weather
+            && lhs.places == rhs.places
             && lhs.requestAccess == rhs.requestAccess
             && lhs.refresh == rhs.refresh
             && lhs.plannedAt == rhs.plannedAt

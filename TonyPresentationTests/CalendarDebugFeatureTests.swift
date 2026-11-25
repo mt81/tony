@@ -13,11 +13,22 @@ private struct FixedCalendarSource: CalendarSource {
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
 
-private func environment(access: CalendarAccess, busy: [DateInterval] = []) throws -> CalendarDebugFeature.Environment {
+private func environment(
+    access: CalendarAccess,
+    busy: [DateInterval] = [],
+    tasks: [TonyTask] = [],
+    forecast: WeatherCondition? = nil
+) throws -> CalendarDebugFeature.Environment {
     let source = FixedCalendarSource(currentAccess: access, busy: busy)
     let now = try Sample.november(2, hour: 8)
-    let coordinator = PlanCoordinator(repository: FakeRepository(), calendarSource: source, calendar: Sample.calendar) { now }
-    return CalendarDebugFeature.Environment(calendarSource: source, coordinator: coordinator)
+    let repository = FakeRepository(tasks: tasks)
+    let coordinator = PlanCoordinator(
+        repository: repository,
+        calendarSource: source,
+        weatherSource: FakeWeatherSource(forecast: forecast),
+        calendar: Sample.calendar
+    ) { now }
+    return CalendarDebugFeature.Environment(calendarSource: source, repository: repository, coordinator: coordinator)
 }
 
 @Test func appearingAndRefreshingReadTheCalendar() {
@@ -63,6 +74,34 @@ private func environment(access: CalendarAccess, busy: [DateInterval] = []) thro
     #expect(undecided.rows.allSatisfy { !$0.isBusy })
     #expect(sent.actions == [.requestAccessTapped, .refreshTapped])
 
-    _ = CalendarDebugFeature.reduce(&state, .loaded(access: .denied, planned: state.planned))
+    _ = CalendarDebugFeature.reduce(&state, .loaded(access: .denied, planned: state.planned, place: nil))
     #expect(CalendarDebugFeature.dataModel(for: state, context: try Sample.context(day: 2)) { _ in }.requestAccess == nil)
+}
+
+@MainActor
+@Test func choosingACitySavesItAndTheWeatherLineShowsWhatThePlannerSaw() async throws {
+    var outdoor = try Sample.task(1, "Run")
+    outdoor.requirements.neededWeather = [.clear]
+    let environment = try environment(access: .granted, tasks: [outdoor], forecast: .rain)
+    let context = try Sample.context(day: 2)
+    var state = CalendarDebugFeature.State()
+    let sent = SentActions<CalendarDebugFeature.Action>()
+
+    #expect(CalendarDebugFeature.dataModel(for: state, context: context) { _ in }.weather == "Weather: checking")
+
+    let empty = try #require(await CalendarDebugFeature.run(.load, in: environment))
+    _ = CalendarDebugFeature.reduce(&state, empty)
+    let before = CalendarDebugFeature.dataModel(for: state, context: context, send: sent.send)
+    before.places.first?.action.execute()
+    #expect(before.weather == "Weather: no city saved")
+    #expect(before.places.map(\.title) == ["Use Paris", "Use Toronto", "Use Oslo", "Clear the city"])
+
+    let paris = try #require(CalendarDebugFeature.sampleCities.first)
+    #expect(sent.actions == [.placeChosen(paris)])
+    #expect(CalendarDebugFeature.reduce(&state, .placeChosen(paris)) == [.savePlace(paris)])
+    let saved = try #require(await CalendarDebugFeature.run(.savePlace(paris), in: environment))
+    _ = CalendarDebugFeature.reduce(&state, saved)
+
+    #expect(try await environment.repository.routine()?.place == paris)
+    #expect(CalendarDebugFeature.dataModel(for: state, context: context) { _ in }.weather == "Weather today in Paris: rain")
 }

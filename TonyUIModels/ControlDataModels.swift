@@ -68,6 +68,25 @@ extension ToggleDataModel: Equatable {
     }
 }
 
+/// A toggle drawn as a symbol; the title is what VoiceOver reads.
+@MemberwiseInit(.public)
+public struct IconToggleDataModel: Identifiable {
+    public var id: String
+    /// An SF Symbol, without its fill variant: the view fills it when on.
+    public var systemImage: String
+    public var title: String
+    public var isOn: Bool
+    public var accessibilityIdentifier: String? = nil
+    public var onChange: any Executable<Bool>
+}
+
+extension IconToggleDataModel: Equatable {
+    public static func == (lhs: IconToggleDataModel, rhs: IconToggleDataModel) -> Bool {
+        lhs.id == rhs.id && lhs.systemImage == rhs.systemImage && lhs.title == rhs.title && lhs.isOn == rhs.isOn
+            && lhs.accessibilityIdentifier == rhs.accessibilityIdentifier && lhs.onChange.isEqual(to: rhs.onChange)
+    }
+}
+
 @MemberwiseInit(.public)
 public struct StepperDataModel {
     public var title: String

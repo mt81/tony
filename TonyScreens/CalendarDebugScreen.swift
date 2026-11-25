@@ -3,7 +3,7 @@ import TonyPresentation
 import TonyUIKit
 import TonyUIModels
 
-/// Debug builds only: today's blocks as the planner sees them, to check the calendar on a device.
+/// Debug builds only: today's weather and blocks as the planner sees them, to check the calendar and weather on a device.
 public struct CalendarDebugScreen: View {
     private let model: CalendarDebugScreenDataModel
 
@@ -17,6 +17,12 @@ public struct CalendarDebugScreen: View {
                 Text(model.access)
                     .tonyText(.label)
                     .accessibilityIdentifier("calendarAccess")
+                Text(model.weather)
+                    .tonyText(.label)
+                    .accessibilityIdentifier("weather")
+                ForEach(model.places, id: \.title) { place in
+                    ButtonView(place)
+                }
                 if let requestAccess = model.requestAccess {
                     ButtonView(requestAccess)
                 }

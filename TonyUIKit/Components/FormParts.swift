@@ -128,6 +128,63 @@ public struct CheckmarkRow: View {
     }
 }
 
+/// Toggles drawn as one segmented capsule of symbols, any number of them on.
+/// A segment that is on is filled with the accent colour, its symbol filled, and bounces as it turns on.
+public struct ToggleSegments: View {
+    private let items: [IconToggleDataModel]
+
+    public init(_ items: [IconToggleDataModel]) {
+        self.items = items
+    }
+
+    public var body: some View {
+        HStack(spacing: TonySpacing.hairline) {
+            ForEach(items) { ToggleSegment(model: $0) }
+        }
+        .padding(TonySpacing.hairline)
+        .background(TonyColor.glass, in: .capsule)
+        .overlay {
+            Capsule().strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge)
+        }
+        // Like the system segmented control, the symbols stop growing at the largest text size;
+        // a long press shows the large content viewer.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+    }
+}
+
+private struct ToggleSegment: View {
+    let model: IconToggleDataModel
+    @State private var bounces = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Button {
+            model.onChange.execute(!model.isOn)
+        } label: {
+            Image(systemName: model.systemImage)
+                .symbolVariant(model.isOn ? .fill : .none)
+                .symbolEffect(.bounce, value: bounces)
+                .tonyText(.bodyLarge)
+                .foregroundStyle(model.isOn ? TonyColor.onAccent : TonyColor.muted)
+                .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
+                .background(model.isOn ? TonyColor.accent : Color.clear, in: .capsule)
+                .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+        .onChange(of: model.isOn) { _, isOn in
+            if isOn && !reduceMotion {
+                bounces += 1
+            }
+        }
+        .accessibilityLabel(model.title)
+        .accessibilityAddTraits(model.isOn ? .isSelected : [])
+        .accessibilityShowsLargeContentViewer {
+            Label(model.title, systemImage: model.systemImage)
+        }
+        .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
+    }
+}
+
 /// The header of a section of glass rows.
 public struct FormSectionHeader: View {
     private let title: String
@@ -304,5 +361,13 @@ private final class EmojiKeyboardField: UITextField {
 #Preview("Icon field") {
     IconField(TextFieldDataModel(title: "Icon", text: "🪴", onChange: Action(id: "preview") { _ in }))
         .tonyPreview()
+}
+
+#Preview("Toggle segments") {
+    let weather = [("sun.max", "Clear", true), ("sun.haze", "Fair", true), ("cloud.sun", "Partly cloudy", false), ("cloud", "Cloudy", false), ("cloud.fog", "Fog", false), ("cloud.rain", "Rain", false), ("cloud.sleet", "Sleet", false), ("cloud.snow", "Snow", false), ("cloud.bolt", "Thunder", false)]
+    ToggleSegments(weather.map { systemImage, title, isOn in
+        IconToggleDataModel(id: title, systemImage: systemImage, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
+    })
+    .tonyPreview()
 }
 #endif

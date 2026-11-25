@@ -11,7 +11,7 @@ private struct You {
 
     init(calendarSource: any CalendarSource = FakeCalendarSource(), languageService: (any LanguageService)? = nil, language: String = "en") throws {
         let now = try Sample.november(10)
-        let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: Sample.calendar) { now }
+        let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, weatherSource: FakeWeatherSource(), calendar: Sample.calendar) { now }
         store = YouStore(
             repository: repository,
             calendarSource: calendarSource,
@@ -176,6 +176,21 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
         Description: Office on Tuesdays and Thursdays, until 5:30
         """)
     #expect(service.requests.first?.instructions.hasSuffix("The description is in English.") == true)
+}
+
+@MainActor
+@Test func aDescriptionTheModelReadsKeepsTheSavedPlace() async throws {
+    let place = Place(name: "Lyon", latitude: 45.76, longitude: 4.84)
+    var saved = Routine.standard
+    saved.place = place
+    let you = try You(languageService: FakeLanguageService(routine: .standard))
+    try await you.repository.save(saved)
+    try await you.open().routine.edit.action.execute()
+
+    you.store.changeDescription("Office on Tuesdays")
+    await you.store.readDescription()
+
+    #expect(you.store.state.editor?.routine.place == place)
 }
 
 @MainActor

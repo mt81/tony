@@ -108,7 +108,7 @@ func capacityCapsTheNumberOfTasks(status: DayStatus, expectedCount: Int) throws 
 }
 
 @Test func weatherAndBudgetExcludeTasks() throws {
-    let run = try Fixtures.task(1, "Run", rank: 0, requirements: Requirements(avoidedWeather: [.rain]))
+    let run = try Fixtures.task(1, "Run", rank: 0, requirements: Requirements(neededWeather: [.clear, .fair]))
     let haircut = try Fixtures.task(2, "Haircut", rank: 1, requirements: Requirements(costsMoney: true))
     let walk = try Fixtures.task(3, "Walk", rank: 2)
     let tasks = [run, haircut, walk]
@@ -116,6 +116,7 @@ func capacityCapsTheNumberOfTasks(status: DayStatus, expectedCount: Int) throws 
     #expect(try selectedNames(tasks, conditions: DayConditions(weather: .rain)) == ["Haircut", "Walk"])
     #expect(try selectedNames(tasks, conditions: DayConditions(budgetIsTight: true)) == ["Run", "Walk"])
     #expect(try selectedNames(tasks, conditions: DayConditions(weather: .clear)) == ["Run", "Haircut", "Walk"])
+    #expect(try selectedNames(tasks, conditions: DayConditions()) == ["Run", "Haircut", "Walk"])
 }
 
 @Test func activeStepsNeedFreeTimeAndBackgroundStepsFitWorkHours() throws {

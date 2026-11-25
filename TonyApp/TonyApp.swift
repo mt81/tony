@@ -51,7 +51,13 @@ struct AppStores {
         let languageService = FoundationModelsLanguageService()
 
         self.now = now
-        coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, calendar: .current, now: now)
+        coordinator = PlanCoordinator(
+            repository: repository,
+            calendarSource: calendarSource,
+            weatherSource: MetNorwayWeatherSource(calendar: .current),
+            calendar: .current,
+            now: now
+        )
         today = Store(
             state: TodayFeature.State(),
             environment: TodayFeature.Environment(
@@ -80,7 +86,7 @@ struct AppStores {
         #if DEBUG
         calendarDebug = Store(
             state: CalendarDebugFeature.State(),
-            environment: CalendarDebugFeature.Environment(calendarSource: calendarSource, coordinator: coordinator)
+            environment: CalendarDebugFeature.Environment(calendarSource: calendarSource, repository: repository, coordinator: coordinator)
         )
         #endif
     }

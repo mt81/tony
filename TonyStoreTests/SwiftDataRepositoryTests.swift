@@ -14,7 +14,7 @@ private func task(_ name: String) -> TonyTask {
         kind: .recurring,
         rank: 99,
         cadence: .weekdays([.monday, .thursday]),
-        requirements: Requirements(location: .home, windows: [.evening], avoidedWeather: [.rain]),
+        requirements: Requirements(location: .home, windows: [.evening], neededWeather: [.clear, .fair]),
         steps: [Step(id: UUID(), name: name, mode: .active, duration: 30 * 60)],
         mustHappenBy: referenceDate.addingTimeInterval(86_400),
         createdAt: referenceDate

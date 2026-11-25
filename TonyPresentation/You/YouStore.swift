@@ -93,7 +93,8 @@ public final class YouStore {
         )
         guard state.editor?.reading == .inProgress else { return }
         state.editor?.reading = routine == nil ? .notUnderstood : .filled
-        if let routine {
+        if var routine {
+            routine.place = editor.routine.place
             state.editor?.routine = routine
         }
     }
