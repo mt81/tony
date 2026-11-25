@@ -19,7 +19,7 @@ struct RootView: View {
                     unavailable
                 }
             } label: {
-                Label { Text("Today") } icon: { TonyIcon.today }
+                Label("Today", systemImage: "sun.max")
             }
             Tab(value: RootTab.tasks) {
                 if let stores {
@@ -28,7 +28,7 @@ struct RootView: View {
                     unavailable
                 }
             } label: {
-                Label { Text("Tasks") } icon: { TonyIcon.tasks }
+                Label("Tasks", systemImage: "list.bullet")
             }
             Tab(value: RootTab.you) {
                 if let stores {
@@ -37,7 +37,7 @@ struct RootView: View {
                     unavailable
                 }
             } label: {
-                Label { Text("You") } icon: { TonyIcon.you }
+                Label("You", systemImage: "person")
             }
             #if DEBUG
             Tab(value: RootTab.debug) {

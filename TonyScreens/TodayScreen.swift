@@ -43,7 +43,7 @@ public struct TodayScreen: View {
             VStack(spacing: TonySpacing.tight) {
                 Text(model.date)
                     .tonyText(.bodySmall)
-                Text(model.headline)
+                Text(model.headline.accented())
                     .tonyText(.display)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("todayHeadline")
@@ -60,6 +60,8 @@ public struct TodayScreen: View {
             .foregroundStyle(TonyColor.ink)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
+            .padding(TonySpacing.page)
+            .background(TonyColor.glass, in: .rect(cornerRadius: TonyRadius.panel))
             .accessibilityIdentifier("todayBriefing")
     }
 

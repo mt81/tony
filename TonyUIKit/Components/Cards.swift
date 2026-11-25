@@ -51,7 +51,6 @@ public struct Tile: View {
     }
 
     public var body: some View {
-        let colour = Self.colour(model.colour)
         VStack(alignment: .leading, spacing: TonySpacing.tight) {
             Text(model.icon)
                 .font(.system(size: iconSize))
@@ -62,11 +61,7 @@ public struct Tile: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(TonySpacing.large)
-        .background(colour.opacity(model.isNeglected ? TonyOpacity.tileNeglected : TonyOpacity.tile), in: .rect(cornerRadius: TonyRadius.tile))
-        .overlay {
-            RoundedRectangle(cornerRadius: TonyRadius.tile)
-                .strokeBorder(colour, lineWidth: TonySize.glassEdge)
-        }
+        .background(Self.colour(model.colour), in: .rect(cornerRadius: TonyRadius.tile))
         .accessibilityElement(children: .combine)
     }
 
@@ -131,9 +126,18 @@ public struct AreaRow: View {
 }
 
 extension View {
-    /// The see-through card of the tabs: the glass fill with its edge.
+    /// The see-through white card of rows and numbers, with its edge.
     public func glassCard(cornerRadius: CGFloat) -> some View {
-        background(TonyColor.glass, in: .rect(cornerRadius: cornerRadius))
+        card(TonyColor.glass, cornerRadius: cornerRadius)
+    }
+
+    /// The solid white card of a panel that stands on its own, such as the routine or the calendar.
+    public func raisedCard(cornerRadius: CGFloat) -> some View {
+        card(TonyColor.surfaceRaised, cornerRadius: cornerRadius)
+    }
+
+    private func card(_ fill: Color, cornerRadius: CGFloat) -> some View {
+        background(fill, in: .rect(cornerRadius: cornerRadius))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge)

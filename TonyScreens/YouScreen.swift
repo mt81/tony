@@ -117,7 +117,7 @@ private struct YouCard<Content: View>: View {
         VStack(alignment: .leading, spacing: TonySpacing.small) { content }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(TonySpacing.panelInset)
-            .glassCard(cornerRadius: TonyRadius.tile)
+            .raisedCard(cornerRadius: TonyRadius.tile)
     }
 }
 

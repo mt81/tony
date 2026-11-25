@@ -51,7 +51,7 @@ public struct ModelCheckScreen: View {
                         }
                         Text(row.verdict)
                             .tonyText(.labelSmall)
-                            .foregroundStyle(row.hasPassed == false ? TonyColor.warning : TonyColor.accent)
+                            .foregroundStyle(row.hasPassed == false ? TonyColor.warning : TonyColor.accentText)
                     }
                     .accessibilityElement(children: .combine)
                 }

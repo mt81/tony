@@ -23,17 +23,17 @@ public struct Chip: View {
 extension ChipDataModel.Style {
     var background: Color {
         switch self {
-        case .neutral: TonyColor.surfaceRaised
+        case .neutral, .warning: TonyColor.canvas
         case .selected: TonyColor.ink
         case .accent: TonyColor.accent
-        case .warning: TonyColor.warningSoft
         }
     }
 
     var foreground: Color {
         switch self {
         case .neutral: TonyColor.ink
-        case .selected, .accent: TonyColor.onAccent
+        case .selected: TonyColor.onCta
+        case .accent: TonyColor.onAccent
         case .warning: TonyColor.warning
         }
     }
@@ -49,7 +49,7 @@ struct IconCircle: View {
         Text(icon)
             .tonyText(.bodyLarge)
             .frame(width: diameter, height: diameter)
-            .background(isNeglected ? TonyColor.warningSoft : TonyColor.surfaceRaised, in: .circle)
+            .background(isNeglected ? TonyColor.warningSoft : TonyColor.canvas, in: .circle)
             .accessibilityHidden(true)
     }
 }

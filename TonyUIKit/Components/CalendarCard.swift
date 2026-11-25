@@ -25,12 +25,12 @@ public struct CalendarCard: View {
                 } label: {
                     // Not a chip: a chip stays on one line, and this title must wrap at large text sizes.
                     Text(allow.title)
-                        .tonyText(.labelSmall)
-                        .foregroundStyle(TonyColor.onAccent)
-                        .padding(.horizontal, TonySpacing.inset)
-                        .padding(.vertical, TonySpacing.small)
-                        .background(TonyColor.accent, in: .rect(cornerRadius: TonyRadius.row))
+                        .tonyText(.labelLarge)
+                        .foregroundStyle(TonyColor.onCta)
+                        .padding(.horizontal, TonySpacing.page)
+                        .padding(.vertical, TonySpacing.snug)
                         .frame(minHeight: TonySize.touchTarget)
+                        .background(TonyColor.cta, in: .capsule)
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier(ifPresent: allow.accessibilityIdentifier)
@@ -38,7 +38,7 @@ public struct CalendarCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(TonySpacing.panelInset)
-        .glassCard(cornerRadius: TonyRadius.tile)
+        .raisedCard(cornerRadius: TonyRadius.tile)
     }
 }
 

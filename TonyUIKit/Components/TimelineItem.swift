@@ -1,7 +1,8 @@
 import SwiftUI
 import TonyUIModels
 
-/// One entry of the Today timeline: what is done, now, a task, or meetings. A rail on the left joins the entries.
+/// One entry of the Today timeline: what is done, now, a task, or meetings. A rail on the left joins the entries;
+/// what is done stands above it, stepped back.
 /// A task's ring marks it done; its other actions are in its context menu.
 public struct TimelineItem: View {
     private let model: TimelineItemDataModel
@@ -14,7 +15,9 @@ public struct TimelineItem: View {
 
     public var body: some View {
         HStack(alignment: .top, spacing: TonySpacing.medium) {
-            rail
+            if !isDone {
+                rail
+            }
             content
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, isLast ? 0 : TonySpacing.timeline)
@@ -29,7 +32,7 @@ public struct TimelineItem: View {
             }
             marker
             if !isLast {
-                line(isDone ? TonyColor.ink : TonyColor.ring)
+                line(TonyColor.ring)
                     .frame(maxHeight: .infinity)
             }
         }
@@ -46,18 +49,9 @@ public struct TimelineItem: View {
     @ViewBuilder private var marker: some View {
         switch model {
         case .done:
-            Circle()
-                .fill(TonyColor.ink)
-                .frame(width: TonySize.marker, height: TonySize.marker)
-                .overlay {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: TonySize.markerCheck, weight: .bold))
-                        .foregroundStyle(TonyColor.canvas)
-                }
-                .padding(.top, markerOffset)
-                .accessibilityHidden(true)
+            EmptyView()
         case .now:
-            ring(TonyColor.accent)
+            ring(TonyColor.accentText)
                 .frame(height: TonySize.nowMarkerHeight)
                 .accessibilityHidden(true)
         case .task(let item, _):
@@ -65,7 +59,7 @@ public struct TimelineItem: View {
                 .frame(height: item.now == nil ? nil : TonySize.nowMarkerHeight)
         case .meetings:
             Circle()
-                .fill(TonyColor.muted)
+                .fill(TonyColor.ink)
                 .frame(width: TonySize.meetingsDot, height: TonySize.meetingsDot)
                 .frame(height: TonySize.meetingsMarkerHeight)
                 .accessibilityHidden(true)
@@ -82,7 +76,7 @@ public struct TimelineItem: View {
         Button {
             item.check.action.execute()
         } label: {
-            ring(item.now != nil ? TonyColor.accent : item.isNeglected ? TonyColor.warning : TonyColor.ring)
+            ring(item.now != nil ? TonyColor.accentText : item.isNeglected ? TonyColor.warning : TonyColor.ring)
                 .contentShape(.rect.inset(by: (TonySize.marker - TonySize.touchTarget) / 2))
         }
         .buttonStyle(.plain)
@@ -96,16 +90,16 @@ public struct TimelineItem: View {
             Text(text)
                 .tonyText(.bodySmall)
                 .foregroundStyle(TonyColor.ink)
-                .padding(.top, markerOffset)
+                .opacity(TonyOpacity.done)
         case .now(let text):
             Text(text)
                 .tonyText(.label)
-                .foregroundStyle(TonyColor.accent)
+                .foregroundStyle(TonyColor.accentText)
                 .padding(.top, TonySpacing.tight)
         case .task(let item, _):
             VStack(alignment: .leading, spacing: TonySpacing.textGap) {
                 if let now = item.now {
-                    Text(now).tonyText(.label).foregroundStyle(TonyColor.accent)
+                    Text(now).tonyText(.label).foregroundStyle(TonyColor.accentText)
                 } else {
                     Text(item.time).tonyText(.labelSmall).foregroundStyle(TonyColor.ink)
                 }
