@@ -63,7 +63,7 @@ One suite: `xcodebuild test -project Tony.xcodeproj -scheme TonyUnitTests -desti
 ## Architecture
 
 - Logic lives in `TonyCore`, which never imports UIKit, SwiftUI, EventKit, HealthKit, WeatherKit, WidgetKit, SwiftData or UserNotifications.
-- System frameworks sit behind `TonyCore` protocols: `CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `Repository`, `TaskCatalog`. Adapters in the app, fakes in tests. No other seams on speculation.
+- System frameworks sit behind `TonyCore` protocols: `CalendarSource`, `HealthSource`, `WeatherSource`, `LanguageService`, `NudgeScheduler`, `PermissionProvider`, `Repository`, `TaskCatalog`. Adapters in the app, fakes in tests. No other seams on speculation.
 - The planner is deterministic: time, calendar and locale are passed in, never `Date()`, `Calendar.current` or `Locale.current` in `TonyCore`.
 - The on-device model only words and parses, never decides the plan. Its output is validated, and every model feature has a rule-based fallback.
 - Views (`TonyUIKit`, `TonyUIModels`, `TonyScreens`) never see business types; they see data models.
@@ -140,7 +140,7 @@ Never push red.
 - No user data leaves the device: nothing identifying the person or device, no tasks, completions, calendar, health, routine, preferences or location. No logging or analytics.
 - Requests carry only generic, anonymous input. The catalogue gets the new task's name and the language. Until it exists, `TableTaskCatalog` reads `TonyApp/Catalog/TaskCatalog.json`.
 - MET Norway (api.met.no) gets the saved place's coordinates rounded to about 10 km, only when some task needs some weather. The User-Agent names the app and the repo, as MET requires.
-- Ask each permission when its feature is first used; the app works if refused.
+- Ask a permission only after the user taps a call to action that needs it, through the permission manager (`PermissionStore`) and its sheet. Never at launch. The app works if refused.
 - Read only what's needed (busy intervals, not titles; sleep and workouts, not other health data).
 - Fixtures use invented data, never Matteo's real records.
 
