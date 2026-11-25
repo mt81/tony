@@ -18,7 +18,8 @@ public struct TodayScreenDataModel {
     }
 
     public var date: String
-    public var headline: String
+    /// The kind of day, its word emphasised: "A *light* day, Matteo".
+    public var headline: AttributedString
     /// What Tony says about the day.
     public var briefing: String
     /// Asks for the calendar while Tony cannot read it; nil once he can.

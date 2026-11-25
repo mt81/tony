@@ -1,8 +1,9 @@
 import CoreText
 import SwiftUI
 
-/// The Figma type styles (`Tony/*`). The display, Tony's briefing and numerals use Lekton; the rest uses the system font where Figma has Inter.
+/// The Figma type styles (`Tony Light/*`). Titles, headings and numerals use Unbounded; the rest uses Lexend.
 public enum TonyTextStyle: Sendable, CaseIterable {
+    /// The headline of the day.
     case display
     /// What Tony says about the day.
     case briefing
@@ -23,41 +24,56 @@ public enum TonyTextStyle: Sendable, CaseIterable {
 
     var size: CGFloat {
         switch self {
-        case .display: 21
-        case .briefing: 17
-        case .heading: 22
-        case .numeral: 26
-        case .titleLarge: 22
-        case .title: 20
-        case .bodyLarge: 17
-        case .body, .label, .labelStrong: 14
-        case .bodySmall: 13
-        case .caption, .labelSmall: 12
-        case .labelLarge: 16
+        case .display: 24
+        case .numeral: 22
+        case .titleLarge: 20
+        case .heading: 18
+        case .title: 17
+        case .bodyLarge: 16
+        case .briefing, .labelLarge: 15
+        case .body, .label, .labelStrong: 13
+        case .bodySmall: 12
+        case .caption, .labelSmall: 11
+        }
+    }
+
+    var lineHeight: CGFloat {
+        switch self {
+        case .display: 31
+        case .numeral: 30
+        case .titleLarge: 28
+        case .heading: 26
+        case .briefing: 25
+        case .title, .bodyLarge: 24
+        case .labelLarge: 21
+        case .body: 19
+        case .label, .labelStrong: 18
+        case .bodySmall: 17
+        case .caption, .labelSmall: 15
         }
     }
 
     var weight: Font.Weight {
         switch self {
-        case .display, .heading, .titleLarge, .title, .bodyLarge, .body, .bodySmall, .caption: .regular
+        case .briefing, .titleLarge, .title, .bodyLarge, .body, .bodySmall, .caption: .regular
         case .labelLarge, .label, .labelSmall: .medium
-        case .labelStrong: .semibold
-        case .briefing, .numeral: .bold
+        case .heading, .labelStrong: .semibold
+        case .display, .numeral: .bold
         }
     }
 
-    var usesLekton: Bool {
+    var family: TonyFont {
         switch self {
-        case .display, .briefing, .numeral: true
-        default: false
+        case .display, .heading, .numeral: .unbounded
+        default: .lexend
         }
     }
 
     /// The system text style whose Dynamic Type scaling this style follows.
     var scalesWith: Font.TextStyle {
         switch self {
-        case .display, .heading, .numeral, .titleLarge: .title2
-        case .title: .title3
+        case .display, .numeral: .title2
+        case .heading, .titleLarge, .title: .title3
         case .bodyLarge, .briefing: .body
         case .labelLarge: .callout
         case .body, .label, .labelStrong: .subheadline
@@ -67,10 +83,22 @@ public enum TonyTextStyle: Sendable, CaseIterable {
     }
 
     func font(size: CGFloat) -> Font {
-        guard usesLekton, Lekton.isRegistered else {
-            return .system(size: size, weight: weight, design: usesLekton ? .monospaced : .default)
+        guard TonyFont.areRegistered else {
+            return .system(size: size, weight: weight)
         }
-        return .custom(weight == .bold ? Lekton.bold : Lekton.regular, fixedSize: size)
+        return .custom(family.rawValue, fixedSize: size).weight(weight)
+    }
+}
+
+extension AttributedString {
+    /// Draws the emphasised words in the accent instead of italics: "A *light* day".
+    public func accented() -> AttributedString {
+        var text = self
+        for run in text.runs where run.inlinePresentationIntent?.contains(.emphasized) == true {
+            text[run.range].inlinePresentationIntent = nil
+            text[run.range].foregroundColor = TonyColor.accentText
+        }
+        return text
     }
 }
 
@@ -91,17 +119,20 @@ private struct TonyTextModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content.font(style.font(size: size))
+        content
+            .font(style.font(size: size))
+            .lineHeight(.exact(points: style.lineHeight * size / style.size))
     }
 }
 
-private enum Lekton {
-    static let regular = "Lekton-Regular"
-    static let bold = "Lekton-Bold"
+/// The two variable fonts of the Figma file, by family name.
+enum TonyFont: String {
+    case unbounded = "Unbounded"
+    case lexend = "Lexend"
 
     /// Fonts in a framework are not picked up from Info.plist, so the files are registered on first use.
-    static let isRegistered: Bool = {
-        let urls = [regular, bold].compactMap { Bundle.design.url(forResource: $0, withExtension: "ttf") }
+    static let areRegistered: Bool = {
+        let urls = [unbounded, lexend].compactMap { Bundle.design.url(forResource: $0.rawValue, withExtension: "ttf") }
         guard urls.count == 2 else {
             return false
         }

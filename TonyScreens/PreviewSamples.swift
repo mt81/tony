@@ -31,7 +31,7 @@ enum PreviewSamples {
     static func today(calendar: CalendarCardDataModel? = nil, editor: TaskEditorDataModel? = nil, alert: AlertDataModel? = nil) -> TodayScreenDataModel {
         TodayScreenDataModel(
             date: "Thursday, November 12",
-            headline: "A light day, Matteo",
+            headline: AttributedString(localized: "A *light* day, Matteo"),
             briefing: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight.",
             calendar: calendar,
             timelineTitle: "Your day",
@@ -73,7 +73,7 @@ enum PreviewSamples {
     static var emptyToday: TodayScreenDataModel {
         TodayScreenDataModel(
             date: "Saturday, November 14",
-            headline: "A free day",
+            headline: AttributedString(localized: "A *free* day"),
             briefing: "Nothing needs you today. Enjoy it.",
             calendar: calendarCard,
             timelineTitle: "Your day",
