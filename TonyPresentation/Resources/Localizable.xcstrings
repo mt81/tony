@@ -569,6 +569,22 @@
         }
       }
     },
+    "Close" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
     "Cloudy" : {
       "localizations" : {
         "en" : {
@@ -581,6 +597,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nuageux"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
           }
         }
       }
@@ -1386,22 +1418,6 @@
         }
       }
     },
-    "Grant access" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grant access"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Autoriser l’accès"
-          }
-        }
-      }
-    },
     "Home days: %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1796,22 +1812,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune"
-          }
-        }
-      }
-    },
-    "Not now" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not now"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas maintenant"
           }
         }
       }

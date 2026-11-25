@@ -18,7 +18,7 @@ public struct PermissionViewModel {
     public var illustration: Illustration { Self.illustration(store.state) }
     public var explanation: String { Self.explanation(store.state, context: context) }
     public var grant: ButtonDataModel { Self.grant(store.state, context: context, store: store) }
-    public var notNow: ButtonDataModel { Self.notNow(context: context, store: store) }
+    public var close: ButtonDataModel { Self.close(context: context, store: store) }
 
     public var dismiss: any Executable<Void> {
         Action(id: "permission_not_now") { [store] _ in store.notNow() }
@@ -54,17 +54,19 @@ public struct PermissionViewModel {
 
     static func grant(_ state: PermissionState, context: PresentationContext, store: PermissionStore) -> ButtonDataModel {
         ButtonDataModel(
-            title: isRefused(state) ? localized("Open Settings", context.locale) : localized("Grant access", context.locale),
+            // One button, titled Continue rather than Allow: the HIG's rule for a screen shown before a system prompt.
+            title: isRefused(state) ? localized("Open Settings", context.locale) : localized("Continue", context.locale),
             accessibilityIdentifier: "grantPermission",
             action: Action(id: "grant_permission") { _ in Task { await store.grant() } }
         )
     }
 
-    static func notNow(context: PresentationContext, store: PermissionStore) -> ButtonDataModel {
+    static func close(context: PresentationContext, store: PermissionStore) -> ButtonDataModel {
         ButtonDataModel(
-            title: localized("Not now", context.locale),
+            title: localized("Close", context.locale),
+            systemImage: "xmark",
             role: .cancel,
-            accessibilityIdentifier: "permissionNotNow",
+            accessibilityIdentifier: "permissionClose",
             action: Action(id: "permission_not_now") { _ in store.notNow() }
         )
     }

@@ -50,7 +50,7 @@ public final class PermissionStore {
         finish(with: status)
     }
 
-    /// Not now, or the sheet swiped away: nothing is asked.
+    /// The sheet closed or swiped away: nothing is asked.
     func notNow() {
         guard state.isAsking else { return }
         finish(with: state.permission.flatMap { state.statuses[$0] } ?? .notDetermined)

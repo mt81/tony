@@ -12,18 +12,25 @@ public struct PermissionScreen: View {
     }
 
     public var body: some View {
-        VStack(spacing: TonySpacing.section) {
-            ScrollView {
-                PermissionExplanation(viewModel: viewModel)
-                    .padding(.vertical, TonySpacing.section)
+        NavigationStack {
+            VStack(spacing: TonySpacing.section) {
+                ScrollView {
+                    PermissionExplanation(viewModel: viewModel)
+                        .padding(.vertical, TonySpacing.section)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+                .defaultScrollAnchor(.center, for: .alignment)
+                PermissionButton(viewModel: viewModel)
             }
-            .scrollBounceBehavior(.basedOnSize)
-            .defaultScrollAnchor(.center, for: .alignment)
-            PermissionActions(viewModel: viewModel)
+            .padding(.horizontal, TonySpacing.page)
+            .padding(.bottom, TonySpacing.page)
+            .background(TonyColor.canvas)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    PermissionClose(viewModel: viewModel)
+                }
+            }
         }
-        .padding(.horizontal, TonySpacing.page)
-        .padding(.bottom, TonySpacing.page)
-        .background(TonyColor.canvas)
     }
 }
 
@@ -46,36 +53,31 @@ private struct PermissionExplanation: View {
     }
 }
 
-private struct PermissionActions: View {
+private struct PermissionButton: View {
     let viewModel: PermissionViewModel
 
     var body: some View {
         let grant = viewModel.grant
-        let notNow = viewModel.notNow
-        VStack(spacing: TonySpacing.small) {
-            Button {
-                grant.action.execute()
-            } label: {
-                Text(grant.title)
-                    .tonyText(.labelLarge)
-                    .foregroundStyle(TonyColor.onAccent)
-                    .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .controlSize(.large)
-            .accessibilityIdentifier(ifPresent: grant.accessibilityIdentifier)
-            Button {
-                notNow.action.execute()
-            } label: {
-                Text(notNow.title)
-                    .tonyText(.labelLarge)
-                    .foregroundStyle(TonyColor.accent)
-                    .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier(ifPresent: notNow.accessibilityIdentifier)
+        Button {
+            grant.action.execute()
+        } label: {
+            Text(grant.title)
+                .tonyText(.labelLarge)
+                .foregroundStyle(TonyColor.onAccent)
+                .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
         }
+        .buttonStyle(.borderedProminent)
+        .buttonBorderShape(.capsule)
+        .controlSize(.large)
+        .accessibilityIdentifier(ifPresent: grant.accessibilityIdentifier)
+    }
+}
+
+private struct PermissionClose: View {
+    let viewModel: PermissionViewModel
+
+    var body: some View {
+        ButtonView(viewModel.close)
     }
 }
 

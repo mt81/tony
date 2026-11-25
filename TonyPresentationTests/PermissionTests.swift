@@ -10,19 +10,19 @@ private func viewModel(_ store: PermissionStore, language: String = "en") throws
 }
 
 @MainActor
-@Test func grantAccessShowsTheSystemPromptAndReturnsItsAnswerOnceTheSheetCloses() async throws {
+@Test func continueShowsTheSystemPromptAndReturnsItsAnswerOnceTheSheetCloses() async throws {
     let calendar = FakePermissionProvider(status: .notDetermined, answer: .granted)
     let store = PermissionStore.fake(calendar)
 
     let asking = Task { await store.request(.calendar) }
     await store.untilAsking()
     let sheet = try viewModel(store)
-    let shown = (sheet.isPresented, sheet.title, sheet.grant.title, sheet.notNow.title, sheet.illustration)
+    let shown = (sheet.isPresented, sheet.title, sheet.grant.title, sheet.close.title, sheet.illustration)
     let promptsBeforeTapping = await calendar.requestCount
     sheet.grant.action.execute()
     let answer = await asking.value
 
-    #expect(shown == (true, "Plan around your events", "Grant access", "Not now", .tony))
+    #expect(shown == (true, "Plan around your events", "Continue", "Close", .tony))
     #expect(sheet.explanation.hasPrefix("Tony reads when you’re busy, never what your events are about"))
     #expect(promptsBeforeTapping == 0)
     #expect(answer == .granted)
@@ -31,7 +31,7 @@ private func viewModel(_ store: PermissionStore, language: String = "en") throws
 }
 
 @MainActor
-@Test func notNowClosesTheSheetWithoutAsking() async throws {
+@Test func closingTheSheetAsksNothing() async throws {
     let calendar = FakePermissionProvider(status: .notDetermined)
     let store = PermissionStore.fake(calendar)
 
@@ -82,9 +82,9 @@ private func viewModel(_ store: PermissionStore, language: String = "en") throws
     let asking = Task { await store.request(.calendar) }
     await store.untilAsking()
     let sheet = try viewModel(store, language: "fr")
-    let words = (sheet.title, sheet.grant.title, sheet.notNow.title)
+    let words = (sheet.title, sheet.grant.title, sheet.close.title)
     store.notNow()
     _ = await asking.value
 
-    #expect(words == ("Planifier autour de tes événements", "Autoriser l’accès", "Pas maintenant"))
+    #expect(words == ("Planifier autour de tes événements", "Continuer", "Fermer"))
 }

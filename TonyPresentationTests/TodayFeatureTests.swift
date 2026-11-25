@@ -276,7 +276,7 @@ private func morningMeetings() throws -> [DateInterval] {
 }
 
 @MainActor
-@Test func notNowKeepsTheCard() async throws {
+@Test func closingThePermissionSheetKeepsTheCard() async throws {
     let calendar = FakePermissionProvider(status: .notDetermined)
     let day = try Day(hour: 8, tasks: [], calendarAccess: calendar)
 
