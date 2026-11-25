@@ -57,7 +57,7 @@ One suite: `xcodebuild test -project Tony.xcodeproj -scheme TonyUnitTests -desti
 - Local implementation choices within the patterns are yours; don't ask about them.
 - Flag architectural risks outside the task; don't fix them unasked.
 - Ask Matteo when requirements are ambiguous, or for legal, financial or external consequences (App Store, TestFlight, signing, paid services).
-- New UI (screen, sheet, component, new state or section) is drawn first as a Figma wireframe beside the existing frames and approved by Matteo. Build only what he approved.
+- New UI (screen, sheet, component, new state or section) follows the [UX guidelines](https://app.notion.com/p/42381c5914d281c8a36bccefb5b83e1b) (then Apple's HIG), and is drawn first as a Figma wireframe beside the existing frames and approved by Matteo. Build only what he approved.
 - Figma costs credits: read single nodes, one screenshot after composing and one after a fix, few `use_figma` calls, copy existing frames and components. No Figma AI generation without asking.
 
 ## Architecture
@@ -140,7 +140,7 @@ Never push red.
 - No user data leaves the device: nothing identifying the person or device, no tasks, completions, calendar, health, routine, preferences or location. No logging or analytics.
 - Requests carry only generic, anonymous input. The catalogue gets the new task's name and the language. Until it exists, `TableTaskCatalog` reads `TonyApp/Catalog/TaskCatalog.json`.
 - MET Norway (api.met.no) gets the saved place's coordinates rounded to about 10 km, only when some task needs some weather. The User-Agent names the app and the repo, as MET requires.
-- Ask a permission only after the user taps a call to action that needs it, through the permission manager (`PermissionStore`) and its sheet. Never at launch. The app works if refused.
+- Ask a permission only after the user taps a call to action that needs it, through the permission manager (`PermissionStore`) and its sheet: one button, **Continue**, and a close ✕. Never at launch. The app works if refused.
 - Read only what's needed (busy intervals, not titles; sleep and workouts, not other health data).
 - Fixtures use invented data, never Matteo's real records.
 
