@@ -8,11 +8,9 @@ import SwiftUI
         ("canvas", TonyColor.canvas), ("sidebar", TonyColor.sidebar),
         ("surface", TonyColor.surface), ("surfaceRaised", TonyColor.surfaceRaised), ("line", TonyColor.line),
         ("ink", TonyColor.ink), ("muted", TonyColor.muted), ("accent", TonyColor.accent),
-        ("accentBand", TonyColor.accentBand), ("warning", TonyColor.warning), ("warningSoft", TonyColor.warningSoft),
-        ("onAccent", TonyColor.onAccent), ("glass", TonyColor.glass), ("glassEdge", TonyColor.glassEdge),
-        ("glassBar", TonyColor.glassBar), ("ring", TonyColor.ring),
-        ("headerViolet", TonyColor.header[0]), ("headerIndigo", TonyColor.header[1]), ("headerNavy", TonyColor.header[2]),
-        ("headerNight", TonyColor.header[3]),
+        ("accentBand", TonyColor.accentBand), ("accentText", TonyColor.accentText), ("warning", TonyColor.warning),
+        ("warningSoft", TonyColor.warningSoft), ("onAccent", TonyColor.onAccent), ("cta", TonyColor.cta), ("onCta", TonyColor.onCta),
+        ("glass", TonyColor.glass), ("glassEdge", TonyColor.glassEdge), ("glassBar", TonyColor.glassBar), ("ring", TonyColor.ring),
         ("areaYellow", TonyColor.areaYellow), ("areaGreen", TonyColor.areaGreen), ("areaBlue", TonyColor.areaBlue),
         ("areaOrange", TonyColor.areaOrange), ("areaTeal", TonyColor.areaTeal), ("areaIndigo", TonyColor.areaIndigo),
     ]
@@ -104,16 +102,8 @@ import SwiftUI
     .tonyPreview()
 }
 
-#Preview("Icons and artwork") {
-    VStack(alignment: .leading, spacing: TonySpacing.section) {
-        HStack(spacing: TonySpacing.timeline) {
-            TonyIcon.today
-            TonyIcon.tasks
-            TonyIcon.you
-        }
-        .foregroundStyle(TonyColor.ink)
-        TonyImage().frame(width: TonySize.tonyHeader, height: TonySize.tonyHeader)
-    }
-    .tonyPreview()
+#Preview("Artwork") {
+    TonyImage().frame(width: TonySize.tonyHeader, height: TonySize.tonyHeader)
+        .tonyPreview()
 }
 #endif
