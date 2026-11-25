@@ -128,59 +128,59 @@ public struct CheckmarkRow: View {
     }
 }
 
-/// Toggles drawn as tiles, an emoji above the title, as many per line as fit.
-/// A tile that is on is outlined in the accent colour and checked.
-public struct IconToggleGrid: View {
+/// Toggles drawn as one segmented capsule of symbols, any number of them on.
+/// A segment that is on is filled with the accent colour, its symbol filled, and bounces as it turns on.
+public struct ToggleSegments: View {
     private let items: [IconToggleDataModel]
-    @ScaledMetric(relativeTo: .body) private var minimumWidth = TonySize.iconToggleTile
 
     public init(_ items: [IconToggleDataModel]) {
         self.items = items
     }
 
     public var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: minimumWidth), spacing: TonySpacing.snug)], spacing: TonySpacing.snug) {
-            ForEach(items) { IconToggleTile(model: $0) }
+        HStack(spacing: TonySpacing.hairline) {
+            ForEach(items) { ToggleSegment(model: $0) }
         }
+        .padding(TonySpacing.hairline)
+        .background(TonyColor.glass, in: .capsule)
+        .overlay {
+            Capsule().strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge)
+        }
+        // Like the system segmented control, the symbols stop growing at the largest text size;
+        // a long press shows the large content viewer.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 }
 
-private struct IconToggleTile: View {
+private struct ToggleSegment: View {
     let model: IconToggleDataModel
-    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = TonySize.tileIcon
+    @State private var bounces = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Button {
             model.onChange.execute(!model.isOn)
         } label: {
-            VStack(spacing: TonySpacing.tight) {
-                Text(model.icon)
-                    .font(.system(size: iconSize))
-                HStack(alignment: .firstTextBaseline, spacing: TonySpacing.xSmall) {
-                    if model.isOn {
-                        Image(systemName: "checkmark")
-                    }
-                    Text(model.title)
-                        .lineLimit(2, reservesSpace: true)
-                }
-                .tonyText(model.isOn ? .labelStrong : .label)
-                .foregroundStyle(model.isOn ? TonyColor.ink : TonyColor.muted)
-                .multilineTextAlignment(.center)
-            }
-            .padding(.vertical, TonySpacing.large)
-            .padding(.horizontal, TonySpacing.small)
-            .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
-            .background(TonyColor.glass, in: .rect(cornerRadius: TonyRadius.row))
-            .overlay {
-                RoundedRectangle(cornerRadius: TonyRadius.row)
-                    .strokeBorder(model.isOn ? TonyColor.accent : TonyColor.glassEdge, lineWidth: model.isOn ? TonySize.border : TonySize.glassEdge)
-            }
-            .contentShape(.rect)
+            Image(systemName: model.systemImage)
+                .symbolVariant(model.isOn ? .fill : .none)
+                .symbolEffect(.bounce, value: bounces)
+                .tonyText(.bodyLarge)
+                .foregroundStyle(model.isOn ? TonyColor.onAccent : TonyColor.muted)
+                .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
+                .background(model.isOn ? TonyColor.accent : Color.clear, in: .capsule)
+                .contentShape(.capsule)
         }
         .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
+        .onChange(of: model.isOn) { _, isOn in
+            if isOn && !reduceMotion {
+                bounces += 1
+            }
+        }
         .accessibilityLabel(model.title)
-        .accessibilityAddTraits(model.isOn ? [.isButton, .isSelected] : .isButton)
+        .accessibilityAddTraits(model.isOn ? .isSelected : [])
+        .accessibilityShowsLargeContentViewer {
+            Label(model.title, systemImage: model.systemImage)
+        }
         .accessibilityIdentifier(ifPresent: model.accessibilityIdentifier)
     }
 }
@@ -363,10 +363,10 @@ private final class EmojiKeyboardField: UITextField {
         .tonyPreview()
 }
 
-#Preview("Icon toggle grid") {
-    let weather = [("☀️", "Clear", true), ("🌤️", "Fair", true), ("⛅️", "Partly cloudy", false), ("☁️", "Cloudy", false), ("🌫️", "Fog", false), ("🌧️", "Rain", false)]
-    IconToggleGrid(weather.map { icon, title, isOn in
-        IconToggleDataModel(id: title, icon: icon, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
+#Preview("Toggle segments") {
+    let weather = [("sun.max", "Clear", true), ("sun.haze", "Fair", true), ("cloud.sun", "Partly cloudy", false), ("cloud", "Cloudy", false), ("cloud.fog", "Fog", false), ("cloud.rain", "Rain", false), ("cloud.sleet", "Sleet", false), ("cloud.snow", "Snow", false), ("cloud.bolt", "Thunder", false)]
+    ToggleSegments(weather.map { systemImage, title, isOn in
+        IconToggleDataModel(id: title, systemImage: systemImage, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
     })
     .tonyPreview()
 }

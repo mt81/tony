@@ -311,10 +311,7 @@ extension TaskEditor {
         let names = needed.enumerated().map { index, condition in
             index == 0 ? weatherName(condition, locale: locale) : weatherName(condition, locale: locale).lowercased(with: locale)
         }
-        let value =
-            needed.isEmpty
-            ? localized("Any weather", locale)
-            : (needed.map(weatherIcon) + [names.formatted(.list(type: .or).locale(locale))]).joined(separator: " ")
+        let value = needed.isEmpty ? localized("Any weather", locale) : names.formatted(.list(type: .or).locale(locale))
 
         return WeatherPickerDataModel(
             row: DetailRowDataModel(systemImage: "cloud.sun", title: localized("Weather", locale), value: value, accessibilityIdentifier: "weather"),
@@ -328,7 +325,7 @@ extension TaskEditor {
             conditions: WeatherCondition.allCases.map { condition in
                 IconToggleDataModel(
                     id: condition.rawValue,
-                    icon: weatherIcon(condition),
+                    systemImage: weatherSymbol(condition),
                     title: weatherName(condition, locale: locale),
                     isOn: requirements.neededWeather.contains(condition),
                     accessibilityIdentifier: "weather-\(condition.rawValue)",
@@ -339,17 +336,17 @@ extension TaskEditor {
         )
     }
 
-    private static func weatherIcon(_ condition: WeatherCondition) -> String {
+    private static func weatherSymbol(_ condition: WeatherCondition) -> String {
         switch condition {
-        case .clear: "☀️"
-        case .fair: "🌤️"
-        case .partlyCloudy: "⛅️"
-        case .cloudy: "☁️"
-        case .fog: "🌫️"
-        case .rain: "🌧️"
-        case .sleet: "🌨️"
-        case .snow: "❄️"
-        case .thunder: "⛈️"
+        case .clear: "sun.max"
+        case .fair: "sun.haze"
+        case .partlyCloudy: "cloud.sun"
+        case .cloudy: "cloud"
+        case .fog: "cloud.fog"
+        case .rain: "cloud.rain"
+        case .sleet: "cloud.sleet"
+        case .snow: "cloud.snow"
+        case .thunder: "cloud.bolt"
         }
     }
 

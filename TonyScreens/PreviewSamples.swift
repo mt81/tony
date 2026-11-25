@@ -184,11 +184,11 @@ enum PreviewSamples {
                 location: ChoiceDataModel(row: row("location", "Where", "At home"), choices: picker("Where", ["Anywhere", "At home", "At the office"], selected: "At home")),
                 timeOfDay: ChecklistDataModel(row: row("clock", "Time of day", "Any time"), items: checklist(["Any time", "Morning", "Work hours", "Evening"], on: ["Any time"])),
                 weather: WeatherPickerDataModel(
-                    row: row("cloud.sun", "Weather", "☀️ 🌤️ Clear or fair"),
+                    row: row("cloud.sun", "Weather", "Clear or fair"),
                     any: ToggleDataModel(id: "any", title: "Any weather", isOn: false, onChange: Action(id: "preview") { _ in }),
                     header: "Can happen in",
-                    conditions: [("☀️", "Clear", true), ("🌤️", "Fair", true), ("⛅️", "Partly cloudy", false), ("☁️", "Cloudy", false), ("🌫️", "Fog", false), ("🌧️", "Rain", false), ("🌨️", "Sleet", false), ("❄️", "Snow", false), ("⛈️", "Thunder", false)].map { icon, title, isOn in
-                        IconToggleDataModel(id: title, icon: icon, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
+                    conditions: [("sun.max", "Clear", true), ("sun.haze", "Fair", true), ("cloud.sun", "Partly cloudy", false), ("cloud", "Cloudy", false), ("cloud.fog", "Fog", false), ("cloud.rain", "Rain", false), ("cloud.sleet", "Sleet", false), ("cloud.snow", "Snow", false), ("cloud.bolt", "Thunder", false)].map { systemImage, title, isOn in
+                        IconToggleDataModel(id: title, systemImage: systemImage, title: title, isOn: isOn, onChange: Action(id: "preview") { _ in })
                     },
                     footer: "Tony plans it only on days with this weather. When there’s no forecast, any day works."
                 ),

@@ -229,11 +229,11 @@ private func dataModel(_ state: TasksFeature.State, language: String = "en") thr
     let english = try #require(try dataModel(state).0.editor?.form?.weather)
     let french = try #require(try dataModel(state, language: "fr").0.editor?.form?.weather)
 
-    #expect(english.row.value == "☀️ 🌤️ ⛅️ Clear, fair, or partly cloudy")
+    #expect(english.row.value == "Clear, fair, or partly cloudy")
     #expect(english.any.isOn == false)
-    #expect(english.conditions.map(\.icon) == ["☀️", "🌤️", "⛅️", "☁️", "🌫️", "🌧️", "🌨️", "❄️", "⛈️"])
+    #expect(english.conditions.map(\.systemImage) == ["sun.max", "sun.haze", "cloud.sun", "cloud", "cloud.fog", "cloud.rain", "cloud.sleet", "cloud.snow", "cloud.bolt"])
     #expect(english.conditions.filter(\.isOn).map(\.title) == ["Clear", "Fair", "Partly cloudy"])
-    #expect(french.row.value == "☀️ 🌤️ ⛅️ Dégagé, beau temps ou partiellement nuageux")
+    #expect(french.row.value == "Dégagé, beau temps ou partiellement nuageux")
     #expect(french.conditions.map(\.title) == ["Dégagé", "Beau temps", "Partiellement nuageux", "Nuageux", "Brouillard", "Pluie", "Neige fondue", "Neige", "Orage"])
     #expect(french.footer == "Tony ne le planifie que les jours avec ce temps. Sans prévision, n’importe quel jour convient.")
 }

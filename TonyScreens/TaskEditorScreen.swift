@@ -238,7 +238,7 @@ struct TaskFormView: View {
                 }
                 .glassRow()
                 Section {
-                    IconToggleGrid(weather.conditions)
+                    ToggleSegments(weather.conditions)
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 } header: {

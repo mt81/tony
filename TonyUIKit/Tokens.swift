@@ -107,8 +107,6 @@ public enum TonySize {
     public static let headerGradient: CGFloat = 860
     /// A tile's emoji.
     public static let tileIcon: CGFloat = 28
-    /// The narrowest an icon toggle tile gets before the grid wraps to fewer per line.
-    public static let iconToggleTile: CGFloat = 96
     public static let avatar: CGFloat = 60
 }
 
