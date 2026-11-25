@@ -52,7 +52,7 @@ final class YouState {
     var name = ""
     var routine = Routine.standard
     /// Nil until it has been read.
-    var calendarAccess: CalendarAccess?
+    var calendarAccess: PermissionStatus?
     var editor: Editor?
     var hasFailed = false
 }

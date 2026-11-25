@@ -128,8 +128,6 @@ struct FakeCatalog: TaskCatalog {
 struct FakeCalendarSource: CalendarSource {
     var busyIntervals: [DateInterval] = []
 
-    func access() -> CalendarAccess { .granted }
-    func requestAccess() -> CalendarAccess { .granted }
     func busyIntervals(in interval: DateInterval) -> [DateInterval] { busyIntervals }
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
@@ -155,17 +153,41 @@ final class TestClock: Sendable {
     }
 }
 
-/// A calendar the user has not answered for yet, and who says yes when asked.
-actor UnansweredCalendarSource: CalendarSource {
-    private var current = CalendarAccess.notDetermined
+/// Calendar access with a fixed answer to the system prompt, which the system asks only once. Counts the prompts.
+actor FakePermissionProvider: PermissionProvider {
+    nonisolated let permission = Permission.calendar
+    private var current: PermissionStatus
+    private let answer: PermissionStatus
+    private(set) var requestCount = 0
 
-    func access() -> CalendarAccess { current }
-    func requestAccess() -> CalendarAccess {
-        current = .granted
+    init(status: PermissionStatus = .notDetermined, answer: PermissionStatus = .granted) {
+        current = status
+        self.answer = answer
+    }
+
+    func status() -> PermissionStatus { current }
+
+    func request() -> PermissionStatus {
+        requestCount += 1
+        if current == .notDetermined {
+            current = answer
+        }
         return current
     }
-    func busyIntervals(in interval: DateInterval) -> [DateInterval] { [] }
-    nonisolated func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
+}
+
+extension PermissionStore {
+    /// A permission manager whose Settings button does nothing.
+    static func fake(_ provider: FakePermissionProvider = FakePermissionProvider(status: .granted)) -> PermissionStore {
+        PermissionStore(providers: [provider]) {}
+    }
+
+    /// Waits until the permission sheet shows.
+    func untilAsking() async {
+        while !state.isAsking {
+            await Task.yield()
+        }
+    }
 }
 
 /// A language model that always gives the same briefing, and keeps what it was asked.

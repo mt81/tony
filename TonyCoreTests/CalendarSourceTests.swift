@@ -6,32 +6,17 @@ import Testing
 final class FakeCalendarSource: CalendarSource, @unchecked Sendable {
     // Guarded by the lock.
     private let lock = NSLock()
-    private var currentAccess: CalendarAccess
+    private let access: PermissionStatus
     private var events: [CalendarEvent]
     private var continuations: [AsyncStream<Void>.Continuation] = []
-    private let accessAfterRequest: CalendarAccess
 
-    init(events: [CalendarEvent] = [], access: CalendarAccess = .granted, accessAfterRequest: CalendarAccess = .granted) {
+    init(events: [CalendarEvent] = [], access: PermissionStatus = .granted) {
         self.events = events
-        self.currentAccess = access
-        self.accessAfterRequest = accessAfterRequest
-    }
-
-    func access() -> CalendarAccess {
-        lock.withLock { currentAccess }
-    }
-
-    func requestAccess() -> CalendarAccess {
-        lock.withLock {
-            if currentAccess == .notDetermined {
-                currentAccess = accessAfterRequest
-            }
-            return currentAccess
-        }
+        self.access = access
     }
 
     func busyIntervals(in interval: DateInterval) -> [DateInterval] {
-        lock.withLock { currentAccess == .granted ? events.busyIntervals(in: interval) : [] }
+        lock.withLock { access == .granted ? events.busyIntervals(in: interval) : [] }
     }
 
     func changes() -> AsyncStream<Void> {
@@ -124,24 +109,11 @@ func onlyTimedEventsTheUserKeepsAreBusy(showsAs: CalendarEvent.ShowsAs, isAllDay
     #expect(busyBlocks.map(\.eventCount) == [3, 1])
 }
 
-@Test(arguments: [CalendarAccess.notDetermined, .denied])
-func withoutAccessNothingIsBusy(access: CalendarAccess) throws {
+@Test(arguments: [PermissionStatus.notDetermined, .denied])
+func withoutAccessNothingIsBusy(access: PermissionStatus) throws {
     let source = FakeCalendarSource(events: [try event(10)], access: access)
 
     #expect(source.busyIntervals(in: try monday()).isEmpty)
-}
-
-@Test(arguments: [
-    (before: CalendarAccess.notDetermined, answer: CalendarAccess.granted, after: CalendarAccess.granted),
-    (before: .notDetermined, answer: .denied, after: .denied),
-    (before: .denied, answer: .granted, after: .denied),
-    (before: .granted, answer: .denied, after: .granted),
-])
-func askingForAccessOnlyChangesAnUndecidedAnswer(before: CalendarAccess, answer: CalendarAccess, after: CalendarAccess) {
-    let source = FakeCalendarSource(access: before, accessAfterRequest: answer)
-
-    #expect(source.requestAccess() == after)
-    #expect(source.access() == after)
 }
 
 @Test func aCalendarChangeIsAnnounced() async throws {

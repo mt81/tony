@@ -86,6 +86,7 @@ public struct YouViewModel {
         return CalendarCardDataModel(
             title: localized("Calendar", locale),
             text: text,
+            textAccessibilityIdentifier: "calendarAccess",
             allow: state.calendarAccess == .notDetermined
                 ? ButtonDataModel(
                     title: localized("Allow calendar access", locale),

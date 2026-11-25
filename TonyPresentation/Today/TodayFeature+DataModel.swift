@@ -16,6 +16,7 @@ extension TodayFeature {
             date: context.now.formatted(context.dayStyle),
             headline: wording.headline,
             briefing: state.briefing.flatMap { $0.plan == state.planned?.plan ? $0.text : nil } ?? wording.briefing,
+            calendar: calendar(state: state, locale: locale, send: send),
             timelineTitle: localized("Your day", locale),
             timeline: timeline(state: state, wording: wording, send: send),
             tilesTitle: localized("How things are", locale),
@@ -40,6 +41,20 @@ extension TodayFeature {
                 return AlertDataModel(title: title, dismiss: ButtonDataModel(title: localized("OK", locale), action: TonyUIModels.Action(id: "alertDismissed", parameters: Action.alertDismissed) { action, _ in send(action) }))
             },
             onAppear: TonyUIModels.Action(id: "appeared") { _ in send(.appeared) }
+        )
+    }
+
+    @MainActor
+    private static func calendar(state: State, locale: Locale, send: @escaping @MainActor (Action) -> Void) -> CalendarCardDataModel? {
+        guard let access = state.calendarAccess, access != .granted else { return nil }
+        return CalendarCardDataModel(
+            title: localized("Calendar", locale),
+            text: localized("Tony doesn’t see your calendar yet, so he can’t plan around your meetings.", locale),
+            allow: ButtonDataModel(
+                title: localized("Plan around my events", locale),
+                accessibilityIdentifier: "planAroundEvents",
+                action: TonyUIModels.Action(id: "planAroundEventsTapped", parameters: Action.planAroundEventsTapped) { action, _ in send(action) }
+            )
         )
     }
 

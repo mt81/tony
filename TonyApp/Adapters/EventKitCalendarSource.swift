@@ -5,22 +5,8 @@ import TonyCore
 actor EventKitCalendarSource: CalendarSource {
     private let store = EKEventStore()
 
-    func access() -> CalendarAccess {
-        switch EKEventStore.authorizationStatus(for: .event) {
-        case .fullAccess: .granted
-        case .notDetermined: .notDetermined
-        default: .denied
-        }
-    }
-
-    func requestAccess() async -> CalendarAccess {
-        guard access() == .notDetermined else { return access() }
-        let isGranted = (try? await store.requestFullAccessToEvents()) ?? false
-        return isGranted ? .granted : .denied
-    }
-
     func busyIntervals(in interval: DateInterval) -> [DateInterval] {
-        guard access() == .granted else { return [] }
+        guard EventKitCalendarPermission.currentStatus == .granted else { return [] }
         let predicate = store.predicateForEvents(withStart: interval.start, end: interval.end, calendars: nil)
         return store.events(matching: predicate)
             .map(CalendarEvent.init)

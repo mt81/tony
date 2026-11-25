@@ -3,12 +3,12 @@ import MemberwiseInit
 import TonyCore
 import TonyUIModels
 
-/// Debug builds only: asks for calendar access, saves a city for the weather, and shows today's weather and blocks,
-/// to check the calendar and weather adapters on a device. The city picker stands in for the location screen (#68).
+/// Debug builds only: asks for calendar access through the permission sheet, saves a city for the weather, and shows
+/// today's weather and blocks, to check the calendar and weather adapters on a device. The city picker stands in for the location screen (#68).
 /// Its text is for developers, so it is in English and not in the String Catalog.
 public enum CalendarDebugFeature: Feature {
     public struct State: Sendable, Equatable {
-        public var access: CalendarAccess?
+        public var access: PermissionStatus?
         public var planned: PlannedDay?
         public var place: Place?
 
@@ -20,7 +20,7 @@ public enum CalendarDebugFeature: Feature {
         case requestAccessTapped
         case refreshTapped
         case placeChosen(Place?)
-        case loaded(access: CalendarAccess, planned: PlannedDay?, place: Place?)
+        case loaded(access: PermissionStatus, planned: PlannedDay?, place: Place?)
     }
 
     public enum Effect: Sendable, Equatable {
@@ -37,7 +37,7 @@ public enum CalendarDebugFeature: Feature {
 
     @MemberwiseInit(.public)
     public struct Environment: Sendable {
-        public var calendarSource: any CalendarSource
+        public var permissions: PermissionStore
         public var repository: any Repository
         public var coordinator: PlanCoordinator
     }
@@ -63,7 +63,7 @@ public enum CalendarDebugFeature: Feature {
         case .load:
             break
         case .requestAccess:
-            _ = await environment.calendarSource.requestAccess()
+            _ = await environment.permissions.request(.calendar)
         case .savePlace(let place):
             var routine = (try? await environment.repository.routine()) ?? .standard
             routine.place = place
@@ -71,7 +71,7 @@ public enum CalendarDebugFeature: Feature {
         }
         await environment.coordinator.start()
         return .loaded(
-            access: await environment.calendarSource.access(),
+            access: await environment.permissions.status(of: .calendar),
             planned: await environment.coordinator.current,
             place: (try? await environment.repository.routine())?.place
         )

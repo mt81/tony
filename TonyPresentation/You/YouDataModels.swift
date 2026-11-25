@@ -10,14 +10,6 @@ public struct RoutineCardDataModel: Equatable {
     public var lines: [String]
 }
 
-/// Where calendar access stands, and the button that asks for it while it has not been asked.
-@MemberwiseInit(.public)
-public struct CalendarCardDataModel: Equatable {
-    public var title: String
-    public var text: String
-    public var allow: ButtonDataModel?
-}
-
 /// The form for the name and the usual week.
 @MemberwiseInit(.public)
 public struct RoutineEditorDataModel: Identifiable, Equatable {

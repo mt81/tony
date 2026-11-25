@@ -117,3 +117,17 @@ public struct ComposerDataModel: Equatable {
     /// The sentence was sent and its answer has not come back.
     public var isSending: Bool
 }
+
+/// Where calendar access stands, and the button that asks for it, if any.
+@MemberwiseInit(.public)
+public struct CalendarCardDataModel: Equatable {
+    public var title: String
+    public var text: String
+    public var textAccessibilityIdentifier: String? = nil
+    public var allow: ButtonDataModel?
+}
+
+/// A large drawing that says what a screen is about.
+public enum Illustration: Sendable, CaseIterable {
+    case tony
+}

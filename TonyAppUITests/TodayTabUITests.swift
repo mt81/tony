@@ -26,4 +26,24 @@ final class TodayTabUITests: XCTestCase {
         tasks.openTasks()
         tasks.delete(name)
     }
+
+    /// Without calendar access, Today offers to plan around events. The permission sheet opens from it and Not now closes it.
+    @MainActor
+    func testPlanAroundMyEventsOpensThePermissionSheet() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.resetAuthorizationStatus(for: .calendar)
+        app.launchArguments += ["-AppleLanguages", "(en)"]
+        app.launch()
+
+        let planAroundEvents = app.buttons["planAroundEvents"]
+        let grant = app.buttons["grantPermission"]
+        XCTAssertTrue(planAroundEvents.waitForExistence(timeout: 5))
+        planAroundEvents.tap()
+        XCTAssertTrue(grant.waitForExistence(timeout: 5))
+        XCTAssertEqual(grant.label, "Grant access")
+        app.buttons["permissionNotNow"].tap()
+        XCTAssertTrue(grant.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(planAroundEvents.exists)
+    }
 }

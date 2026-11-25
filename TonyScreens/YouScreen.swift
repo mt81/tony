@@ -16,7 +16,7 @@ public struct YouScreen: View {
             VStack(alignment: .leading, spacing: TonySpacing.section) {
                 YouHeader(viewModel: viewModel)
                 RoutineCard(viewModel: viewModel)
-                CalendarCard(viewModel: viewModel)
+                CalendarSection(viewModel: viewModel)
             }
             .padding(.horizontal, TonySpacing.page)
             .padding(.top, TonySpacing.small)
@@ -92,26 +92,11 @@ private struct RoutineCard: View {
     }
 }
 
-private struct CalendarCard: View {
+private struct CalendarSection: View {
     let viewModel: YouViewModel
 
     var body: some View {
-        let calendar = viewModel.calendar
-        YouCard {
-            YouCardTitle(calendar.title)
-            YouCardText(calendar.text)
-                .accessibilityIdentifier("calendarAccess")
-            if let allow = calendar.allow {
-                Button {
-                    allow.action.execute()
-                } label: {
-                    Chip(ChipDataModel(title: allow.title, style: .accent))
-                        .frame(minHeight: TonySize.touchTarget)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(ifPresent: allow.accessibilityIdentifier)
-            }
-        }
+        CalendarCard(viewModel.calendar)
     }
 }
 
