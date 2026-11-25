@@ -6,6 +6,8 @@ import TonyScreens
 struct RootView: View {
     let stores: AppStores?
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.calendar) private var calendar
+    @Environment(\.locale) private var locale
     @State private var selection = RootTab.today
 
     var body: some View {
@@ -57,11 +59,21 @@ struct RootView: View {
                 stores.today.send(.planned(planned))
             }
         }
+        .sheet(isPresented: Binding(get: { permission?.isPresented ?? false }, set: { if !$0 { permission?.dismiss.execute() } })) {
+            if let stores {
+                StoreView(now: stores.now, dataModel: { PermissionViewModel(store: stores.permissions, context: $0) }, content: PermissionScreen.init)
+            }
+        }
         .onChange(of: scenePhase) {
             if scenePhase == .active {
                 stores?.today.send(.appeared)
             }
         }
+    }
+
+    /// The permission sheet, shown above every tab while the permission manager asks.
+    private var permission: PermissionViewModel? {
+        stores.map { PermissionViewModel(store: $0.permissions, context: PresentationContext(now: $0.now(), calendar: calendar, locale: locale)) }
     }
 
     /// The + adds a task where the user is: on Today, or on Tasks from anywhere else.

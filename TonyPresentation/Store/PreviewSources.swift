@@ -27,12 +27,8 @@ actor PreviewRepository: Repository {
     }
 }
 
-/// A calendar with no events, whose access is fixed. Previews only.
+/// A calendar with no events. Previews only.
 struct PreviewCalendarSource: CalendarSource {
-    var fixedAccess: CalendarAccess
-
-    func access() -> CalendarAccess { fixedAccess }
-    func requestAccess() -> CalendarAccess { fixedAccess }
     func busyIntervals(in interval: DateInterval) -> [DateInterval] { [] }
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
@@ -40,5 +36,14 @@ struct PreviewCalendarSource: CalendarSource {
 /// No forecast, as when the weather cannot be read. Previews only.
 struct PreviewWeatherSource: WeatherSource {
     func condition(on day: Date, at place: Place) -> WeatherCondition? { nil }
+}
+
+/// Calendar access that stays as it is, whatever is asked. Previews only.
+struct PreviewPermissionProvider: PermissionProvider {
+    var fixedStatus: PermissionStatus
+
+    var permission: Permission { .calendar }
+    func status() -> PermissionStatus { fixedStatus }
+    func request() -> PermissionStatus { fixedStatus }
 }
 #endif

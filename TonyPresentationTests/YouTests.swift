@@ -8,13 +8,15 @@ import TonyUIModels
 private struct You {
     let repository = FakeRepository(tasks: [])
     let store: YouStore
+    let permissions: PermissionStore
 
-    init(calendarSource: any CalendarSource = FakeCalendarSource(), languageService: (any LanguageService)? = nil, language: String = "en") throws {
+    init(calendar: FakePermissionProvider = FakePermissionProvider(status: .granted), languageService: (any LanguageService)? = nil, language: String = "en") throws {
         let now = try Sample.november(10)
-        let coordinator = PlanCoordinator(repository: repository, calendarSource: calendarSource, weatherSource: FakeWeatherSource(), calendar: Sample.calendar) { now }
+        let coordinator = PlanCoordinator(repository: repository, calendarSource: FakeCalendarSource(), weatherSource: FakeWeatherSource(), calendar: Sample.calendar) { now }
+        permissions = .fake(calendar)
         store = YouStore(
             repository: repository,
-            calendarSource: calendarSource,
+            permissions: permissions,
             coordinator: coordinator,
             languageService: languageService,
             calendar: Sample.calendar,
@@ -215,11 +217,14 @@ private func time(_ hour: Int, _ minute: Int = 0) throws -> Date {
 
 @MainActor
 @Test func calendarAccessIsAskedOnlyFromItsButton() async throws {
-    let you = try You(calendarSource: UnansweredCalendarSource())
+    let you = try You(calendar: FakePermissionProvider())
 
     let viewModel = try await you.open()
     let before = viewModel.calendar
-    await you.store.allowCalendar()
+    let allowing = Task { await you.store.allowCalendar() }
+    await you.permissions.untilAsking()
+    await you.permissions.grant()
+    await allowing.value
     let after = viewModel.calendar
 
     #expect(before.allow?.title == "Allow calendar access")

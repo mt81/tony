@@ -21,6 +21,8 @@ public struct TodayScreenDataModel {
     public var headline: String
     /// What Tony says about the day.
     public var briefing: String
+    /// Asks for the calendar while Tony cannot read it; nil once he can.
+    public var calendar: CalendarCardDataModel?
     public var timelineTitle: String
     public var timeline: [TimelineEntry]
     public var tilesTitle: String
@@ -37,6 +39,7 @@ extension TodayScreenDataModel: Equatable {
         lhs.date == rhs.date
             && lhs.headline == rhs.headline
             && lhs.briefing == rhs.briefing
+            && lhs.calendar == rhs.calendar
             && lhs.timelineTitle == rhs.timelineTitle
             && lhs.timeline == rhs.timeline
             && lhs.tilesTitle == rhs.tilesTitle

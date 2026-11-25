@@ -487,6 +487,22 @@
         }
       }
     },
+    "Calendar access is off. Turn it on in Settings and Tony will plan around your events." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar access is off. Turn it on in Settings and Tony will plan around your events."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’accès au calendrier est désactivé. Active-le dans Réglages et Tony planifiera autour de tes événements."
+          }
+        }
+      }
+    },
     "Calendar access is off. Turn it on in Settings so Tony can plan around your meetings." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -553,6 +569,22 @@
         }
       }
     },
+    "Close" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
     "Cloudy" : {
       "localizations" : {
         "en" : {
@@ -565,6 +597,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nuageux"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
           }
         }
       }
@@ -1904,6 +1952,22 @@
         }
       }
     },
+    "Open Settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir Réglages"
+          }
+        }
+      }
+    },
     "Partly cloudy" : {
       "localizations" : {
         "en" : {
@@ -1916,6 +1980,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Partiellement nuageux"
+          }
+        }
+      }
+    },
+    "Plan around my events" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan around my events"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planifier autour de mes événements"
+          }
+        }
+      }
+    },
+    "Plan around your events" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan around your events"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planifier autour de tes événements"
           }
         }
       }
@@ -2290,6 +2386,22 @@
         }
       }
     },
+    "Tony doesn’t see your calendar yet, so he can’t plan around your meetings." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony doesn’t see your calendar yet, so he can’t plan around your meetings."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony ne voit pas encore ton calendrier, il ne peut donc pas planifier autour de tes réunions."
+          }
+        }
+      }
+    },
     "Tony filled in the form below. Check it before you save." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2353,6 +2465,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tony ne le planifie que les jours avec ce temps. Sans prévision, n’importe quel jour convient."
+          }
+        }
+      }
+    },
+    "Tony reads when you’re busy, never what your events are about, and fits your tasks in the gaps. Nothing leaves your iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony reads when you’re busy, never what your events are about, and fits your tasks in the gaps. Nothing leaves your iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tony lit quand tu es occupé, jamais le contenu de tes événements, et place tes tâches dans les creux. Rien ne quitte ton iPhone."
           }
         }
       }

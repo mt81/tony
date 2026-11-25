@@ -3,23 +3,14 @@ import Testing
 import TonyCore
 @testable import TonyPresentation
 
-private struct FixedCalendarSource: CalendarSource {
-    var currentAccess: CalendarAccess
-    var busy: [DateInterval] = []
-
-    func access() -> CalendarAccess { currentAccess }
-    func requestAccess() -> CalendarAccess { currentAccess }
-    func busyIntervals(in interval: DateInterval) -> [DateInterval] { currentAccess == .granted ? busy : [] }
-    func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
-}
-
+@MainActor
 private func environment(
-    access: CalendarAccess,
+    access: PermissionStatus,
     busy: [DateInterval] = [],
     tasks: [TonyTask] = [],
     forecast: WeatherCondition? = nil
 ) throws -> CalendarDebugFeature.Environment {
-    let source = FixedCalendarSource(currentAccess: access, busy: busy)
+    let source = FakeCalendarSource(busyIntervals: access == .granted ? busy : [])
     let now = try Sample.november(2, hour: 8)
     let repository = FakeRepository(tasks: tasks)
     let coordinator = PlanCoordinator(
@@ -28,7 +19,7 @@ private func environment(
         weatherSource: FakeWeatherSource(forecast: forecast),
         calendar: Sample.calendar
     ) { now }
-    return CalendarDebugFeature.Environment(calendarSource: source, repository: repository, coordinator: coordinator)
+    return CalendarDebugFeature.Environment(permissions: .fake(FakePermissionProvider(status: access)), repository: repository, coordinator: coordinator)
 }
 
 @Test func appearingAndRefreshingReadTheCalendar() {

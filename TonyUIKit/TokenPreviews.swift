@@ -67,7 +67,7 @@ import SwiftUI
         ("tight", TonySpacing.tight), ("small", TonySpacing.small), ("cardVertical", TonySpacing.cardVertical),
         ("snug", TonySpacing.snug), ("medium", TonySpacing.medium), ("inset", TonySpacing.inset),
         ("large", TonySpacing.large), ("panelInset", TonySpacing.panelInset), ("page", TonySpacing.page),
-        ("timeline", TonySpacing.timeline), ("section", TonySpacing.section),
+        ("timeline", TonySpacing.timeline), ("section", TonySpacing.section), ("explanation", TonySpacing.explanation),
     ]
     return ScrollView {
         VStack(alignment: .leading, spacing: TonySpacing.small) {

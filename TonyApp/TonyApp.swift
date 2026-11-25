@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import TonyCore
 import TonyUIKit
 import TonyPresentation
@@ -33,6 +34,7 @@ struct TonyApp: App {
 struct AppStores {
     let now: @Sendable () -> Date
     let coordinator: PlanCoordinator
+    let permissions: PermissionStore
     let today: Store<TodayFeature>
     let tasks: Store<TasksFeature>
     let you: YouStore
@@ -58,10 +60,16 @@ struct AppStores {
             calendar: .current,
             now: now
         )
+        let permissions = PermissionStore(providers: [EventKitCalendarPermission()]) {
+            guard let settings = URL(string: UIApplication.openSettingsURLString) else { return }
+            UIApplication.shared.open(settings)
+        }
+        self.permissions = permissions
         today = Store(
             state: TodayFeature.State(),
             environment: TodayFeature.Environment(
                 coordinator: coordinator,
+                permissions: permissions,
                 briefingWriter: BriefingWriter(service: languageService),
                 repository: repository,
                 catalog: catalog,
@@ -76,7 +84,7 @@ struct AppStores {
         )
         you = YouStore(
             repository: repository,
-            calendarSource: calendarSource,
+            permissions: permissions,
             coordinator: coordinator,
             languageService: languageService,
             calendar: .current,
@@ -86,7 +94,7 @@ struct AppStores {
         #if DEBUG
         calendarDebug = Store(
             state: CalendarDebugFeature.State(),
-            environment: CalendarDebugFeature.Environment(calendarSource: calendarSource, repository: repository, coordinator: coordinator)
+            environment: CalendarDebugFeature.Environment(permissions: permissions, repository: repository, coordinator: coordinator)
         )
         #endif
     }

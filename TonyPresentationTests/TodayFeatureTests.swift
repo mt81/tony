@@ -9,12 +9,14 @@ import TonyUIModels
 private struct Day {
     let clock: TestClock
     let repository: FakeRepository
+    let permissions: PermissionStore
     let store: Store<TodayFeature>
 
     init(
         hour: Int,
         tasks: [TonyTask],
         meetings: [DateInterval] = [],
+        calendarAccess: FakePermissionProvider = FakePermissionProvider(status: .granted),
         languageService: (any LanguageService)? = nil,
         language: String = "en_GB"
     ) throws {
@@ -27,10 +29,13 @@ private struct Day {
             weatherSource: FakeWeatherSource(),
             calendar: Sample.calendar
         ) { clock.now }
+        let permissions = PermissionStore.fake(calendarAccess)
+        self.permissions = permissions
         store = Store(
             state: TodayFeature.State(),
             environment: TodayFeature.Environment(
                 coordinator: coordinator,
+                permissions: permissions,
                 briefingWriter: BriefingWriter(service: languageService),
                 repository: repository,
                 catalog: FakeCatalog(),
@@ -73,10 +78,10 @@ private func morningMeetings() throws -> [DateInterval] {
 
 // MARK: Reducer
 
-@Test func appearingAsksForThePlanAndTheName() {
+@Test func appearingAsksForThePlanTheNameAndCalendarAccess() {
     var state = TodayFeature.State()
 
-    #expect(TodayFeature.reduce(&state, .appeared) == [.plan, .loadName])
+    #expect(TodayFeature.reduce(&state, .appeared) == [.plan, .loadName, .readCalendarAccess])
 }
 
 @MainActor
@@ -233,6 +238,55 @@ private func morningMeetings() throws -> [DateInterval] {
     #expect(service.requests.last?.plan == "mardi 10 novembre\n8:00 Vacuum. Le premier moment qui convient.")
     #expect(day.model(language: "fr_FR").briefing == "Une chose serait bien aujourd'hui : Vacuum.")
     #expect(service.requests.first?.instructions.contains("Write in French") == true)
+}
+
+// MARK: Calendar
+
+@MainActor
+@Test func withoutCalendarAccessTodayOffersToPlanAroundEvents() async throws {
+    let undecided = try Day(hour: 8, tasks: [], calendarAccess: FakePermissionProvider(status: .notDetermined))
+    let refused = try Day(hour: 8, tasks: [], calendarAccess: FakePermissionProvider(status: .denied))
+    let granted = try Day(hour: 8, tasks: [])
+
+    let card = try #require(await undecided.open().calendar)
+    let french = undecided.model(language: "fr").calendar
+
+    #expect(card.allow?.title == "Plan around my events")
+    #expect(card.text == "Tony doesn’t see your calendar yet, so he can’t plan around your meetings.")
+    #expect(french?.allow?.title == "Planifier autour de mes événements")
+    #expect(await refused.open().calendar?.allow != nil)
+    #expect(await granted.open().calendar == nil)
+}
+
+@MainActor
+@Test func planAroundMyEventsAsksThroughThePermissionSheetAndTheCardGoesOnceGranted() async throws {
+    let calendar = FakePermissionProvider(status: .notDetermined, answer: .granted)
+    let day = try Day(hour: 8, tasks: [], calendarAccess: calendar)
+    let before = await day.open()
+
+    try #require(before.calendar?.allow).action.execute()
+    await day.permissions.untilAsking()
+    let asked = await calendar.requestCount
+    await day.permissions.grant()
+    await day.store.waitForEffects()
+
+    #expect(asked == 0)
+    #expect(await calendar.requestCount == 1)
+    #expect(day.model().calendar == nil)
+}
+
+@MainActor
+@Test func closingThePermissionSheetKeepsTheCard() async throws {
+    let calendar = FakePermissionProvider(status: .notDetermined)
+    let day = try Day(hour: 8, tasks: [], calendarAccess: calendar)
+
+    try #require(await day.open().calendar?.allow).action.execute()
+    await day.permissions.untilAsking()
+    day.permissions.notNow()
+    await day.store.waitForEffects()
+
+    #expect(await calendar.requestCount == 0)
+    #expect(day.model().calendar != nil)
 }
 
 // MARK: Adding a task

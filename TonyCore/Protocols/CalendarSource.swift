@@ -1,17 +1,9 @@
 import Foundation
 import MemberwiseInit
 
-public enum CalendarAccess: String, Sendable, CaseIterable {
-    case notDetermined
-    case granted
-    case denied
-}
-
 /// The user's calendars, as far as planning needs them: when they are busy, never what the events are about.
+/// Access is asked through the calendar's `PermissionProvider`.
 public protocol CalendarSource: Sendable {
-    func access() async -> CalendarAccess
-    /// Asks the user for access if they have not answered yet, and returns where things stand.
-    func requestAccess() async -> CalendarAccess
     /// Busy time inside the interval, across all calendars. Empty when access is not granted.
     func busyIntervals(in interval: DateInterval) async throws -> [DateInterval]
     /// Yields each time the calendars change.

@@ -22,11 +22,18 @@ enum PreviewSamples {
         )
     }
 
-    static func today(editor: TaskEditorDataModel? = nil, alert: AlertDataModel? = nil) -> TodayScreenDataModel {
+    static let calendarCard = CalendarCardDataModel(
+        title: "Calendar",
+        text: "Tony doesn't see your calendar yet, so he can't plan around your meetings.",
+        allow: ButtonDataModel(title: "Plan around my events", action: Action(id: "preview") { _ in })
+    )
+
+    static func today(calendar: CalendarCardDataModel? = nil, editor: TaskEditorDataModel? = nil, alert: AlertDataModel? = nil) -> TodayScreenDataModel {
         TodayScreenDataModel(
             date: "Thursday, November 12",
             headline: "A light day, Matteo",
             briefing: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight.",
+            calendar: calendar,
             timelineTitle: "Your day",
             timeline: [
                 .init(id: "done", item: .done(text: "Good job, today you already did Supplements and Grocery.")),
@@ -68,6 +75,7 @@ enum PreviewSamples {
             date: "Saturday, November 14",
             headline: "A free day",
             briefing: "Nothing needs you today. Enjoy it.",
+            calendar: calendarCard,
             timelineTitle: "Your day",
             timeline: [.init(id: "now", item: .now(text: "Now"))],
             tilesTitle: "How things are",

@@ -9,16 +9,15 @@ extension YouViewModel {
         routine.homeDays = [.monday, .wednesday, .friday]
         routine.officeDays = [.tuesday, .thursday]
         routine.workEnd = DateComponents(hour: 17, minute: 30)
-        let access: CalendarAccess = canAllowCalendar ? .notDetermined : .granted
+        let access: PermissionStatus = canAllowCalendar ? .notDetermined : .granted
         let repository = PreviewRepository(
             routine: routine,
             preferences: name.isEmpty ? [] : [Preference(key: Preference.userNameKey, value: name, sourceSentence: "", date: .now)]
         )
-        let calendarSource = PreviewCalendarSource(fixedAccess: access)
         let store = YouStore(
             repository: repository,
-            calendarSource: calendarSource,
-            coordinator: PlanCoordinator(repository: repository, calendarSource: calendarSource, weatherSource: PreviewWeatherSource(), calendar: .current) { .now },
+            permissions: PermissionStore(providers: [PreviewPermissionProvider(fixedStatus: access)]) {},
+            coordinator: PlanCoordinator(repository: repository, calendarSource: PreviewCalendarSource(), weatherSource: PreviewWeatherSource(), calendar: .current) { .now },
             calendar: .current,
             locale: .current,
             now: { .now }

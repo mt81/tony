@@ -77,7 +77,7 @@ private struct Setup {
     /// `plantsNeed` is the only weather the first task can be done in.
     init(
         routine: Routine? = nil,
-        access: CalendarAccess = .granted,
+        access: PermissionStatus = .granted,
         forecast: WeatherCondition? = nil,
         plantsNeed: Set<WeatherCondition> = [],
         day: Int = 7

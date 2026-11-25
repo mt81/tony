@@ -17,6 +17,9 @@ public struct TodayScreen: View {
             VStack(alignment: .leading, spacing: TonySpacing.section) {
                 header
                 briefing
+                if let calendar = model.calendar {
+                    CalendarCard(calendar)
+                }
                 timeline
                 if !model.tiles.isEmpty {
                     tiles
@@ -99,6 +102,11 @@ public struct TodayScreen: View {
 #if DEBUG
 #Preview("Today") {
     TodayScreen(PreviewSamples.today())
+        .tonyPreview(padding: 0)
+}
+
+#Preview("Today, calendar not connected") {
+    TodayScreen(PreviewSamples.today(calendar: PreviewSamples.calendarCard))
         .tonyPreview(padding: 0)
 }
 

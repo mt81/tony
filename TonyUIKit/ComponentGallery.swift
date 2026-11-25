@@ -50,6 +50,17 @@ public struct ComponentGallery: View {
 
                 AreaRow(AreaRowDataModel(name: "Home", progress: 0.6, status: "Good"))
 
+                CalendarCard(
+                    CalendarCardDataModel(
+                        title: "Calendar",
+                        text: "Tony doesn't see your calendar yet, so he can't plan around your meetings.",
+                        allow: ButtonDataModel(title: "Plan around my events", action: Action(id: "preview") { _ in })
+                    )
+                )
+
+                IllustrationView(.tony)
+                    .frame(maxWidth: .infinity)
+
                 VStack(alignment: .leading, spacing: TonySpacing.small) {
                     ForEach(TonyTextStyle.allCases, id: \.self) { style in
                         Text(verbatim: String(describing: style)).tonyText(style)

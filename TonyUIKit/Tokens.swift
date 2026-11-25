@@ -68,6 +68,8 @@ public enum TonySpacing {
     public static let page: CGFloat = 20
     public static let timeline: CGFloat = 22
     public static let section: CGFloat = 28
+    /// Between the title, illustration and text of a sheet that explains something.
+    public static let explanation: CGFloat = 40
 }
 
 public enum TonyRadius {
@@ -108,6 +110,9 @@ public enum TonySize {
     /// A tile's emoji.
     public static let tileIcon: CGFloat = 28
     public static let avatar: CGFloat = 60
+    /// The disc behind a sheet's illustration, and the drawing on it.
+    public static let illustration: CGFloat = 200
+    public static let illustrationArtwork: CGFloat = 130
 }
 
 public enum TonyIcon {

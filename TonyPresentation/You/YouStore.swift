@@ -7,7 +7,7 @@ public final class YouStore {
     let state = YouState()
 
     private let repository: any Repository
-    private let calendarSource: any CalendarSource
+    private let permissions: PermissionStore
     private let coordinator: PlanCoordinator
     /// Reads the description of the week; nil when there is no model.
     private let languageService: (any LanguageService)?
@@ -17,7 +17,7 @@ public final class YouStore {
 
     public init(
         repository: any Repository,
-        calendarSource: any CalendarSource,
+        permissions: PermissionStore,
         coordinator: PlanCoordinator,
         languageService: (any LanguageService)? = nil,
         calendar: Calendar,
@@ -25,7 +25,7 @@ public final class YouStore {
         now: @escaping @Sendable () -> Date
     ) {
         self.repository = repository
-        self.calendarSource = calendarSource
+        self.permissions = permissions
         self.coordinator = coordinator
         self.languageService = languageService
         self.calendar = calendar
@@ -37,7 +37,7 @@ public final class YouStore {
         do {
             let name = try await repository.preferences().first { $0.key == Preference.userNameKey }?.value ?? ""
             let routine = try await repository.routine() ?? .standard
-            let calendarAccess = await calendarSource.access()
+            let calendarAccess = await permissions.status(of: .calendar)
             state.name = name
             state.routine = routine
             state.calendarAccess = calendarAccess
@@ -120,7 +120,7 @@ public final class YouStore {
     }
 
     func allowCalendar() async {
-        _ = await calendarSource.requestAccess()
+        _ = await permissions.request(.calendar)
         await coordinator.refresh()
         await load()
     }
