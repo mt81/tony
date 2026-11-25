@@ -2,6 +2,7 @@ import SwiftUI
 import TonyUIKit
 import TonyPresentation
 import TonyScreens
+import TonyUIModels
 
 struct RootView: View {
     let stores: AppStores?
@@ -11,10 +12,11 @@ struct RootView: View {
     @State private var selection = RootTab.today
 
     var body: some View {
-        TabView(selection: Binding(get: { selection }, set: select)) {
+        TabView(selection: $selection) {
             Tab(value: RootTab.today) {
                 if let stores {
                     StoreView(now: stores.now, dataModel: stores.today.dataModel, content: TodayScreen.init)
+                        .floatingButton(add)
                 } else {
                     unavailable
                 }
@@ -24,6 +26,7 @@ struct RootView: View {
             Tab(value: RootTab.tasks) {
                 if let stores {
                     StoreView(now: stores.now, dataModel: stores.tasks.dataModel, content: TasksScreen.init)
+                        .floatingButton(add)
                 } else {
                     unavailable
                 }
@@ -33,6 +36,7 @@ struct RootView: View {
             Tab(value: RootTab.you) {
                 if let stores {
                     StoreView(now: stores.now, dataModel: { YouViewModel(store: stores.you, context: $0) }, content: YouScreen.init)
+                        .floatingButton(add)
                 } else {
                     unavailable
                 }
@@ -42,16 +46,11 @@ struct RootView: View {
             #if DEBUG
             Tab(value: RootTab.debug) {
                 DebugTab(stores: stores)
+                    .floatingButton(add)
             } label: {
                 Label { Text(verbatim: "Debug") } icon: { Image(systemName: "ladybug") }
             }
             #endif
-            // The + is a tab only to sit in the tab bar: selecting it adds a task and goes back.
-            Tab(value: RootTab.add, role: .prominent) {
-                EmptyView()
-            } label: {
-                Label("Add a task", systemImage: "plus")
-            }
         }
         .task {
             guard let stores else { return }
@@ -76,24 +75,19 @@ struct RootView: View {
         stores.map { PermissionViewModel(store: $0.permissions, context: PresentationContext(now: $0.now(), calendar: calendar, locale: locale)) }
     }
 
-    /// The + adds a task where the user is: on Today, or on Tasks from anywhere else.
-    /// The tab bar shows the + tab as soon as it is tapped, so the selection goes there and comes straight back.
-    private func select(_ tab: RootTab) {
-        guard tab == .add else {
-            selection = tab
-            return
-        }
+    /// The + beside the tabs adds a task where the user is: on Today, or on Tasks from anywhere else.
+    private var add: ButtonDataModel {
+        ButtonDataModel(title: String(localized: "Add a task"), systemImage: "plus", action: Action(id: "addTask") { _ in addTask() })
+    }
+
+    private func addTask() {
         guard let stores else { return }
-        let destination = selection == .today ? RootTab.today : RootTab.tasks
-        selection = .add
-        Task { @MainActor in
-            selection = destination
-            let now = stores.now()
-            if destination == .today {
-                stores.today.send(.addTapped(id: UUID(), stepID: UUID(), now: now))
-            } else {
-                stores.tasks.send(.addTapped(id: UUID(), stepID: UUID(), now: now))
-            }
+        let now = stores.now()
+        if selection == .today {
+            stores.today.send(.addTapped(id: UUID(), stepID: UUID(), now: now))
+        } else {
+            selection = .tasks
+            stores.tasks.send(.addTapped(id: UUID(), stepID: UUID(), now: now))
         }
     }
 
@@ -107,7 +101,6 @@ enum RootTab: Hashable {
     case tasks
     case you
     case debug
-    case add
 }
 
 /// Draws a store's data model, and draws it again whenever the store's state changes.

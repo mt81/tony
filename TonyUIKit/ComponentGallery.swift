@@ -55,6 +55,8 @@ public struct ComponentGallery: View {
                 IllustrationView(.tony)
                     .frame(maxWidth: .infinity)
 
+                FloatingButton(ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }))
+
                 VStack(alignment: .leading, spacing: TonySpacing.small) {
                     ForEach(TonyTextStyle.allCases, id: \.self) { style in
                         Text(verbatim: String(describing: style)).tonyText(style)

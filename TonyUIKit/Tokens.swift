@@ -80,6 +80,8 @@ public enum TonyRadius {
 public enum TonySize {
     /// The smallest touch target.
     public static let touchTarget: CGFloat = 44
+    /// The round button that floats above the tabs.
+    public static let floatingButton: CGFloat = 56
     public static let iconCircle: CGFloat = 40
     public static let checkbox: CGFloat = 26
     public static let border: CGFloat = 1.5
