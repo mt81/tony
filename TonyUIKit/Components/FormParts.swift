@@ -38,10 +38,7 @@ public struct Composer: View {
         .padding(.top, TonySpacing.page)
         .padding(.leading, TonySpacing.page)
         .padding([.trailing, .bottom], TonySpacing.medium)
-        .background(TonyColor.glass, in: .rect(cornerRadius: TonyRadius.panel))
-        .overlay {
-            RoundedRectangle(cornerRadius: TonyRadius.panel).strokeBorder(TonyColor.glassEdge, lineWidth: TonySize.glassEdge)
-        }
+        .raisedCard(cornerRadius: TonyRadius.panel)
         .onAppear { isFocused = true }
     }
 
@@ -51,16 +48,16 @@ public struct Composer: View {
         } label: {
             ZStack {
                 if model.isSending {
-                    ProgressView().tint(TonyColor.onAccent)
+                    ProgressView().tint(TonyColor.onCta)
                 } else {
                     Image(systemName: model.send.systemImage ?? "arrow.up")
                         .tonyText(.heading)
-                        .foregroundStyle(TonyColor.onAccent)
+                        .foregroundStyle(TonyColor.onCta)
                 }
             }
             .padding(TonySpacing.snug)
             .frame(minWidth: TonySize.touchTarget, minHeight: TonySize.touchTarget)
-            .background(TonyColor.accent, in: .circle)
+            .background(TonyColor.cta, in: .circle)
             .opacity(model.send.isEnabled || model.isSending ? 1 : 0.4)
         }
         .buttonStyle(.plain)
@@ -116,7 +113,7 @@ public struct CheckmarkRow: View {
                     .foregroundStyle(TonyColor.ink)
                 Spacer()
                 Image(systemName: "checkmark")
-                    .foregroundStyle(TonyColor.accent)
+                    .foregroundStyle(TonyColor.accentText)
                     .opacity(model.isOn ? 1 : 0)
                     .accessibilityHidden(true)
             }
@@ -202,14 +199,14 @@ public struct FormSectionHeader: View {
 }
 
 extension View {
-    /// A list row on a glass card, with glass lines between rows.
+    /// A list row on a white card, with lines between rows.
     public func glassRow() -> some View {
-        listRowBackground(TonyColor.glass)
-            .listRowSeparatorTint(TonyColor.glassEdge)
+        listRowBackground(TonyColor.surfaceRaised)
+            .listRowSeparatorTint(TonyColor.line)
     }
 }
 
-/// A task's emoji on a dark round, with a pen that says it can be changed.
+/// A task's emoji on a white round, with a pen that says it can be changed.
 /// Tapping it opens the emoji keyboard; the emoji picked replaces the one shown.
 public struct IconField: View {
     private let model: TextFieldDataModel
@@ -353,7 +350,7 @@ private final class EmojiKeyboardField: UITextField {
             .glassRow()
         }
         .scrollContentBackground(.hidden)
-        .background(TonyColor.surfaceRaised)
+        .background(TonyColor.canvas)
     }
     .tonyPreview(padding: 0)
 }

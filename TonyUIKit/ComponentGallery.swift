@@ -18,13 +18,7 @@ public struct ComponentGallery: View {
                     VStack(alignment: .leading, spacing: TonySpacing.medium) { chips }
                 }
 
-                HStack(spacing: TonySpacing.timeline) {
-                    TonyIcon.today
-                    TonyIcon.tasks
-                    TonyIcon.you
-                    TonyImage().frame(height: TonySize.touchTarget)
-                }
-                .foregroundStyle(TonyColor.ink)
+                TonyImage().frame(height: TonySize.touchTarget)
 
                 VStack(spacing: 0) {
                     ForEach(timeline.indices, id: \.self) { index in
@@ -60,6 +54,8 @@ public struct ComponentGallery: View {
 
                 IllustrationView(.tony)
                     .frame(maxWidth: .infinity)
+
+                FloatingButton(ButtonDataModel(title: "Add a task", systemImage: "plus", action: Action(id: "preview") { _ in }))
 
                 VStack(alignment: .leading, spacing: TonySpacing.small) {
                     ForEach(TonyTextStyle.allCases, id: \.self) { style in
@@ -119,6 +115,5 @@ public struct ComponentGallery: View {
 #if DEBUG
 #Preview("Component gallery") {
     ComponentGallery()
-        .preferredColorScheme(.dark)
 }
 #endif

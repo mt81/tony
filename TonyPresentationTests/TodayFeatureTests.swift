@@ -353,8 +353,23 @@ private func morningMeetings() throws -> [DateInterval] {
 
     let english = await day.open()
 
-    #expect(english.headline == "A free day, Matteo")
-    #expect(day.model(language: "fr_FR").headline == "Une journée libre, Matteo")
+    #expect(String(english.headline.characters) == "A free day, Matteo")
+    #expect(String(day.model(language: "fr_FR").headline.characters) == "Une journée libre, Matteo")
+}
+
+@MainActor
+@Test func theHeadlineEmphasisesTheKindOfDayInBothLanguages() async throws {
+    let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants")])
+    await day.repository.save(Preference(key: Preference.userNameKey, value: "Matteo", sourceSentence: "", date: day.clock.now))
+
+    let english = await day.open().headline
+    let french = day.model(language: "fr_FR").headline
+
+    func emphasised(_ headline: AttributedString) -> [String] {
+        headline.runs.filter { $0.inlinePresentationIntent == .emphasized }.map { String(headline[$0.range].characters) }
+    }
+    #expect(emphasised(english) == ["light"])
+    #expect(emphasised(french) == ["légère"])
 }
 
 @MainActor
@@ -365,14 +380,14 @@ private func morningMeetings() throws -> [DateInterval] {
     let french = day.model(language: "fr_FR")
 
     #expect(english.date == "Tuesday 10 November")
-    #expect(english.headline == "A light day")
+    #expect(String(english.headline.characters) == "A light day")
     #expect(english.briefing == "2 things would be nice today: Plants and Vacuum. You have 3 meetings left today, the next at 10:00.")
     #expect(!english.timeline.contains { $0.id == "now" })
     #expect(english.taskItems[0].now == "8:00 · a good moment to start")
     #expect(english.taskItems[0].reason == "The first moment that fits.")
     #expect(english.taskItems[0].check.title == "Mark Plants as done")
     #expect(french.date == "mardi 10 novembre")
-    #expect(french.headline == "Une journée légère")
+    #expect(String(french.headline.characters) == "Une journée légère")
     #expect(french.briefing == "2 choses seraient bien aujourd'hui : Plants et Vacuum. Il te reste 3 réunions aujourd'hui, la prochaine à 10:00.")
     #expect(french.meetings == ["10:00 3 réunions à la suite jusqu'à 11:00"])
     #expect(french.taskItems[0].now == "8:00 · un bon moment pour commencer")
@@ -385,7 +400,7 @@ private func morningMeetings() throws -> [DateInterval] {
 
     #expect(await one.open().briefing == "One thing would be nice today: Plants.")
     #expect(await none.open().briefing == "Nothing needs you today. Enjoy it.")
-    #expect(none.model().headline == "A free day")
+    #expect(String(none.model().headline.characters) == "A free day")
     #expect(none.model().timeline.map(\.id) == ["now"])
 }
 

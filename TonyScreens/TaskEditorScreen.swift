@@ -30,7 +30,7 @@ public struct TaskEditorScreen: View {
                 ToolbarItem(placement: .confirmationAction) {
                     ButtonView(model.save)
                         .buttonStyle(.glassProminent)
-                        .tint(TonyColor.accent)
+                        .tint(TonyColor.cta)
                 }
             }
         }
@@ -48,7 +48,7 @@ struct TaskComposerView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: TonySpacing.large) {
-                TonyImage(color: TonyColor.muted)
+                TonyImage()
                     .frame(width: TonySize.tonyHeader, height: TonySize.tonyHeader)
                 Text(model.prompt)
                     .tonyText(.bodySmall)
@@ -64,9 +64,9 @@ struct TaskComposerView: View {
             Composer(model.composer)
                 .padding(.horizontal, TonySpacing.snug)
                 .padding(.bottom, TonySpacing.snug)
-                .background(TonyColor.surfaceRaised)
+                .background(TonyColor.canvas)
         }
-        .background(TonyColor.surfaceRaised)
+        .background(TonyColor.canvas)
     }
 }
 
@@ -121,7 +121,7 @@ struct TaskFormView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(TonyColor.surfaceRaised)
+        .background(TonyColor.canvas)
     }
 
     private var repeatsRow: some View {
@@ -291,7 +291,7 @@ private struct FormPage<Content: View>: View {
             content
         }
         .scrollContentBackground(.hidden)
-        .background(TonyColor.surfaceRaised)
+        .background(TonyColor.canvas)
         .navigationTitle(title)
         .toolbarTitleDisplayMode(.inline)
     }

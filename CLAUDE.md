@@ -149,7 +149,7 @@ Never push red.
 - VoiceOver labels on every interactive element, reachable with VoiceOver and Full Keyboard Access.
 - Type styles with Dynamic Type; layouts hold at the largest size. Touch targets at least 44 × 44.
 - Respect Reduce Motion; never carry meaning by colour alone.
-- Dark only. Check iPhone and iPad in supported orientations.
+- Light only. Check iPhone and iPad in supported orientations.
 - iOS 27 only: no availability checks.
 - English and French ship together; a missing string is a bug.
 - Dates, times, numbers, weekdays formatted with the passed locale.

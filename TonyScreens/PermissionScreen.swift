@@ -63,12 +63,13 @@ private struct PermissionButton: View {
         } label: {
             Text(grant.title)
                 .tonyText(.labelLarge)
-                .foregroundStyle(TonyColor.onAccent)
+                .foregroundStyle(TonyColor.onCta)
                 .frame(maxWidth: .infinity, minHeight: TonySize.touchTarget)
         }
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)
         .controlSize(.large)
+        .tint(TonyColor.cta)
         .accessibilityIdentifier(ifPresent: grant.accessibilityIdentifier)
     }
 }

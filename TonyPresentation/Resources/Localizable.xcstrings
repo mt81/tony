@@ -221,13 +221,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A free day"
+            "value" : "A *free* day"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une journée libre"
+            "value" : "Une journée *libre*"
           }
         }
       }
@@ -238,13 +238,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A full day"
+            "value" : "A *full* day"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une journée chargée"
+            "value" : "Une journée *chargée*"
           }
         }
       }
@@ -255,13 +255,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A light day"
+            "value" : "A *light* day"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une journée légère"
+            "value" : "Une journée *légère*"
           }
         }
       }
@@ -272,13 +272,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A steady day"
+            "value" : "A *steady* day"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une journée bien remplie"
+            "value" : "Une journée *bien remplie*"
           }
         }
       }

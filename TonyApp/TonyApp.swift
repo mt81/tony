@@ -23,8 +23,8 @@ struct TonyApp: App {
     private var window: some Scene {
         WindowGroup {
             RootView(stores: stores)
-                .tint(TonyColor.accent)
-                .preferredColorScheme(.dark)
+                .tint(TonyColor.accentText)
+                .preferredColorScheme(.light)
         }
     }
 }

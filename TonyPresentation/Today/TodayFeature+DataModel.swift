@@ -172,17 +172,18 @@ struct TodayWording {
         }
     }
 
-    var headline: String {
+    /// The kind of day, its word emphasised.
+    var headline: AttributedString {
         let locale = context.locale
         let kind =
             switch plannedTasks.count {
-            case 0: localized("A free day", locale)
-            case 1...2: localized("A light day", locale)
-            case 3...4: localized("A steady day", locale)
-            default: localized("A full day", locale)
+            case 0: localizedAttributed("A free day", locale)
+            case 1...2: localizedAttributed("A light day", locale)
+            case 3...4: localizedAttributed("A steady day", locale)
+            default: localizedAttributed("A full day", locale)
             }
         guard let name = state.userName else { return kind }
-        return localized("\(kind), \(name)", locale)
+        return localizedAttributed("\(kind), \(name)", locale)
     }
 
     var briefing: String {
