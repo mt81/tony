@@ -15,7 +15,7 @@ struct RootView: View {
         TabView(selection: $selection) {
             Tab(value: RootTab.today) {
                 if let stores {
-                    StoreView(now: stores.now, dataModel: stores.today.dataModel, content: TodayScreen.init)
+                    StoreView(now: stores.now, dataModel: { TodayViewModel(store: stores.today, context: $0) }, content: TodayScreen.init)
                         .floatingButton(add)
                 } else {
                     unavailable
@@ -54,9 +54,7 @@ struct RootView: View {
         }
         .task {
             guard let stores else { return }
-            for await planned in await stores.coordinator.plans() {
-                stores.today.send(.planned(planned))
-            }
+            await stores.today.followPlans()
         }
         .sheet(isPresented: Binding(get: { permission?.isPresented ?? false }, set: { if !$0 { permission?.dismiss.execute() } })) {
             if let stores {
@@ -64,8 +62,8 @@ struct RootView: View {
             }
         }
         .onChange(of: scenePhase) {
-            if scenePhase == .active {
-                stores?.today.send(.appeared)
+            if scenePhase == .active, let stores {
+                Task { await stores.today.load() }
             }
         }
     }
@@ -84,7 +82,7 @@ struct RootView: View {
         guard let stores else { return }
         let now = stores.now()
         if selection == .today {
-            stores.today.send(.addTapped(id: UUID(), stepID: UUID(), now: now))
+            stores.today.startAdding(id: UUID(), stepID: UUID(), now: now)
         } else {
             selection = .tasks
             stores.tasks.send(.addTapped(id: UUID(), stepID: UUID(), now: now))

@@ -23,6 +23,8 @@ private actor InMemoryRepository: Repository {
     private var storedRoutine: Routine?
     private(set) var taskReads = 0
     private var fails = false
+    private var holdsNextRead = false
+    private var heldRead: CheckedContinuation<Void, Never>?
 
     init(tasks: [TonyTask], routine: Routine? = nil) {
         storedTasks = tasks
@@ -31,8 +33,24 @@ private actor InMemoryRepository: Repository {
 
     func setFails(_ fails: Bool) { self.fails = fails }
 
-    func tasks() throws -> [TonyTask] {
+    /// The next read of the tasks waits until `releaseRead()`.
+    func holdNextRead() {
+        holdsNextRead = true
+    }
+
+    /// Lets the held read go on; when no read is waiting yet, the next one does not wait.
+    func releaseRead() {
+        holdsNextRead = false
+        heldRead?.resume()
+        heldRead = nil
+    }
+
+    func tasks() async throws -> [TonyTask] {
         taskReads += 1
+        if holdsNextRead {
+            holdsNextRead = false
+            await withCheckedContinuation { heldRead = $0 }
+        }
         if fails { throw CocoaError(.fileReadUnknown) }
         return storedTasks
     }
@@ -185,15 +203,50 @@ private struct Setup {
     #expect(try await setup.current().plan.items.first?.interval.start == (try Fixtures.november(7, hour: 14)))
 }
 
+/// Signals once the expected number of requests has arrived.
+private final class Arrivals: Sendable {
+    private let count = Mutex(0)
+    private let expected: Int
+    let all: AsyncStream<Void>
+    private let continuation: AsyncStream<Void>.Continuation
+
+    init(expected: Int) {
+        self.expected = expected
+        (all, continuation) = AsyncStream.makeStream(of: Void.self)
+    }
+
+    func arrive() {
+        if count.withLock({ count in
+            count += 1
+            return count
+        }) == expected {
+            continuation.finish()
+        }
+    }
+}
+
+extension PlanCoordinator {
+    /// Counts the request, then makes it, in one turn of the coordinator: once counted, the request has arrived.
+    fileprivate func refresh(counting arrivals: Arrivals) async {
+        arrivals.arrive()
+        await refresh()
+    }
+}
+
 @Test func rapidEventsDoNotPlanOncePerEvent() async throws {
     let setup = try Setup()
     await setup.coordinator.start()
     let readsBefore = await setup.repository.taskReads
+    let arrivals = Arrivals(expected: 25)
+    await setup.repository.holdNextRead()
 
     await withTaskGroup(of: Void.self) { group in
         for _ in 0..<25 {
-            group.addTask { await setup.coordinator.refresh() }
+            group.addTask { await setup.coordinator.refresh(counting: arrivals) }
         }
+        // The first plan waits until every request has arrived, so they all arrive while it is being made.
+        for await _ in arrivals.all {}
+        await setup.repository.releaseRead()
     }
 
     let passes = await setup.repository.taskReads - readsBefore

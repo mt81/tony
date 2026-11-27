@@ -35,7 +35,7 @@ struct AppStores {
     let now: @Sendable () -> Date
     let coordinator: PlanCoordinator
     let permissions: PermissionStore
-    let today: Store<TodayFeature>
+    let today: TodayStore
     let tasks: Store<TasksFeature>
     let you: YouStore
     #if DEBUG
@@ -65,18 +65,15 @@ struct AppStores {
             UIApplication.shared.open(settings)
         }
         self.permissions = permissions
-        today = Store(
-            state: TodayFeature.State(),
-            environment: TodayFeature.Environment(
-                coordinator: coordinator,
-                permissions: permissions,
-                briefingWriter: BriefingWriter(service: languageService),
-                repository: repository,
-                catalog: catalog,
-                languageService: languageService,
-                calendar: .current,
-                locale: .current
-            )
+        today = TodayStore(
+            coordinator: coordinator,
+            permissions: permissions,
+            briefingWriter: BriefingWriter(service: languageService),
+            repository: repository,
+            catalog: catalog,
+            languageService: languageService,
+            calendar: .current,
+            locale: .current
         )
         tasks = Store(
             state: TasksFeature.State(),
