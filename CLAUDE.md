@@ -83,7 +83,7 @@ One store per screen, unidirectional (see the You tab: `YouState`, `YouStore`, `
 5. User action → data model closure → store method.
 
 - A form with its own lifetime may get a child store, created by its screen's store.
-- Today, Tasks and Debug still use the older `Store<Feature>` until converted.
+- Tasks and Debug still use the older `Store<Feature>` until converted.
 - View models have a `preview(...)` factory under `#if DEBUG`, on `TonyPresentation/Store/PreviewSources.swift`.
 - Components take their own data model: values already localised and formatted, plus actions. Actions are `Action(id:parameters:) { parameters, argument in … }` (`TonyUIModels/Action.swift`); equality is identifier and parameters, so parameters hold everything the closure depends on. Awaited lifecycle work (`load()`) stays an async view model method.
 - Views decide nothing: no `if` on domain state, no formatting, no own strings.

@@ -3,47 +3,46 @@ import TonyPresentation
 import TonyUIKit
 import TonyUIModels
 
-/// The Today tab, drawn from its data model.
+/// The Today tab, drawn from its view model. Each part reads only its own values, so it redraws on its own.
 public struct TodayScreen: View {
-    private let model: TodayScreenDataModel
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    private let viewModel: TodayViewModel
 
-    public init(_ model: TodayScreenDataModel) {
-        self.model = model
+    public init(_ viewModel: TodayViewModel) {
+        self.viewModel = viewModel
     }
 
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TonySpacing.section) {
-                header
-                briefing
-                if let calendar = model.calendar {
-                    CalendarCard(calendar)
-                }
-                timeline
-                if !model.tiles.isEmpty {
-                    tiles
-                }
+                TodayHeader(viewModel: viewModel)
+                TodayBriefing(viewModel: viewModel)
+                TodayCalendar(viewModel: viewModel)
+                TodayTimeline(viewModel: viewModel)
+                TodayTiles(viewModel: viewModel)
             }
             .padding(.horizontal, TonySpacing.page)
             .padding(.bottom, TonySpacing.section)
         }
         .background { PageBackground() }
-        .onAppear { model.onAppear.execute() }
-        .sheet(item: Binding(get: { model.editor }, set: { if $0 == nil { model.dismissEditor.execute() } })) { editor in
+        .task { await viewModel.load() }
+        .sheet(item: Binding(get: { viewModel.editor }, set: { if $0 == nil { viewModel.dismissEditor.execute() } })) { editor in
             TaskEditorScreen(editor)
         }
-        .alert(model.alert)
+        .alert(viewModel.alert)
     }
+}
 
-    private var header: some View {
+private struct TodayHeader: View {
+    let viewModel: TodayViewModel
+
+    var body: some View {
         VStack(spacing: TonySpacing.large) {
             TonyImage()
                 .frame(width: TonySize.tonyHeader, height: TonySize.tonyHeader)
             VStack(spacing: TonySpacing.tight) {
-                Text(model.date)
+                Text(viewModel.date)
                     .tonyText(.bodySmall)
-                Text(model.headline.accented())
+                Text(viewModel.headline.accented())
                     .tonyText(.display)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("todayHeadline")
@@ -53,9 +52,13 @@ public struct TodayScreen: View {
         }
         .frame(maxWidth: .infinity)
     }
+}
 
-    private var briefing: some View {
-        Text(model.briefing)
+private struct TodayBriefing: View {
+    let viewModel: TodayViewModel
+
+    var body: some View {
+        Text(viewModel.briefing)
             .tonyText(.briefing)
             .foregroundStyle(TonyColor.ink)
             .multilineTextAlignment(.center)
@@ -64,36 +67,62 @@ public struct TodayScreen: View {
             .background(TonyColor.glass, in: .rect(cornerRadius: TonyRadius.panel))
             .accessibilityIdentifier("todayBriefing")
     }
+}
 
-    private var timeline: some View {
+private struct TodayCalendar: View {
+    let viewModel: TodayViewModel
+
+    var body: some View {
+        if let calendar = viewModel.calendar {
+            CalendarCard(calendar)
+        }
+    }
+}
+
+private struct TodayTimeline: View {
+    let viewModel: TodayViewModel
+
+    var body: some View {
         VStack(alignment: .leading, spacing: TonySpacing.large) {
-            sectionTitle(model.timelineTitle)
+            TodaySectionTitle(title: viewModel.timelineTitle)
             VStack(spacing: 0) {
-                ForEach(model.timeline) { entry in
+                ForEach(viewModel.timeline) { entry in
                     TimelineItem(entry.item)
                 }
             }
         }
     }
+}
 
-    private var tiles: some View {
-        VStack(alignment: .leading, spacing: TonySpacing.inset) {
-            sectionTitle(model.tilesTitle)
-            LazyVGrid(
-                columns: Array(
-                    repeating: GridItem(.flexible(), spacing: TonySpacing.medium, alignment: .top),
-                    count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
-                ),
-                spacing: TonySpacing.inset
-            ) {
-                ForEach(model.tiles) { tile in
-                    Tile(tile.tile)
+private struct TodayTiles: View {
+    let viewModel: TodayViewModel
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        let tiles = viewModel.tiles
+        if !tiles.isEmpty {
+            VStack(alignment: .leading, spacing: TonySpacing.inset) {
+                TodaySectionTitle(title: viewModel.tilesTitle)
+                LazyVGrid(
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: TonySpacing.medium, alignment: .top),
+                        count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
+                    ),
+                    spacing: TonySpacing.inset
+                ) {
+                    ForEach(tiles) { tile in
+                        Tile(tile.tile)
+                    }
                 }
             }
         }
     }
+}
 
-    private func sectionTitle(_ title: String) -> some View {
+private struct TodaySectionTitle: View {
+    let title: String
+
+    var body: some View {
         Text(title)
             .tonyText(.heading)
             .foregroundStyle(TonyColor.ink)
@@ -103,28 +132,28 @@ public struct TodayScreen: View {
 
 #if DEBUG
 #Preview("Today") {
-    TodayScreen(PreviewSamples.today())
+    TodayScreen(.preview())
         .tonyPreview(padding: 0)
 }
 
 #Preview("Today, calendar not connected") {
-    TodayScreen(PreviewSamples.today(calendar: PreviewSamples.calendarCard))
+    TodayScreen(.preview(canAllowCalendar: true))
         .tonyPreview(padding: 0)
 }
 
 #Preview("Today, nothing planned") {
-    TodayScreen(PreviewSamples.emptyToday)
+    TodayScreen(.preview(hasTasks: false, canAllowCalendar: true))
         .tonyPreview(padding: 0)
 }
 
 #Preview("Today, largest text") {
-    TodayScreen(PreviewSamples.today())
+    TodayScreen(.preview())
         .tonyPreview(padding: 0)
         .dynamicTypeSize(.accessibility5)
 }
 
 #Preview("Today, answer not saved") {
-    TodayScreen(PreviewSamples.today(alert: AlertDataModel(title: "Your answer could not be saved", dismiss: ButtonDataModel(title: "OK", action: Action(id: "preview") { _ in }))))
+    TodayScreen(.preview(failure: true))
         .tonyPreview(padding: 0)
 }
 #endif

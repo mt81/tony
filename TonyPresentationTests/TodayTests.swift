@@ -10,7 +10,7 @@ private struct Day {
     let clock: TestClock
     let repository: FakeRepository
     let permissions: PermissionStore
-    let store: Store<TodayFeature>
+    let store: TodayStore
 
     init(
         hour: Int,
@@ -31,33 +31,45 @@ private struct Day {
         ) { clock.now }
         let permissions = PermissionStore.fake(calendarAccess)
         self.permissions = permissions
-        store = Store(
-            state: TodayFeature.State(),
-            environment: TodayFeature.Environment(
-                coordinator: coordinator,
-                permissions: permissions,
-                briefingWriter: BriefingWriter(service: languageService),
-                repository: repository,
-                catalog: FakeCatalog(),
-                calendar: Sample.calendar,
-                locale: Locale(identifier: language),
-                suggestionDelay: .zero
-            )
+        store = TodayStore(
+            coordinator: coordinator,
+            permissions: permissions,
+            briefingWriter: BriefingWriter(service: languageService),
+            repository: repository,
+            catalog: FakeCatalog(),
+            calendar: Sample.calendar,
+            locale: Locale(identifier: language),
+            suggestionDelay: .zero
         )
     }
 
-    func open(language: String = "en_GB") async -> TodayScreenDataModel {
-        store.send(.appeared)
-        await store.waitForEffects()
-        return model(language: language)
+    func open(language: String = "en_GB") async -> TodayViewModel {
+        let viewModel = viewModel(language: language)
+        await viewModel.load()
+        return viewModel
     }
 
-    func model(language: String = "en_GB") -> TodayScreenDataModel {
-        store.dataModel(context: PresentationContext(now: clock.now, calendar: Sample.calendar, locale: Locale(identifier: language)))
+    func viewModel(language: String = "en_GB") -> TodayViewModel {
+        TodayViewModel(store: store, context: PresentationContext(now: clock.now, calendar: Sample.calendar, locale: Locale(identifier: language)))
+    }
+
+    /// The plan's items, in order.
+    func items() throws -> [DayPlan.Item] {
+        try #require(store.state.planned).plan.items
+    }
+
+    /// Waits until the task form's lookups are over, including the ones they lead to.
+    func settleEditor() async {
+        while let work = store.editorWork {
+            await work.value
+            if store.editorWork == work {
+                return
+            }
+        }
     }
 }
 
-extension TodayScreenDataModel {
+extension TodayViewModel {
     fileprivate var taskItems: [TimelineItemDataModel.TaskItem] {
         timeline.compactMap { entry in
             if case .task(let item, _) = entry.item { item } else { nil }
@@ -76,12 +88,18 @@ private func morningMeetings() throws -> [DateInterval] {
     return [0, 20, 40].map { DateInterval(start: ten.addingTimeInterval($0 * 60), duration: 20 * 60) }
 }
 
-// MARK: Reducer
+// MARK: Store
 
-@Test func appearingAsksForThePlanTheNameAndCalendarAccess() {
-    var state = TodayFeature.State()
+@MainActor
+@Test func loadingReadsThePlanTheNameAndCalendarAccess() async throws {
+    let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants")], calendarAccess: FakePermissionProvider(status: .denied))
+    await day.repository.save(Preference(key: Preference.userNameKey, value: "Matteo", sourceSentence: "", date: day.clock.now))
 
-    #expect(TodayFeature.reduce(&state, .appeared) == [.plan, .loadName, .readCalendarAccess])
+    await day.store.load()
+
+    #expect(try day.items().count == 1)
+    #expect(day.store.state.userName == "Matteo")
+    #expect(day.store.state.calendarAccess == .denied)
 }
 
 @MainActor
@@ -90,7 +108,7 @@ private func morningMeetings() throws -> [DateInterval] {
     _ = await day.open()
     let planned = day.store.state.planned
 
-    day.store.send(.planned(nil))
+    await day.store.show(nil)
 
     #expect(planned != nil)
     #expect(day.store.state.planned == planned)
@@ -103,12 +121,14 @@ private func morningMeetings() throws -> [DateInterval] {
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")], meetings: try morningMeetings())
 
     let morning = await day.open()
+    let morningItems = morning.taskItems
+    let morningMeetings = morning.meetings
     day.clock.set(try Sample.november(10, hour: 14))
     let afternoon = await day.open()
 
-    #expect(morning.taskItems.map(\.time) == ["8:00", "8:30"])
-    #expect(morning.taskItems.map(\.now) == ["8:00 · a good moment to start", nil])
-    #expect(morning.meetings == ["10:00 3 meetings, back to back until 11:00"])
+    #expect(morningItems.map(\.time) == ["8:00", "8:30"])
+    #expect(morningItems.map(\.now) == ["8:00 · a good moment to start", nil])
+    #expect(morningMeetings == ["10:00 3 meetings, back to back until 11:00"])
     #expect(afternoon.taskItems.map(\.time) == ["17:00", "17:30"])
     #expect(afternoon.taskItems.map(\.now) == [nil, nil])
     #expect(afternoon.timeline.first?.item == .now(text: "Now"))
@@ -118,19 +138,33 @@ private func morningMeetings() throws -> [DateInterval] {
 @MainActor
 @Test func checkingAnItemEarlyFreesItsSlot() async throws {
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")])
-    let before = await day.open()
+    let viewModel = await day.open()
+    let before = viewModel.taskItems
+    let doneBefore = viewModel.timeline.first?.item
 
-    before.taskItems[0].check.action.execute()
-    await day.store.waitForEffects()
-    let after = day.model()
+    await day.store.check(try day.items()[0])
 
-    #expect(before.taskItems.map(\.title) == ["Plants", "Vacuum"])
-    #expect(before.taskItems.map(\.time) == ["8:00", "8:30"])
-    #expect(after.taskItems.map(\.title) == ["Vacuum"])
-    #expect(after.taskItems.map(\.time) == ["8:00"])
-    #expect(before.timeline.first?.item != .done(text: "Good job, today you already did Plants."))
-    #expect(after.timeline.first?.item == .done(text: "Good job, today you already did Plants."))
-    #expect(day.model(language: "fr_FR").timeline.first?.item == .done(text: "Bravo, aujourd'hui tu as déjà fait Plants."))
+    #expect(before.map(\.title) == ["Plants", "Vacuum"])
+    #expect(before.map(\.time) == ["8:00", "8:30"])
+    #expect(viewModel.taskItems.map(\.title) == ["Vacuum"])
+    #expect(viewModel.taskItems.map(\.time) == ["8:00"])
+    #expect(doneBefore != .done(text: "Good job, today you already did Plants."))
+    #expect(viewModel.timeline.first?.item == .done(text: "Good job, today you already did Plants."))
+    #expect(day.viewModel(language: "fr_FR").timeline.first?.item == .done(text: "Bravo, aujourd'hui tu as déjà fait Plants."))
+    #expect(await day.repository.completions().map(\.outcome) == [.done, .done])
+}
+
+@MainActor
+@Test func theCheckButtonChecksItsItem() async throws {
+    let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants")])
+    let viewModel = await day.open()
+
+    viewModel.taskItems[0].check.action.execute()
+    // The button starts the store's work without waiting for it; sleeping lets that work run.
+    while await day.repository.completions().count < 2 {
+        try await Task.sleep(for: .milliseconds(10))
+    }
+
     #expect(await day.repository.completions().map(\.outcome) == [.done, .done])
 }
 
@@ -139,9 +173,9 @@ private func morningMeetings() throws -> [DateInterval] {
     let tasks = try (1...7).map { try Sample.task($0, "Task \($0)") }
     let day = try Day(hour: 8, tasks: tasks)
 
-    let model = await day.open()
+    let viewModel = await day.open()
 
-    #expect(model.tiles.map(\.tile.colour) == [.yellow, .green, .blue, .orange, .teal, .indigo])
+    #expect(viewModel.tiles.map(\.tile.colour) == [.yellow, .green, .blue, .orange, .teal, .indigo])
 }
 
 // MARK: Answers
@@ -149,19 +183,16 @@ private func morningMeetings() throws -> [DateInterval] {
 @MainActor
 @Test func notTodayRemovesTheTaskAndLaterMovesItPastTheBlock() async throws {
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")])
-    let before = await day.open()
-    #expect(before.taskItems[0].actions.map(\.title) == ["Later", "Not today"])
-    #expect(before.taskItems[1].actions.isEmpty)
+    let viewModel = await day.open()
+    #expect(viewModel.taskItems[0].actions.map(\.title) == ["Later", "Not today"])
+    #expect(viewModel.taskItems[1].actions.isEmpty)
 
-    before.taskItems[0].actions[0].action.execute()
-    await day.store.waitForEffects()
-    let later = day.model()
-    #expect(later.taskItems.map(\.title) == ["Vacuum", "Plants"])
-    #expect(later.taskItems.map(\.time) == ["8:00", "17:00"])
+    await day.store.postpone(try day.items()[0])
+    #expect(viewModel.taskItems.map(\.title) == ["Vacuum", "Plants"])
+    #expect(viewModel.taskItems.map(\.time) == ["8:00", "17:00"])
 
-    later.taskItems[0].actions[1].action.execute()
-    await day.store.waitForEffects()
-    #expect(day.model().taskItems.map(\.title) == ["Plants"])
+    await day.store.refuse(try day.items()[0])
+    #expect(viewModel.taskItems.map(\.title) == ["Plants"])
 }
 
 @MainActor
@@ -169,24 +200,23 @@ private func morningMeetings() throws -> [DateInterval] {
     let passport = try Sample.task(1, "Passport", kind: .oneTime, cadence: nil, mustHappenBy: try Sample.november(12))
     let day = try Day(hour: 8, tasks: [passport])
 
-    let model = await day.open()
+    let viewModel = await day.open()
 
-    #expect(model.taskItems.first?.actions.map(\.title) == ["Later"])
+    #expect(viewModel.taskItems.first?.actions.map(\.title) == ["Later"])
 }
 
 @MainActor
 @Test func aFailedAnswerShowsAnAlert() async throws {
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants")])
-    let model = await day.open()
+    let viewModel = await day.open()
     await day.repository.setFailsOnSave(true)
 
-    model.taskItems[0].check.action.execute()
-    await day.store.waitForEffects()
-    let alert = try #require(day.model().alert)
+    await day.store.check(try day.items()[0])
+    let alert = try #require(viewModel.alert)
     alert.dismiss.action.execute()
 
     #expect(alert.title == "Your answer could not be saved")
-    #expect(day.model().alert == nil)
+    #expect(viewModel.alert == nil)
 }
 
 // MARK: The model's wording
@@ -196,9 +226,9 @@ private func morningMeetings() throws -> [DateInterval] {
     let service = FakeLanguageService(briefing: "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")], meetings: try morningMeetings(), languageService: service)
 
-    let model = await day.open()
+    let viewModel = await day.open()
 
-    #expect(model.briefing == "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
+    #expect(viewModel.briefing == "Start with the plants at 8:00, then the vacuum. Your meetings begin at 10:00.")
     #expect(service.requests.count == 1)
     #expect(service.requests.first?.plan == """
         Tuesday 10 November
@@ -226,17 +256,16 @@ private func morningMeetings() throws -> [DateInterval] {
     let service = FakeLanguageService(briefing: "Les Plants d'abord, puis le Vacuum.")
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")], languageService: service, language: "fr_FR")
 
-    let first = await day.open(language: "fr_FR")
+    let first = await day.open(language: "fr_FR").briefing
     _ = await day.open(language: "fr_FR")
-    first.taskItems[0].check.action.execute()
-    await day.store.waitForEffects()
+    await day.store.check(try day.items()[0])
 
     // Opening twice asks once. The new plan is asked twice: the answer still names Plants, now done, so it is retried, then dropped.
-    #expect(first.briefing == "Les Plants d'abord, puis le Vacuum.")
+    #expect(first == "Les Plants d'abord, puis le Vacuum.")
     #expect(service.requests.count == 3)
     #expect(service.requests.first?.plan == "mardi 10 novembre\n8:00 Plants. Le premier moment qui convient.\n8:30 Vacuum. Le premier moment qui convient.")
     #expect(service.requests.last?.plan == "mardi 10 novembre\n8:00 Vacuum. Le premier moment qui convient.")
-    #expect(day.model(language: "fr_FR").briefing == "Une chose serait bien aujourd'hui : Vacuum.")
+    #expect(day.viewModel(language: "fr_FR").briefing == "Une chose serait bien aujourd'hui : Vacuum.")
     #expect(service.requests.first?.instructions.contains("Write in French") == true)
 }
 
@@ -249,7 +278,7 @@ private func morningMeetings() throws -> [DateInterval] {
     let granted = try Day(hour: 8, tasks: [])
 
     let card = try #require(await undecided.open().calendar)
-    let french = undecided.model(language: "fr").calendar
+    let french = undecided.viewModel(language: "fr").calendar
 
     #expect(card.allow?.title == "Plan around my events")
     #expect(card.text == "Tony doesn’t see your calendar yet, so he can’t plan around your meetings.")
@@ -262,31 +291,33 @@ private func morningMeetings() throws -> [DateInterval] {
 @Test func planAroundMyEventsAsksThroughThePermissionSheetAndTheCardGoesOnceGranted() async throws {
     let calendar = FakePermissionProvider(status: .notDetermined, answer: .granted)
     let day = try Day(hour: 8, tasks: [], calendarAccess: calendar)
-    let before = await day.open()
+    let viewModel = await day.open()
 
-    try #require(before.calendar?.allow).action.execute()
+    #expect(viewModel.calendar?.allow != nil)
+    let asking = Task { await day.store.planAroundEvents() }
     await day.permissions.untilAsking()
     let asked = await calendar.requestCount
     await day.permissions.grant()
-    await day.store.waitForEffects()
+    await asking.value
 
     #expect(asked == 0)
     #expect(await calendar.requestCount == 1)
-    #expect(day.model().calendar == nil)
+    #expect(viewModel.calendar == nil)
 }
 
 @MainActor
 @Test func closingThePermissionSheetKeepsTheCard() async throws {
     let calendar = FakePermissionProvider(status: .notDetermined)
     let day = try Day(hour: 8, tasks: [], calendarAccess: calendar)
+    let viewModel = await day.open()
 
-    try #require(await day.open().calendar?.allow).action.execute()
+    let asking = Task { await day.store.planAroundEvents() }
     await day.permissions.untilAsking()
     day.permissions.notNow()
-    await day.store.waitForEffects()
+    await asking.value
 
     #expect(await calendar.requestCount == 0)
-    #expect(day.model().calendar != nil)
+    #expect(viewModel.calendar != nil)
 }
 
 // MARK: Adding a task
@@ -294,54 +325,50 @@ private func morningMeetings() throws -> [DateInterval] {
 @MainActor
 @Test func aTaskAddedFromTodayIsSavedAndPlanned() async throws {
     let day = try Day(hour: 8, tasks: [])
-    _ = await day.open()
+    let viewModel = await day.open()
 
-    day.store.send(.addTapped(id: UUID(), stepID: UUID(), now: day.clock.now))
-    let editor = try #require(day.model().editor)
+    day.store.startAdding(id: UUID(), stepID: UUID(), now: day.clock.now)
+    let editor = try #require(viewModel.editor)
     try #require(editor.composer).composer.text.onChange.execute("Laundry")
-    try #require(day.model().editor?.composer).composer.send.action.execute()
-    await day.store.waitForEffects()
-    let form = try #require(day.model().editor?.form)
-    try #require(day.model().editor).save.action.execute()
-    await day.store.waitForEffects()
-    let model = day.model()
+    try #require(viewModel.editor?.composer).composer.send.action.execute()
+    await day.settleEditor()
+    let form = try #require(viewModel.editor?.form)
+    await day.store.saveEditor()
 
     #expect(editor.title == "New task")
     #expect(form.name.text == "Laundry")
     #expect(form.delete == nil)
-    #expect(model.editor == nil)
+    #expect(viewModel.editor == nil)
     #expect(await day.repository.savedTasks.map(\.name) == ["Laundry"])
     #expect(await day.repository.savedTasks.first?.steps.map(\.name) == ["Load", "Wash"])
-    #expect(model.taskItems.map(\.title) == ["Laundry · Load", "Laundry · Wash"])
+    #expect(viewModel.taskItems.map(\.title) == ["Laundry · Load", "Laundry · Wash"])
 }
 
 @MainActor
 @Test func cancellingTheFormSavesNothing() async throws {
     let day = try Day(hour: 8, tasks: [])
+    let viewModel = await day.open()
 
-    _ = await day.open()
-    day.store.send(.addTapped(id: UUID(), stepID: UUID(), now: day.clock.now))
-    try #require(day.model().editor).cancel.action.execute()
-    await day.store.waitForEffects()
+    day.store.startAdding(id: UUID(), stepID: UUID(), now: day.clock.now)
+    try #require(viewModel.editor).cancel.action.execute()
 
-    #expect(day.model().editor == nil)
+    #expect(viewModel.editor == nil)
     #expect(await day.repository.savedTasks.isEmpty)
 }
 
 @MainActor
 @Test func aTaskThatCannotBeSavedShowsAnAlert() async throws {
     let day = try Day(hour: 8, tasks: [])
-    _ = await day.open()
-    day.store.send(.addTapped(id: UUID(), stepID: UUID(), now: day.clock.now))
-    day.store.send(.editor(.sentenceChanged("Passport")))
-    day.store.send(.editor(.sentenceSent))
-    await day.store.waitForEffects()
+    let viewModel = await day.open()
+    day.store.startAdding(id: UUID(), stepID: UUID(), now: day.clock.now)
+    day.store.edit(.sentenceChanged("Passport"))
+    day.store.edit(.sentenceSent)
+    await day.settleEditor()
     await day.repository.setFailsOnSave(true)
 
-    day.store.send(.editorSaved)
-    await day.store.waitForEffects()
+    await day.store.saveEditor()
 
-    #expect(day.model().alert?.title == "Your tasks could not be saved")
+    #expect(viewModel.alert?.title == "Your tasks could not be saved")
 }
 
 // MARK: Wording
@@ -354,7 +381,7 @@ private func morningMeetings() throws -> [DateInterval] {
     let english = await day.open()
 
     #expect(String(english.headline.characters) == "A free day, Matteo")
-    #expect(String(day.model(language: "fr_FR").headline.characters) == "Une journée libre, Matteo")
+    #expect(String(day.viewModel(language: "fr_FR").headline.characters) == "Une journée libre, Matteo")
 }
 
 @MainActor
@@ -363,7 +390,7 @@ private func morningMeetings() throws -> [DateInterval] {
     await day.repository.save(Preference(key: Preference.userNameKey, value: "Matteo", sourceSentence: "", date: day.clock.now))
 
     let english = await day.open().headline
-    let french = day.model(language: "fr_FR").headline
+    let french = day.viewModel(language: "fr_FR").headline
 
     func emphasised(_ headline: AttributedString) -> [String] {
         headline.runs.filter { $0.inlinePresentationIntent == .emphasized }.map { String(headline[$0.range].characters) }
@@ -377,7 +404,7 @@ private func morningMeetings() throws -> [DateInterval] {
     let day = try Day(hour: 8, tasks: [try Sample.task(1, "Plants"), try Sample.task(2, "Vacuum")], meetings: try morningMeetings())
 
     let english = await day.open()
-    let french = day.model(language: "fr_FR")
+    let french = day.viewModel(language: "fr_FR")
 
     #expect(english.date == "Tuesday 10 November")
     #expect(String(english.headline.characters) == "A light day")
@@ -400,8 +427,8 @@ private func morningMeetings() throws -> [DateInterval] {
 
     #expect(await one.open().briefing == "One thing would be nice today: Plants.")
     #expect(await none.open().briefing == "Nothing needs you today. Enjoy it.")
-    #expect(String(none.model().headline.characters) == "A free day")
-    #expect(none.model().timeline.map(\.id) == ["now"])
+    #expect(String(none.viewModel().headline.characters) == "A free day")
+    #expect(none.viewModel().timeline.map(\.id) == ["now"])
 }
 
 @MainActor
@@ -413,12 +440,12 @@ private func morningMeetings() throws -> [DateInterval] {
     try await day.repository.save(try Sample.done(vacuum, day: 2))
     try await day.repository.save(try Sample.done(plants, day: 9))
 
-    let model = await day.open()
-    let item = try #require(model.taskItems.first { $0.title == "Vacuum" })
+    let viewModel = await day.open()
+    let item = try #require(viewModel.taskItems.first { $0.title == "Vacuum" })
 
     #expect(item.reason == "8 days since last time")
     #expect(item.isNeglected)
-    #expect(model.tiles.map(\.tile.title) == ["Vacuum", "Gym", "Plants"])
-    #expect(model.tiles.map(\.tile.detail) == ["8 days since last time", "0 of 4 this week", "In 4 days"])
-    #expect(model.tiles.map(\.tile.isNeglected) == [true, true, false])
+    #expect(viewModel.tiles.map(\.tile.title) == ["Vacuum", "Gym", "Plants"])
+    #expect(viewModel.tiles.map(\.tile.detail) == ["8 days since last time", "0 of 4 this week", "In 4 days"])
+    #expect(viewModel.tiles.map(\.tile.isNeglected) == [true, true, false])
 }

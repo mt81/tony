@@ -6,8 +6,6 @@ import TonyUIModels
 /// Sample data models for the screen previews. Debug builds only: the text is sample data, not translated.
 @MainActor
 enum PreviewSamples {
-    static let check = ButtonDataModel(title: "Mark as done", action: Action(id: "preview") { _ in })
-
     static func row(_ icon: String, _ title: String, _ subtitle: String, _ status: ChipDataModel, isNeglected: Bool = false) -> TaskRowDataModel {
         TaskRowDataModel(
             id: UUID(),
@@ -19,71 +17,6 @@ enum PreviewSamples {
             accessibilityIdentifier: title,
             open: Action(id: "preview") { _ in },
             delete: ButtonDataModel(title: "Delete", role: .destructive, action: Action(id: "preview") { _ in })
-        )
-    }
-
-    static let calendarCard = CalendarCardDataModel(
-        title: "Calendar",
-        text: "Tony doesn't see your calendar yet, so he can't plan around your meetings.",
-        allow: ButtonDataModel(title: "Plan around my events", action: Action(id: "preview") { _ in })
-    )
-
-    static func today(calendar: CalendarCardDataModel? = nil, editor: TaskEditorDataModel? = nil, alert: AlertDataModel? = nil) -> TodayScreenDataModel {
-        TodayScreenDataModel(
-            date: "Thursday, November 12",
-            headline: AttributedString(localized: "A *light* day, Matteo"),
-            briefing: "Start the laundry before your 10:00 meetings, it runs on its own. The plants have waited 8 days, and the gym is kept for tonight.",
-            calendar: calendar,
-            timelineTitle: "Your day",
-            timeline: [
-                .init(id: "done", item: .done(text: "Good job, today you already did Supplements and Grocery.")),
-                .init(
-                    id: "laundry",
-                    item: .task(
-                        .init(
-                            icon: "🧺",
-                            time: "8:30",
-                            title: "Laundry · Wash",
-                            reason: "Before your 10:00 meetings. It runs on its own.",
-                            actions: ["Later", "Not today"].map { ButtonDataModel(title: $0, action: Action(id: "preview") { _ in }) },
-                            check: check,
-                            now: "8:30 · a good moment to start"
-                        ),
-                        isLast: false
-                    )
-                ),
-                .init(id: "meetings", item: .meetings(time: "10:00", title: "3 meetings, back to back", detail: "until 11:00")),
-                .init(id: "plants", item: .task(.init(icon: "🥀", time: "11:15", title: "Water the plants", reason: "8 days since last time", check: check, isNeglected: true), isLast: false)),
-                .init(id: "gym", item: .task(.init(icon: "🏋️", time: "18:00", title: "Gym", reason: "Kept for the evening.", check: check), isLast: true)),
-            ],
-            tilesTitle: "How things are",
-            tiles: [
-                .init(id: UUID(), tile: TileDataModel(icon: "🥀", title: "Water the plants", detail: "8 days since last time", colour: .green, isNeglected: true)),
-                .init(id: UUID(), tile: TileDataModel(icon: "🏋️", title: "Gym", detail: "2 of 4 this week", colour: .orange)),
-                .init(id: UUID(), tile: TileDataModel(icon: "🧺", title: "Laundry", detail: "Today", colour: .yellow)),
-                .init(id: UUID(), tile: TileDataModel(icon: "🧹", title: "Vacuum", detail: "In 3 days", colour: .blue)),
-            ],
-            editor: editor,
-            dismissEditor: Action(id: "preview") { _ in },
-            alert: alert,
-            onAppear: Action(id: "preview") { _ in }
-        )
-    }
-
-    static var emptyToday: TodayScreenDataModel {
-        TodayScreenDataModel(
-            date: "Saturday, November 14",
-            headline: AttributedString(localized: "A *free* day"),
-            briefing: "Nothing needs you today. Enjoy it.",
-            calendar: calendarCard,
-            timelineTitle: "Your day",
-            timeline: [.init(id: "now", item: .now(text: "Now"))],
-            tilesTitle: "How things are",
-            tiles: [],
-            editor: nil,
-            dismissEditor: Action(id: "preview") { _ in },
-            alert: nil,
-            onAppear: Action(id: "preview") { _ in }
         )
     }
 

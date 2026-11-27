@@ -4,20 +4,27 @@ import TonyCore
 
 /// Keeps what previews save, in memory. Previews only: tests have their own fakes.
 actor PreviewRepository: Repository {
+    private var storedTasks: [TonyTask]
+    private var storedCompletions: [Completion]
     private var storedRoutine: Routine?
     private var storedPreferences: [Preference]
 
-    init(routine: Routine? = nil, preferences: [Preference] = []) {
+    init(tasks: [TonyTask] = [], completions: [Completion] = [], routine: Routine? = nil, preferences: [Preference] = []) {
+        storedTasks = tasks
+        storedCompletions = completions
         storedRoutine = routine
         storedPreferences = preferences
     }
 
-    func tasks() -> [TonyTask] { [] }
-    func save(_ task: TonyTask) {}
-    func deleteTask(id: UUID) {}
+    func tasks() -> [TonyTask] { storedTasks }
+    func save(_ task: TonyTask) {
+        storedTasks.removeAll { $0.id == task.id }
+        storedTasks.append(task)
+    }
+    func deleteTask(id: UUID) { storedTasks.removeAll { $0.id == id } }
     func reorderTasks(_ orderedIDs: [UUID]) {}
-    func completions() -> [Completion] { [] }
-    func save(_ completion: Completion) {}
+    func completions() -> [Completion] { storedCompletions }
+    func save(_ completion: Completion) { storedCompletions.append(completion) }
     func routine() -> Routine? { storedRoutine }
     func save(_ routine: Routine) { storedRoutine = routine }
     func preferences() -> [Preference] { storedPreferences }
@@ -27,9 +34,11 @@ actor PreviewRepository: Repository {
     }
 }
 
-/// A calendar with no events. Previews only.
+/// A calendar with fixed busy times, none by default. Previews only.
 struct PreviewCalendarSource: CalendarSource {
-    func busyIntervals(in interval: DateInterval) -> [DateInterval] { [] }
+    var busy: [DateInterval] = []
+
+    func busyIntervals(in interval: DateInterval) -> [DateInterval] { busy }
     func changes() -> AsyncStream<Void> { AsyncStream { _ in } }
 }
 
