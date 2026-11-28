@@ -95,6 +95,7 @@ One store per screen, unidirectional (see the You tab: `YouState`, `YouStore`, `
 
 - `main` is the only long-lived branch. Never commit or push to it; everything goes through a PR.
 - Branch from an up-to-date `main`: `c03-cadence-and-neglect` for a chunk, plain kebab-case otherwise.
+- Each branch in its own worktree, so chunks run in parallel: `git worktree add worktrees/<branch> -b <branch> origin/main` (`worktrees/` is ignored). Build output stays per worktree. Parallel test runs use different simulators: `make test SIMULATOR='iPhone 18 Pro Max'`. After the merge, `git worktree remove worktrees/<branch>`.
 - One chunk, one PR, closing its issue (`Closes #3`). Start a chunk only after its dependencies are merged.
 - Catch up by rebasing onto `main`. Force-push only your own branch, `--force-with-lease`.
 - Merge with `gh pr merge --squash`, one brief subject, no body. No merge commits. Delete the branch after.
@@ -118,6 +119,8 @@ Never push red.
 ## Code
 
 - First read the chunk's issue, its dependencies and the code around the change.
+- Before code that calls a system framework or external service (EventKit, HealthKit, FoundationModels, WidgetKit, MET Norway), check names, types and behaviour in its official documentation. The documentation wins over the issue; flag the conflict.
+- Tests first. Write the chunk's tests from the spec, compiling and failing, then show Matteo a table: # · suite · test · happy, edge or error. Commit them and start the implementation only after he approves.
 - Fix causes, not symptoms. Stay in scope; flag other problems.
 - Simplest thing that satisfies the chunk. No abstractions, helpers, configuration or building ahead without a need. Reuse patterns, don't duplicate, don't refactor unrelated code, don't optimise without a measured problem.
 - Full-word names (`completion`, `busyInterval`); only `x`, `y`, `_` short. Swift API Design Guidelines.
@@ -125,6 +128,8 @@ Never push red.
 - No warnings. `@unchecked Sendable`, `nonisolated(unsafe)` or `@preconcurrency` only with a one-line reason.
 - No force unwraps, `try!` or `fatalError` in shipping code. Tests may `#require`.
 - Swift Testing everywhere except the XCTest UI tests. Planner behaviour: fixtures and table-driven tests. New behaviour comes with a test.
+- No test-only code in shipping code: no test branches, hooks or flags. Tests isolate through fakes of the `TonyCore` protocols, kept in the test targets.
+- Test each layer against fakes of the one below. Don't test infrastructure: SwiftData schema, migrations, `Info.plist`, framework wiring.
 - No hardcoded user-facing text: String Catalog, English and French, templates included.
 - Model prompts: one English `.txt` per prompt in `TonyPresentation/Prompts`, answering in `{language}` from the passed locale.
 - No hardcoded colours, fonts, sizes or radii: `TonyUIKit` tokens and components, from Figma.
